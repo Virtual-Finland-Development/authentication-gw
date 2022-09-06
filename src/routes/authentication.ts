@@ -9,7 +9,7 @@ import { parseAppContext } from "../utils/validators";
  * @param context
  * @returns
  */
-export const LoginRequest = async (context: Context) => {
+export async function LoginRequest(context: Context) {
   const appContext = parseAppContext(context);
 
   return {
@@ -18,7 +18,7 @@ export const LoginRequest = async (context: Context) => {
       location: SinunaRequests.getLoginRequestUrl(appContext),
     },
   };
-};
+}
 
 /**
  * GET->REDIRECT: The route for handling the auth flow callback, redirecting back to the frontend app
@@ -26,7 +26,7 @@ export const LoginRequest = async (context: Context) => {
  * @param context
  * @returns AuthenticateResponse -> LoginResponse
  */
-export const AuthenticateResponse = async (context: Context) => {
+export async function AuthenticateResponse(context: Context) {
   const loginResponse = SinunaRequests.parseAuthenticateResponse(context.request.query);
   const redirectUrl = `${loginResponse.appContextRedirectUrl}?loginCode=${loginResponse.loginCode}&authProvider=${loginResponse.authProvider}`;
   return {
@@ -35,7 +35,7 @@ export const AuthenticateResponse = async (context: Context) => {
       location: redirectUrl,
     },
   };
-};
+}
 
 /**
  *  POST: The route for the access token exchange: loginCode -> accessToken
@@ -43,7 +43,7 @@ export const AuthenticateResponse = async (context: Context) => {
  * @param context
  * @returns
  */
-export const AuthTokenRequest = async (context: Context) => {
+export async function AuthTokenRequest(context: Context) {
   parseAppContext(context); // Valites app context
   const token = await SinunaRequests.getAccessToken(context.request.requestBody.loginCode); // request body already validated by openapi-backend
   return {
@@ -51,4 +51,4 @@ export const AuthTokenRequest = async (context: Context) => {
     headers: jsonResponseHeaders,
     body: JSON.stringify({ token: token }),
   };
-};
+}
