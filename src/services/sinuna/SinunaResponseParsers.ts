@@ -7,7 +7,7 @@ import { SinunaAuthenticateResponse } from "./SinunaTypes";
 /**
  *  Parses the state attribute from the Sinuna requests
  */
-class ___SinunaStateAttributor {
+export const SinunaStateAttributor = new (class ___SinunaStateAttributor {
   hash = generateBase64Hash(Settings.getEnv("RUNTIME_TOKEN", "no-runtime-token-defined"));
   #createCheckSum(appContext: AppContext) {
     return generateBase64Hash({
@@ -32,8 +32,7 @@ class ___SinunaStateAttributor {
     delete appContext.checksum;
     return appContext;
   }
-}
-export const SinunaStateAttributor = new ___SinunaStateAttributor();
+})();
 
 /**
  *
