@@ -15,5 +15,6 @@ An autentication flow service
 ## References
 
 - https://developer.sinuna.fi/integration_documentation/
+- https://swagger.io/docs/specification/about/
 - https://github.com/anttiviljami/openapi-backend
 - https://github.com/sylwit/aws-serverless-swagger-ui

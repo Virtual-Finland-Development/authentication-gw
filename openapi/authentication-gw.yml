@@ -17,6 +17,13 @@ paths:
   "/auth/login-request":
     get:
       operationId: LoginRequest
+      parameters:
+        - in: query
+          name: appContext
+          schema:
+            type: string
+          required: true
+          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string, guid: string}"
       responses:
         "307":
           description: Redirect to the authentication provider service
@@ -25,6 +32,7 @@ paths:
               description: Authentication provider service URL
               schema:
                 type: string
+
   "/auth/openid/authenticate-response":
     get:
       operationId: AuthenticateResponse
