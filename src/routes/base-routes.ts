@@ -5,7 +5,7 @@ export default {
   healthCheck: async () => ({
     statusCode: 200,
     body: "OK",
-    headers: { "Content-Type": "text/html" },
+    headers: { "Content-Type": "text/plain" },
   }),
 
   // special handlers

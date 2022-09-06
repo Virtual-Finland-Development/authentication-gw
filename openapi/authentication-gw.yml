@@ -8,34 +8,67 @@ paths:
       operationId: healthCheck
       responses:
         "200":
-          description: ok
+          description: Health check response
           content:
-            text/html:
+            text/plain:
               schema:
                 type: string
-  "/login":
+                example: "OK"
+  "/auth/login-request":
     get:
       operationId: LoginRequest
       responses:
         "307":
-          description: ok
+          description: Redirect to the authentication provider service
           headers:
             location:
-              description: Redirect to the authentication provider service
+              description: Authentication provider service URL
               schema:
-                oneOf:
-                  - type: string
-                    description: Authentication provider service URL
+                type: string
   "/auth/openid/authenticate-response":
     get:
       operationId: AuthenticateResponse
       responses:
         "307":
-          description: ok
+          description: Authentication providers callback url, redirect back to the app context, provide loginCode and provider -variables as query params
           headers:
             location:
-              description: Redirect back to the login initiating app context
+              description: Login initiating app context URL
               schema:
-                oneOf:
-                  - type: string
-                    description: login initiating app context URL
+                type: string
+          parameters:
+            - in: query
+              name: loginCode
+              schema:
+                type: string
+              description: Auth providers login code for the next auth steps
+            - in: query
+              name: provider
+              schema:
+                type: string
+              description: Auth provider ident
+  "/auth/openid/auth-token-request":
+    post:
+      operationId: AuthTokenRequest
+      requestBody:
+        description: Retrieve the authentication token from the auth provider service
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                loginCode:
+                  type: string
+                provider:
+                  type: string
+      responses:
+        "200":
+          description: Auth token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
