@@ -1,7 +1,7 @@
 {
   "name": "authentication-gw",
   "version": "1.0.0",
-  "description": "An autentication flow service",
+  "description": "An authentication flow service",
   "scripts": {
     "start": "npm-run-all build serve",
     "build": "tsc --skipLibCheck",
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Virtual-Finland-Development/authentication-gw#readme",
   "dependencies": {
     "aws-serverless-swagger-ui": "^1.0.1",
+    "axios": "^0.27.2",
     "openapi-backend": "^5.5.0"
   },
   "devDependencies": {
