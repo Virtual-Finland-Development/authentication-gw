@@ -1,0 +1,37 @@
+openapi: 3.0.3
+info:
+  title: "Authentication Gateway API"
+  version: 1.0.0
+paths:
+  "/health":
+    get:
+      operationId: healthCheck
+      responses:
+        "200":
+          description: ok
+  "/login":
+    get:
+      operationId: LoginRequest
+      responses:
+        "307":
+          description: ok
+          headers:
+            location:
+              description: Redirect to the authentication provider service
+              schema:
+                oneOf:
+                  - type: string
+                    description: Authentication provider service URL
+  "/auth/openid/authenticate-response":
+    get:
+      operationId: AuthenticateResponse
+      responses:
+        "307":
+          description: ok
+          headers:
+            location:
+              description: Redirect back to the login initiating app context
+              schema:
+                oneOf:
+                  - type: string
+                    description: login initiating app context URL

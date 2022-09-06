@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig to read more about this file */
+    "target": "esnext",
+    "lib": ["esnext"],
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noImplicitAny": true,
+    "noUnusedLocals": true
+  },
+  "include": ["./src"],
+  "exclude": ["./node_modules", "./dist"]
+}

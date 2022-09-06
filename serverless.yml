@@ -1,0 +1,19 @@
+service: authentication-gw
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: eu-north-1
+
+functions:
+  api-app:
+    handler: dist/api-app.handler
+    events:
+      - httpApi:
+          method: any
+          path: /{proxy+}
+          cors: true
