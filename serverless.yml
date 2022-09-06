@@ -16,4 +16,9 @@ functions:
       - httpApi:
           method: any
           path: /{proxy+}
-          cors: true
+  swagger:
+    handler: dist/swagger.handler
+    events:
+      - httpApi:
+          method: GET
+          path: /swagger/{proxy+}

@@ -9,6 +9,10 @@ paths:
       responses:
         "200":
           description: ok
+          content:
+            text/html:
+              schema:
+                type: string
   "/login":
     get:
       operationId: LoginRequest

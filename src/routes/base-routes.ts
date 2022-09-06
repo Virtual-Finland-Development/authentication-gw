@@ -1,11 +1,11 @@
 import { Context, Document } from "openapi-backend";
-import { jsonResponseHeaders, defaultHeaders } from "../utils/default-headers";
+import { jsonResponseHeaders } from "../utils/default-headers";
 
 export default {
   healthCheck: async () => ({
     statusCode: 200,
     body: "OK",
-    headers: defaultHeaders,
+    headers: { "Content-Type": "text/html" },
   }),
 
   // special handlers
