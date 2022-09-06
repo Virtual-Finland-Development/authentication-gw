@@ -36,17 +36,6 @@ paths:
               description: Login initiating app context URL
               schema:
                 type: string
-          parameters:
-            - in: query
-              name: loginCode
-              schema:
-                type: string
-              description: Auth providers login code for the next auth steps
-            - in: query
-              name: provider
-              schema:
-                type: string
-              description: Auth provider ident
   "/auth/openid/auth-token-request":
     post:
       operationId: AuthTokenRequest
