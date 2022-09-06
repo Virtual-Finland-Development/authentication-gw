@@ -3,6 +3,28 @@ info:
   title: "Authentication Gateway API"
   version: 1.0.0
 paths:
+  "/":
+    get:
+      operationId: root
+      responses:
+        "307":
+          description: Redirect to the API documentation
+          headers:
+            location:
+              description: /docs/
+              schema:
+                type: string
+  "/swagger":
+    get:
+      operationId: swagger
+      responses:
+        "307":
+          description: Redirect to the API documentation
+          headers:
+            location:
+              description: /docs/
+              schema:
+                type: string
   "/health":
     get:
       operationId: healthCheck
@@ -14,7 +36,7 @@ paths:
               schema:
                 type: string
                 example: "OK"
-  "/auth/login-request":
+  "/auth/openid/login-request":
     get:
       operationId: LoginRequest
       parameters:
@@ -24,6 +46,13 @@ paths:
             type: string
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string, guid: string}"
+        - in: query
+          name: authProvider
+          schema:
+            type: string
+            default: "sinuna"
+          required: false
+          description: "Auth provider name"
       responses:
         "307":
           description: Redirect to the authentication provider service

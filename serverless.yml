@@ -16,9 +16,9 @@ functions:
       - httpApi:
           method: any
           path: /{proxy+}
-  swagger:
-    handler: dist/swagger.handler
+  api-docs:
+    handler: dist/api-docs.handler
     events:
       - httpApi:
           method: GET
-          path: /swagger/{proxy+}
+          path: /docs/{proxy+}

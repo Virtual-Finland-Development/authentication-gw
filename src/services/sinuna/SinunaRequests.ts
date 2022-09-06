@@ -3,8 +3,10 @@ import axios from "axios";
 import Settings from "../../utils/Settings";
 import { generateBase64Hash } from "../../utils/transformers";
 
-import { AppContext } from "../../utils/types";
-import SinunaStateAttributor from "./SinunaStateAttributor";
+import { AppContext, LoginResponse } from "../../utils/types";
+import { SinunaStateAttributor, parseSinunaAuthenticateResponse } from "./SinunaResponseParsers";
+
+const SINUNA_AUTH_PROVIDER_IDENT = "sinuna"; // The auth provider identifier for Sinuna
 
 /**
  * LoginRequest
@@ -18,6 +20,22 @@ export function getLoginRequestUrl(appContext: AppContext): string {
   const STATE = SinunaStateAttributor.generate(appContext);
   const REDIRECT_URI = Settings.getAuthRedirectUrl();
   return `https://${AS_URL}/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
+}
+
+/**
+ * AuthenticateResponse
+ *
+ * @param state
+ * @returns
+ */
+export function parseAuthenticateResponse(queryParams: { [key: string]: string | string[] }): LoginResponse {
+  const authenticateResponse = parseSinunaAuthenticateResponse(queryParams);
+
+  return {
+    loginCode: authenticateResponse.loginCode,
+    appContextRedirectUrl: authenticateResponse.appContext.redirectUrl,
+    authProvider: SINUNA_AUTH_PROVIDER_IDENT,
+  };
 }
 
 /**

@@ -21,13 +21,25 @@ export function InternalServerErrorHandler(error: any) {
 }
 
 export default {
+  // Base handlers
+  root: async (context: Context) => ({
+    statusCode: 307,
+    headers: {
+      location: "/docs/",
+    },
+  }),
+  swagger: async (context: Context) => ({
+    statusCode: 307,
+    headers: {
+      location: "/docs/",
+    },
+  }),
   healthCheck: async () => ({
     statusCode: 200,
     body: "OK",
     headers: { "Content-Type": "text/plain" },
   }),
-
-  // special handlers
+  // openapi-backend special handlers
   notFound: async () => ({
     statusCode: 404,
     body: JSON.stringify({ err: "Not found" }),

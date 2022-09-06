@@ -10,7 +10,7 @@ An autentication flow service
 
 `npm run start`
 
-> see swagger docs: http://localhost:3000/swagger/
+> see swagger docs: http://localhost:3000/docs/
 
 ## References
 

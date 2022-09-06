@@ -1,8 +1,13 @@
+import { ValidationError } from "../../utils/exceptions";
 import Settings from "../../utils/Settings";
 import { generateBase64Hash, omitObjectKeys, resolveBase64Hash, isObject } from "../../utils/transformers";
 import { AppContext } from "../../utils/types";
+import { SinunaAuthenticateResponse } from "./SinunaTypes";
 
-class SinunaStateAttributor {
+/**
+ *  Parses the state attribute from the Sinuna requests
+ */
+class ___SinunaStateAttributor {
   hash = generateBase64Hash(Settings.getEnv("RUNTIME_TOKEN", "no-runtime-token-defined"));
   #createCheckSum(appContext: AppContext) {
     return generateBase64Hash({
@@ -28,5 +33,27 @@ class SinunaStateAttributor {
     return appContext;
   }
 }
+export const SinunaStateAttributor = new ___SinunaStateAttributor();
 
-export default new SinunaStateAttributor();
+/**
+ *
+ * @param queryParams
+ * @throws ValidationError if invalid login response
+ * @returns parsed login response
+ */
+export function parseSinunaAuthenticateResponse(queryParams: { [key: string]: string | string[] }): SinunaAuthenticateResponse {
+  if (!isObject(queryParams)) {
+    throw new ValidationError("Received bad AuthenticateResponse");
+  }
+  if (typeof queryParams.loginCode !== "string" || typeof queryParams.state !== "string") {
+    throw new ValidationError("Received invalid AuthenticateResponse");
+  }
+
+  const loginCode = queryParams.loginCode;
+  const appContext = SinunaStateAttributor.parse(queryParams.state);
+
+  return {
+    loginCode: loginCode,
+    appContext: appContext,
+  };
+}
