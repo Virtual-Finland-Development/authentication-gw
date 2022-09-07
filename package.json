@@ -7,7 +7,8 @@
     "build": "tsc --skipLibCheck",
     "serve": "serverless offline",
     "watch": "tsc --skipLibCheck -w",
-    "test": "jest"
+    "test": "jest",
+    "deploy": "serverless deploy --verbose"
   },
   "repository": {
     "type": "git",
