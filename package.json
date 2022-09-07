@@ -4,7 +4,7 @@
   "description": "An authentication flow service",
   "scripts": {
     "start": "npm-run-all build serve",
-    "build": "tsc --skipLibCheck && cp -r openapi dist/",
+    "build": "tsc --skipLibCheck",
     "serve": "serverless offline",
     "watch": "tsc --skipLibCheck -w",
     "test": "jest",
