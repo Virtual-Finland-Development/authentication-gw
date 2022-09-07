@@ -17,7 +17,6 @@ package:
     - "!*"
     - "!**"
     - "dist/**"
-    - "openapi/**"
 
 functions:
   api-app:
