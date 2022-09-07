@@ -17,7 +17,7 @@ export function getLoginRequestUrl(appContext: AppContext): string {
   const AS_URL = "https://login.iam.qa.sinuna.fi";
   const CLIENT_ID = Settings.getEnv("SINUNA_CLIENT_ID", "client_id");
   const SCOPE = "openid frontend";
-  const STATE = SinunaStateAttributor.generate(appContext);
+  const STATE = SinunaStateAttributor.generate(appContext); // Throws if appContext is invalid
   const REDIRECT_URI = Settings.getAuthRedirectUrl();
   return `https://${AS_URL}/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
 }
