@@ -1,6 +1,7 @@
 // @see: https://developer.sinuna.fi/integration_documentation/
 import axios from "axios";
 import Settings from "../../utils/Settings";
+import Secrets from "../../utils/Secrets";
 import { generateBase64Hash } from "../../utils/transformers";
 
 import { AppContext, LoginResponse } from "../../utils/types";
@@ -9,13 +10,21 @@ import { SinunaStateAttributor, parseSinunaAuthenticateResponse } from "./Sinuna
 const SINUNA_AUTH_PROVIDER_IDENT = "sinuna"; // The auth provider identifier for Sinuna
 
 /**
+ * Initializes the SinunaRequests
+ */
+export async function initializeSinunaRequests() {
+  await SinunaStateAttributor.initialize();
+}
+
+/**
  * LoginRequest
  *
  * @returns
  */
-export function getLoginRequestUrl(appContext: AppContext): string {
+export async function getLoginRequestUrl(appContext: AppContext): Promise<string> {
+  await initializeSinunaRequests();
   const AS_URL = "https://login.iam.qa.sinuna.fi";
-  const CLIENT_ID = Settings.getEnv("SINUNA_CLIENT_ID", "client_id");
+  const CLIENT_ID = await Secrets.getSecret("SINUNA_CLIENT_ID", "client_id");
   const SCOPE = "openid frontend";
   const STATE = SinunaStateAttributor.generate(appContext); // Throws if appContext is invalid
   const REDIRECT_URI = Settings.getAuthRedirectUrl();
@@ -28,7 +37,8 @@ export function getLoginRequestUrl(appContext: AppContext): string {
  * @param state
  * @returns
  */
-export function parseAuthenticateResponse(queryParams: { [key: string]: string | string[] }): LoginResponse {
+export async function parseAuthenticateResponse(queryParams: { [key: string]: string | string[] }): Promise<LoginResponse> {
+  await initializeSinunaRequests();
   const authenticateResponse = parseSinunaAuthenticateResponse(queryParams);
 
   return {
@@ -44,7 +54,8 @@ export function parseAuthenticateResponse(queryParams: { [key: string]: string |
  * @param state
  * @returns
  */
-export function getLogoutRequestUrl(appContext: AppContext): string {
+export async function getLogoutRequestUrl(appContext: AppContext): Promise<string> {
+  await initializeSinunaRequests();
   // Redirecting straight to the app context might work, but not tested
   const logoutRedirectUrl = appContext.redirectUrl;
   return `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${logoutRedirectUrl}`;
@@ -57,11 +68,12 @@ export function getLogoutRequestUrl(appContext: AppContext): string {
  * @returns
  */
 export async function getAccessToken(loginCode: string): Promise<string> {
+  await initializeSinunaRequests();
   const AS_URL = "https://login.iam.qa.sinuna.fi";
   const SCOPE = "openid frontend";
 
-  const CLIENT_ID = Settings.getEnv("SINUNA_CLIENT_ID", "client_id");
-  const CLIENT_SECRET = Settings.getEnv("SINUNA_CLIENT_SECRET", "client_secret");
+  const CLIENT_ID = await Secrets.getSecret("SINUNA_CLIENT_ID", "client_id");
+  const CLIENT_SECRET = await Secrets.getSecret("SINUNA_CLIENT_SECRET", "client_secret");
 
   const REDIRECT_URI = Settings.getAuthRedirectUrl();
   const response = await axios.post(

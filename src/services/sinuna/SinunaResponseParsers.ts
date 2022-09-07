@@ -1,5 +1,5 @@
 import { ValidationError } from "../../utils/exceptions";
-import Settings from "../../utils/Settings";
+import Secrets from "../../utils/Secrets";
 import { generateBase64Hash, omitObjectKeys, resolveBase64Hash, isObject } from "../../utils/transformers";
 import { AppContext } from "../../utils/types";
 import { SinunaAuthenticateResponse } from "./SinunaTypes";
@@ -8,14 +8,30 @@ import { SinunaAuthenticateResponse } from "./SinunaTypes";
  *  Parses the state attribute from the Sinuna requests
  */
 export const SinunaStateAttributor = new (class ___SinunaStateAttributor {
-  hash = generateBase64Hash(Settings.getEnv("RUNTIME_TOKEN", "no-runtime-token-defined"));
+  hash: string = "";
+
+  /**
+   * Initializes the SinunaStateAttributor
+   */
+  async initialize() {
+    if (!this.hash) {
+      this.hash = generateBase64Hash(await Secrets.getSecret("RUNTIME_TOKEN", "no-runtime-token-defined"));
+    }
+  }
+
   #createCheckSum(appContext: AppContext) {
+    if (!this.hash) {
+      throw new Error("SinunaStateAttributor not initialized");
+    }
     return generateBase64Hash({
       appContext: omitObjectKeys(appContext, ["checksum"]),
       hash: this.hash,
     });
   }
   #validateCheckSum(appContext: any) {
+    if (!this.hash) {
+      throw new Error("SinunaStateAttributor not initialized");
+    }
     if (!isObject(appContext) || typeof appContext.checksum === "undefined" || appContext.checksum !== this.#createCheckSum(appContext)) {
       throw new Error("Invalid state attribute");
     }
@@ -23,7 +39,7 @@ export const SinunaStateAttributor = new (class ___SinunaStateAttributor {
   generate(appContext: AppContext): string {
     return generateBase64Hash({
       ...appContext,
-      checksum: generateBase64Hash(appContext),
+      checksum: this.#createCheckSum(appContext),
     });
   }
   parse(state: string): AppContext {

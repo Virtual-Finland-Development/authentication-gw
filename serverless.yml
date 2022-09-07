@@ -24,6 +24,10 @@ functions:
       - httpApi:
           method: any
           path: /{proxy+}
+    environment:
+      AUTH_PROVIDER_REDIRECT_BACK_HOST: ${env:AUTH_PROVIDER_REDIRECT_BACK_HOST}
+      APP_CONTEXT_REDIRECT_FALLBACK_URL: ${env:APP_CONTEXT_REDIRECT_FALLBACK_URL}
+
   api-docs:
     handler: dist/api-docs.handler
     events:
