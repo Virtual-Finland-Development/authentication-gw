@@ -2,6 +2,8 @@
 
 An autentication flow service
 
+[![Build, Test, Deploy](https://github.com/Virtual-Finland-Development/authentication-gw/actions/workflows/build-test-deploy.yml/badge.svg)](https://github.com/Virtual-Finland-Development/authentication-gw/actions/workflows/build-test-deploy.yml)
+
 ## Install
 
 `npm install`
