@@ -9,6 +9,11 @@ provider:
   stage: dev
   region: eu-north-1
 
+package:
+  patterns:
+    - "dist/**"
+    - "openapi/**"
+
 functions:
   api-app:
     handler: dist/api-app.handler
