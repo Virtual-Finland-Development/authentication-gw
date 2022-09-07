@@ -2,7 +2,6 @@ service: authentication-gw
 
 plugins:
   - serverless-offline
-  - serverless-plugin-common-excludes
   - serverless-plugin-include-dependencies
 
 provider:
@@ -18,8 +17,6 @@ package:
     - "!**"
     - "dist/**"
     - "openapi/**"
-    - "node_modules/swagger-ui-dist/favicon-32x32.png"
-
 functions:
   api-app:
     handler: dist/api-app.handler
