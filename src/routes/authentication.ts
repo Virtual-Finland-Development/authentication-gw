@@ -79,10 +79,10 @@ export async function LogoutRequest(context: Context) {
  * @returns
  */
 export async function LogoutResponse(context: Context) {
+  const redirectUrl = Settings.getAppContextFallbackURL();
   console.log("DEBUG: LogoutResponse");
   console.log(context.request);
-  const redirectUrl = Settings.getAppContextFallbackURL();
-
+  console.log(redirectUrl);
   return {
     statusCode: 307,
     headers: {
