@@ -5,10 +5,9 @@ const swaggerHandler = swaggerUi.setup("./openapi/authentication-gw.yml");
 
 export const handler = async (event: APIGatewayProxyEventV2) => {
   let eventPath = event.rawPath;
-  if (eventPath === "/docs") {
+  if (eventPath === "/docs" || eventPath === "/docs/") {
     eventPath = "/docs/index.html";
   }
-  console.log("eventPath", eventPath);
   return (await swaggerHandler)({
     path: eventPath,
   });
