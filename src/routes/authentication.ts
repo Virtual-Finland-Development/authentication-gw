@@ -1,6 +1,7 @@
 import { Context } from "openapi-backend";
 import * as SinunaRequests from "../services/sinuna/SinunaRequests";
 import { jsonResponseHeaders } from "../utils/default-headers";
+import Settings from "../utils/Settings";
 import { parseAppContext } from "../utils/validators";
 
 /**
@@ -50,5 +51,42 @@ export async function AuthTokenRequest(context: Context) {
     statusCode: 200,
     headers: jsonResponseHeaders,
     body: JSON.stringify({ token: token }),
+  };
+}
+
+/**
+ * GET->REDIRECT: The route for handling the logout flow
+ *
+ * @param context
+ * @returns
+ */
+export async function LogoutRequest(context: Context) {
+  const appContext = parseAppContext(context);
+
+  return {
+    statusCode: 307,
+    headers: {
+      location: SinunaRequests.getLogoutRequestUrl(appContext),
+    },
+  };
+}
+
+/**
+ * GET->REDIRECT: The route for handling the logout flow callback url
+ * (not used, but required by the Sinuna logout flow)
+ *
+ * @param context
+ * @returns
+ */
+export async function LogoutResponse(context: Context) {
+  console.log("DEBUG: LogoutResponse");
+  console.log(context.request);
+  const redirectUrl = Settings.getAppContextFallbackURL();
+
+  return {
+    statusCode: 307,
+    headers: {
+      location: redirectUrl,
+    },
   };
 }
