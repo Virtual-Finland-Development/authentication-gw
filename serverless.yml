@@ -18,7 +18,7 @@ package:
     - "!**"
     - "dist/**"
     - "openapi/**"
-    - "node_modules/**/*.png" # swagger-ui
+    - "node_modules/swagger-ui-dist/favicon-32x32.png"
 
 functions:
   api-app:
