@@ -18,6 +18,7 @@ package:
     - "!**"
     - "dist/**"
     - "openapi/**"
+    - "node_modules/**/*.png" # swagger-ui
 
 functions:
   api-app:
