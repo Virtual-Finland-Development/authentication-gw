@@ -2,6 +2,8 @@ service: authentication-gw
 
 plugins:
   - serverless-offline
+  - serverless-plugin-common-excludes
+  - serverless-plugin-include-dependencies
 
 provider:
   name: aws
@@ -10,7 +12,10 @@ provider:
   region: eu-north-1
 
 package:
+  excludeDevDependencies: false
   patterns:
+    - "!*"
+    - "!**"
     - "dist/**"
     - "openapi/**"
 
