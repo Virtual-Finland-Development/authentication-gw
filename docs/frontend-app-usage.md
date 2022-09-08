@@ -72,6 +72,6 @@ window.location.href = `https://${authEndpointHost}/auth/openid/logout-request?a
 
 ## LogoutResponse
 
-After the logout process is done, the user is redirected to the `redirectUrl` predefined in the `appContext`-variable with a `logout` with a string value `success` variable as a query parameter
+After the logout process is done, the user is redirected to the `redirectUrl` predefined in the `appContext`-variable, with a `logout=success` query parameter.
 
 eg: `https://${frontendAppHost}/login-handler.html?logout=success`
