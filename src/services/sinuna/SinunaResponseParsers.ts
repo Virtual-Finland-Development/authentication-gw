@@ -1,3 +1,4 @@
+import { createHmac } from "crypto";
 import { ValidationError } from "../../utils/exceptions";
 import Settings from "../../utils/Settings";
 import { generateBase64Hash, omitObjectKeys, resolveBase64Hash, isObject } from "../../utils/transformers";
@@ -8,32 +9,31 @@ import { SinunaAuthenticateResponse } from "./SinunaTypes";
  *  Parses the state attribute from the Sinuna requests
  */
 export const SinunaStateAttributor = new (class ___SinunaStateAttributor {
-  hash: string = "";
+  runtimeToken: string = "";
 
   /**
    * Initializes the SinunaStateAttributor
    */
   async initialize() {
-    if (!this.hash) {
-      this.hash = generateBase64Hash(await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN", "no-runtime-token-defined"));
+    if (!this.runtimeToken) {
+      this.runtimeToken = await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN", "no-runtime-token-defined");
     }
   }
 
   #createCheckSum(appContext: AppContext) {
-    if (!this.hash) {
+    if (!this.runtimeToken) {
       throw new Error("SinunaStateAttributor not initialized");
     }
-    return generateBase64Hash({
-      appContext: omitObjectKeys(appContext, ["checksum"]),
-      hash: this.hash,
-    });
+    return createHmac("sha256", this.runtimeToken)
+      .update(JSON.stringify(omitObjectKeys(appContext, ["checksum"])))
+      .digest("hex");
   }
   #validateCheckSum(appContext: any) {
-    if (!this.hash) {
+    if (!this.runtimeToken) {
       throw new Error("SinunaStateAttributor not initialized");
     }
     if (!isObject(appContext) || typeof appContext.checksum === "undefined" || appContext.checksum !== this.#createCheckSum(appContext)) {
-      throw new Error("Invalid state attribute");
+      throw new ValidationError("Invalid state attribute");
     }
   }
   generate(appContext: AppContext): string {
@@ -43,7 +43,12 @@ export const SinunaStateAttributor = new (class ___SinunaStateAttributor {
     });
   }
   parse(state: string): AppContext {
-    const appContext: any = resolveBase64Hash(state);
+    let appContext;
+    try {
+      appContext = JSON.parse(resolveBase64Hash(state));
+    } catch (error) {
+      throw new ValidationError("Could not parse state attribute");
+    }
     this.#validateCheckSum(appContext);
     delete appContext.checksum;
     return appContext;
