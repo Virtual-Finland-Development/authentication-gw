@@ -12,7 +12,9 @@ An autentication flow service
 
 `npm run start`
 
-> see swagger docs: http://localhost:3000/docs/
+- Swagger docs: http://localhost:3000/docs/
+
+- Documentation for using the service in frontend apps: [./docs/frontend-app-usage.md](docs/frontend-app-usage.md)
 
 ## References
 
