@@ -1,7 +1,6 @@
 // @see: https://developer.sinuna.fi/integration_documentation/
 import axios from "axios";
 import Settings from "../../utils/Settings";
-import Secrets from "../../utils/Secrets";
 import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformers";
 
 import { AppContext, LoginResponse } from "../../utils/types";
@@ -24,7 +23,7 @@ export async function initializeSinunaRequests() {
 export async function getLoginRequestUrl(appContext: AppContext): Promise<string> {
   await initializeSinunaRequests();
   const AS_URL = "https://login.iam.qa.sinuna.fi";
-  const CLIENT_ID = await Secrets.getSecret("SINUNA_CLIENT_ID", "client_id");
+  const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID", "client_id");
   const SCOPE = "openid frontend";
   const STATE = SinunaStateAttributor.generate(appContext); // Throws if appContext is invalid
   const REDIRECT_URI = Settings.getAuthRedirectUrl();
@@ -81,8 +80,8 @@ export async function getAccessToken(loginCode: string): Promise<string> {
   const AS_URL = "https://login.iam.qa.sinuna.fi";
   const SCOPE = "openid frontend";
 
-  const CLIENT_ID = await Secrets.getSecret("SINUNA_CLIENT_ID", "client_id");
-  const CLIENT_SECRET = await Secrets.getSecret("SINUNA_CLIENT_SECRET", "client_secret");
+  const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID", "client_id");
+  const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET", "client_secret");
 
   const REDIRECT_URI = Settings.getAuthRedirectUrl();
   const response = await axios.post(

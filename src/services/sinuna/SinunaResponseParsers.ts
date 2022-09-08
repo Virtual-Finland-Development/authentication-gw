@@ -1,5 +1,5 @@
 import { ValidationError } from "../../utils/exceptions";
-import Secrets from "../../utils/Secrets";
+import Settings from "../../utils/Settings";
 import { generateBase64Hash, omitObjectKeys, resolveBase64Hash, isObject } from "../../utils/transformers";
 import { AppContext } from "../../utils/types";
 import { SinunaAuthenticateResponse } from "./SinunaTypes";
@@ -15,7 +15,7 @@ export const SinunaStateAttributor = new (class ___SinunaStateAttributor {
    */
   async initialize() {
     if (!this.hash) {
-      this.hash = generateBase64Hash(await Secrets.getSecret("RUNTIME_TOKEN", "no-runtime-token-defined"));
+      this.hash = generateBase64Hash(await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN", "no-runtime-token-defined"));
     }
   }
 
