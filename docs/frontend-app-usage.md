@@ -1,4 +1,4 @@
-# Frontent app usage
+# Frontend app usage
 
 Requests to the backend are accompanied with an `appContext` token which is a base64 encoded string of the following JSON object:
 
