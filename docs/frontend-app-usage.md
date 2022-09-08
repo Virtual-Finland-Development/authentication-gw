@@ -22,7 +22,7 @@ btoa(JSON.stringify({ appName: "TMT-test", redirectUrl: "url-to-the-login-handle
 Redirect user to the `/auth/openid/login-request`-endpoint with the `appContext` token as a query parameter:
 
 ```js
-window.location.href = `https://${endpointHost}/auth/openid/login-request?appContext=${appContext}`;
+window.location.href = `https://${authEndpointHost}/auth/openid/login-request?appContext=${appContext}`;
 ```
 
 ## LoginResponse
@@ -36,9 +36,9 @@ eg: `https://${frontendAppHost}/login-handler.html?code={loginCode}`
 The received `loginCode` is a temporary code which is used in retrieving the actual auth token from the `/auth/openid/auth-token-request`-endpoint.
 
 ```js
-const response = await fetch(`https://${endpointHost}/auth/openid/auth-token-request`, {
+const response = await fetch(`https://${authEndpointHost}/auth/openid/auth-token-request`, {
   method: "POST",
-  headres: {
+  headers: {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
@@ -67,7 +67,7 @@ The auth token is used for example in the `Authorization` header of the requests
 Redirect user to the `/auth/openid/logout-request`-endpoint with the `appContext` token as a query parameter:
 
 ```js
-window.location.href = `https://${endpointHost}/auth/openid/logout-request?appContext=${appContext}`;
+window.location.href = `https://${authEndpointHost}/auth/openid/logout-request?appContext=${appContext}`;
 ```
 
 ## LogoutResponse
