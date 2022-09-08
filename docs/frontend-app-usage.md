@@ -42,8 +42,8 @@ const response = await fetch(`https://${authEndpointHost}/auth/openid/auth-token
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    loginCode: loginCode,
-    appContext: appContextHash,
+    loginCode: loginCode, 
+    appContext: appContext, // base64 string
   }),
 });
 
