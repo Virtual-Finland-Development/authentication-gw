@@ -86,3 +86,16 @@ export function exceptionToObject(error: any): { message: string; name?: string;
     statusCode: statusCode,
   };
 }
+
+/**
+ *
+ * @param url
+ * @param param
+ * @param value
+ * @returns
+ */
+export function ensureUrlQueryParam(url: string, param: string, value: string): string {
+  const urlObj = new URL(url);
+  urlObj.searchParams.set(param, value);
+  return urlObj.toString();
+}

@@ -29,7 +29,7 @@ window.location.href = `https://${endpointHost}/auth/openid/login-request?appCon
 
 After the auth process is done, the user is redirected to the `redirectUrl` predefined in the `appContext`-variable with a `loginCode` token as a query parameter.
 
-User is redirected to eg: `https://${frontendAppHost}/login-handler.html?code={loginCode}`
+eg: `https://${frontendAppHost}/login-handler.html?code={loginCode}`
 
 ## AuthTokenRequest
 
@@ -43,6 +43,7 @@ const response = await fetch(`https://${endpointHost}/auth/openid/auth-token-req
   },
   body: JSON.stringify({
     loginCode: loginCode,
+    appContext: appContextHash,
   }),
 });
 
@@ -56,3 +57,21 @@ eg.
 ```js
 localStorage.setItem("authToken", token);
 ```
+
+## Using the auth token
+
+The auth token is used for example in the `Authorization` header of the requests to the productizer backends.
+
+## LogoutRequest
+
+Redirect user to the `/auth/openid/logout-request`-endpoint with the `appContext` token as a query parameter:
+
+```js
+window.location.href = `https://${endpointHost}/auth/openid/logout-request?appContext=${appContext}`;
+```
+
+## LogoutResponse
+
+After the logout process is done, the user is redirected to the `redirectUrl` predefined in the `appContext`-variable with a `logout` with a string value `success` variable as a query parameter
+
+eg: `https://${frontendAppHost}/login-handler.html?logout=success`

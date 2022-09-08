@@ -2,7 +2,7 @@
 import axios from "axios";
 import Settings from "../../utils/Settings";
 import Secrets from "../../utils/Secrets";
-import { generateBase64Hash } from "../../utils/transformers";
+import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformers";
 
 import { AppContext, LoginResponse } from "../../utils/types";
 import { SinunaStateAttributor, parseSinunaAuthenticateResponse } from "./SinunaResponseParsers";
@@ -57,8 +57,17 @@ export async function parseAuthenticateResponse(queryParams: { [key: string]: st
 export async function getLogoutRequestUrl(appContext: AppContext): Promise<string> {
   await initializeSinunaRequests();
   // Redirecting straight to the app context might work, but not tested
-  const logoutRedirectUrl = appContext.redirectUrl;
+  const logoutRedirectUrl = prepareLogoutRedirectUrl(appContext.redirectUrl);
   return `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${logoutRedirectUrl}`;
+}
+
+/**
+ *
+ * @param redirectUrl
+ * @returns
+ */
+export function prepareLogoutRedirectUrl(redirectUrl: string): string {
+  return ensureUrlQueryParam(redirectUrl, "logout", "success");
 }
 
 /**

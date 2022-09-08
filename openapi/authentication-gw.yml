@@ -45,7 +45,7 @@ paths:
           schema:
             type: string
           required: true
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string, guid: string}"
+          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
         - in: query
           name: authProvider
           schema:
@@ -75,6 +75,20 @@ paths:
                 type: string
   "/auth/openid/logout-request":
     get:
+      parameters:
+        - in: query
+          name: appContext
+          schema:
+            type: string
+          required: true
+          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+        - in: query
+          name: authProvider
+          schema:
+            type: string
+            default: "sinuna"
+          required: false
+          description: "Auth provider name"
       operationId: LogoutRequest
       responses:
         "307":
@@ -108,7 +122,7 @@ paths:
               properties:
                 loginCode:
                   type: string
-                provider:
+                appContext:
                   type: string
       responses:
         "200":
