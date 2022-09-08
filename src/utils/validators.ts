@@ -10,14 +10,23 @@ import { AppContext } from "./types";
  * @returns parsed app context
  */
 export function parseAppContext(context: Context): AppContext {
-  if (typeof context.request.query.appContext !== "string") {
+
+  let appContext;
+  
+  
+  if (typeof context.request.query?.appContext === "string") {
+    appContext = context.request.query.appContext;
+  } else if (typeof context.request.requestBody?.appContext === "string") {
+    appContext = context.request.requestBody.appContext;
+  }
+
+  if (typeof appContext !== "string") {
     throw new ValidationError("No app context");
   }
 
-  let appContext;
-
+  
   try {
-    appContext = JSON.parse(resolveBase64Hash(context.request.query.appContext));
+    appContext = JSON.parse(resolveBase64Hash(appContext));
   } catch (error) {
     throw new ValidationError("Bad app context");
   }

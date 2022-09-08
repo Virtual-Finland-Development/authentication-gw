@@ -1,14 +1,22 @@
 service: authentication-gw
 
 plugins:
+  - serverless-offline-ssm
   - serverless-offline
   - serverless-plugin-include-dependencies
 
 provider:
   name: aws
   runtime: nodejs16.x
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: eu-north-1
+
+custom:
+  serverless-offline-ssm:
+    stages:
+      - offline
+    ssm: 
+      '/AUTHENTICATION_GW_RUNTIME_TOKEN': 'none'
 
 package:
   excludeDevDependencies: false
@@ -27,7 +35,7 @@ functions:
     environment:
       AUTH_PROVIDER_REDIRECT_BACK_HOST: ${env:AUTH_PROVIDER_REDIRECT_BACK_HOST, 'http://localhost:3000'}
       APP_CONTEXT_REDIRECT_FALLBACK_URL: ${env:APP_CONTEXT_REDIRECT_FALLBACK_URL, 'http://localhost:8000'}
-
+      AUTHENTICATION_GW_RUNTIME_TOKEN: ${ssm:/AUTHENTICATION_GW_RUNTIME_TOKEN}
   api-docs:
     handler: dist/api-docs.handler
     events:
