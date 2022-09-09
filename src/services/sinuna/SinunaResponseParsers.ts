@@ -67,11 +67,11 @@ export function parseSinunaAuthenticateResponse(queryParams: { [key: string]: st
   if (!isObject(queryParams)) {
     throw new ValidationError("Received bad AuthenticateResponse");
   }
-  if (typeof queryParams.loginCode !== "string" || typeof queryParams.state !== "string") {
+  if (typeof queryParams.code !== "string" || typeof queryParams.state !== "string") {
     throw new ValidationError("Received invalid AuthenticateResponse");
   }
 
-  const loginCode = queryParams.loginCode;
+  const loginCode = queryParams.code;
   const appContext = SinunaStateAttributor.parse(queryParams.state);
 
   return {

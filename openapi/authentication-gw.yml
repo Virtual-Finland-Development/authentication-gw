@@ -65,6 +65,19 @@ paths:
   "/auth/openid/authenticate-response":
     get:
       operationId: AuthenticateResponse
+      parameters:
+        - in: query
+          name: code
+          description: "Login code"
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: state
+          description: "Login state string"
+          schema:
+            type: string
+          required: true
       responses:
         "307":
           description: Authentication providers callback url, redirect back to the app context, provide loginCode and provider -variables as query params
