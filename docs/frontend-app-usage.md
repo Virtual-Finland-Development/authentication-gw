@@ -26,7 +26,7 @@ type AppContextObject = {
 };
 
 export function generateAppContext(appContextObject: AppContextObject): string {
-  return encodeURIComponent(btoa(JSON.stringify(appContext)));
+  return encodeURIComponent(btoa(JSON.stringify(appContextObject)));
 }
 ```
 
