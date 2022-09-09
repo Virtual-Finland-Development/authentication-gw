@@ -78,6 +78,26 @@ paths:
           schema:
             type: string
           required: true
+        - in: query
+          name: acr_values
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: scope
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: session_state
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: sid
+          schema:
+            type: string
+          required: false
       responses:
         "307":
           description: Authentication providers callback url, redirect back to the app context, provide loginCode and provider -variables as query params
