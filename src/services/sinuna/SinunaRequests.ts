@@ -22,12 +22,11 @@ export async function initializeSinunaRequests() {
  */
 export async function getLoginRequestUrl(appContext: AppContext): Promise<string> {
   await initializeSinunaRequests();
-  const AS_URL = "https://login.iam.qa.sinuna.fi";
   const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID", "client_id");
   const SCOPE = "openid frontend";
   const STATE = SinunaStateAttributor.generate(appContext); // Throws if appContext is invalid
   const REDIRECT_URI = Settings.getAuthRedirectUrl();
-  return `https://${AS_URL}/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
+  return `https://login.iam.qa.sinuna.fi/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
 }
 
 /**
@@ -77,7 +76,6 @@ export function prepareLogoutRedirectUrl(redirectUrl: string): string {
  */
 export async function getAccessToken(loginCode: string): Promise<string> {
   await initializeSinunaRequests();
-  const AS_URL = "https://login.iam.qa.sinuna.fi";
   const SCOPE = "openid frontend";
 
   const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID", "client_id");
@@ -85,7 +83,7 @@ export async function getAccessToken(loginCode: string): Promise<string> {
 
   const REDIRECT_URI = Settings.getAuthRedirectUrl();
   const response = await axios.post(
-    `https://${AS_URL}/oxauth/restv1/token`,
+    `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,
     {
       grant_type: "authorization_code",
       code: loginCode,

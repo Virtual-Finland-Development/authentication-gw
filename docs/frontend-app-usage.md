@@ -1,6 +1,6 @@
 # Frontend app usage
 
-Requests to the backend are accompanied with an `appContext` token which is a base64 encoded string of the following JSON object:
+Requests to the backend are accompanied with an `appContext` token which is a base64 encoded and url encoded string of the following JSON object:
 
 ```json
 {
@@ -12,10 +12,23 @@ Requests to the backend are accompanied with an `appContext` token which is a ba
 eg.
 
 ```js
-btoa(JSON.stringify({ appName: "TMT-test", redirectUrl: "url-to-the-login-handler-in-the-app" }));
+encodeURIComponent(btoa(JSON.stringify({ appName: "TMT-test", redirectUrl: "url-back-to-the-login-handler-in-the-app" })));
 ```
 
-> eyJhcHBOYW1lIjoiYXBwLW5hbWUiLCJyZWRpcmVjdFVybCI6InVybC1iYWNrLXRvLXRoZS1sb2dpbi1oYW5kbGVyLWluLXRoZS1hcHAifQ==
+> eyJhcHBOYW1lIjoiVE1ULXRlc3QiLCJyZWRpcmVjdFVybCI6InVybC1iYWNrLXRvLXRoZS1sb2dpbi1oYW5kbGVyLWluLXRoZS1hcHAifQ%3D%3D
+
+Example token generating function in typescript:
+
+```ts
+type AppContextObject = {
+  appName: string;
+  redirectUrl: string;
+};
+
+export function generateAppContext(appContextObject: AppContextObject): string {
+  return encodeURIComponent(btoa(JSON.stringify(appContext)));
+}
+```
 
 ## LoginRequest
 
@@ -42,8 +55,8 @@ const response = await fetch(`https://${authEndpointHost}/auth/openid/auth-token
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    loginCode: loginCode, 
-    appContext: appContext, // base64 string
+    loginCode: loginCode,
+    appContext: appContext, // url-encoded base64 string
   }),
 });
 

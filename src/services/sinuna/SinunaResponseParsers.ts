@@ -37,15 +37,17 @@ export const SinunaStateAttributor = new (class ___SinunaStateAttributor {
     }
   }
   generate(appContext: AppContext): string {
-    return generateBase64Hash({
-      ...appContext,
-      checksum: this.#createCheckSum(appContext),
-    });
+    return encodeURIComponent(
+      generateBase64Hash({
+        ...appContext,
+        checksum: this.#createCheckSum(appContext),
+      })
+    );
   }
   parse(state: string): AppContext {
     let appContext;
     try {
-      appContext = JSON.parse(resolveBase64Hash(state));
+      appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(state)));
     } catch (error) {
       throw new ValidationError("Could not parse state attribute");
     }

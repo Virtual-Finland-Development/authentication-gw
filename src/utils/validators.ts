@@ -10,10 +10,8 @@ import { AppContext } from "./types";
  * @returns parsed app context
  */
 export function parseAppContext(context: Context): AppContext {
-
   let appContext;
-  
-  
+
   if (typeof context.request.query?.appContext === "string") {
     appContext = context.request.query.appContext;
   } else if (typeof context.request.requestBody?.appContext === "string") {
@@ -24,9 +22,8 @@ export function parseAppContext(context: Context): AppContext {
     throw new ValidationError("No app context");
   }
 
-  
   try {
-    appContext = JSON.parse(resolveBase64Hash(appContext));
+    appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(appContext)));
   } catch (error) {
     throw new ValidationError("Bad app context");
   }
