@@ -15,8 +15,10 @@ custom:
   serverless-offline-ssm:
     stages:
       - offline
-    ssm: 
-      '/AUTHENTICATION_GW_RUNTIME_TOKEN': 'none'
+    ssm:
+      "/AUTHENTICATION_GW_RUNTIME_TOKEN": "none"
+      "/SINUNA_CLIENT_ID": "none"
+      "/SINUNA_CLIENT_SECRET": "none"
 
 package:
   excludeDevDependencies: false
@@ -36,6 +38,8 @@ functions:
       AUTH_PROVIDER_REDIRECT_BACK_HOST: ${env:AUTH_PROVIDER_REDIRECT_BACK_HOST, 'http://localhost:3000'}
       APP_CONTEXT_REDIRECT_FALLBACK_URL: ${env:APP_CONTEXT_REDIRECT_FALLBACK_URL, 'http://localhost:8000'}
       AUTHENTICATION_GW_RUNTIME_TOKEN: ${ssm:/AUTHENTICATION_GW_RUNTIME_TOKEN}
+      SINUNA_CLIENT_ID: ${ssm:/SINUNA_CLIENT_ID}
+      SINUNA_CLIENT_SECRET: ${ssm:/SINUNA_CLIENT_SECRET}
   api-docs:
     handler: dist/api-docs.handler
     events:
