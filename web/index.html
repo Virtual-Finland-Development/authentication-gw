@@ -28,7 +28,7 @@
     const AppSettings = {
         appName: "authflow-test",
         authAPIHost: "", // the authentication gw host
-        authResponseHandlerUrl: window.location.origin + window.location.pathname,
+        authResponseHandlerUrl: window.location.href,
         generateAppContext() {
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
         },
@@ -116,7 +116,7 @@
                 try {
                     const token = await AuthService.fetchAuthToken(loginCode);
                     AuthState.login(token); // Store token in local storage
-                    UIState.transitToUrl(AppSettings.authResponseHandlerUrl); // reset view state
+                    UIState.resetViewState(); // reset view state
                 } catch (error) {
                     log("LoginFlowEventsListener", "Failed to fetch auth token", error);
                 }
@@ -129,7 +129,7 @@
             const logoutResponse = urlParams.get('logout');
             if (logoutResponse === "success") {
                 AuthState.logout();
-                UIState.transitToUrl(AppSettings.authResponseHandlerUrl); // reset view state
+                UIState.resetViewState(); // reset view state
             }
         }
     }
@@ -160,6 +160,11 @@
         transitToUrl(url) {
             this.flagTransition();
             window.location.href = url;
+        },
+        resetViewState() {
+            window.history.replaceState({}, document.title, window.location.pathname); // clear url params
+            AuthState.isInTransition = false;
+            this.handleCurrentState();
         },
     }
 

@@ -14,7 +14,7 @@ import { parseAppContext } from "../utils/validators";
  */
 export async function LoginRequest(context: Context) {
   const appContext = parseAppContext(context);
-
+  console.log("LoginRequest: appContext", appContext);
   return {
     statusCode: 307,
     headers: {
