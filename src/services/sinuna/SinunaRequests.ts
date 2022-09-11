@@ -57,8 +57,8 @@ export async function parseAuthenticateResponse(queryParams: { [key: string]: st
 export async function getLogoutRequestUrl(appContext: AppContext): Promise<string> {
   await initializeSinunaRequests();
   // Redirecting straight to the app context might work, but not tested
-  //const logoutRedirectUrl = prepareLogoutRedirectUrl(appContext.redirectUrl);
-  return `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session`;
+  const logoutRedirectUrl = prepareLogoutRedirectUrl(appContext.redirectUrl);
+  return `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${logoutRedirectUrl}`;
 }
 
 /**
@@ -67,7 +67,7 @@ export async function getLogoutRequestUrl(appContext: AppContext): Promise<strin
  * @returns
  */
 export function prepareLogoutRedirectUrl(redirectUrl: string): string {
-  return ensureUrlQueryParam(redirectUrl, "logout", "success");
+  return "https://c7ig58qwk1.execute-api.eu-north-1.amazonaws.com/auth/openid/logout-response"; // ensureUrlQueryParam(redirectUrl, "logout", "success");
 }
 
 /**
