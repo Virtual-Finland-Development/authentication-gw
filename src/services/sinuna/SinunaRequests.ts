@@ -1,5 +1,6 @@
 // @see: https://developer.sinuna.fi/integration_documentation/
 import axios from "axios";
+import { logAxiosException } from "../../utils/logging";
 import Settings from "../../utils/Settings";
 import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformers";
 
@@ -99,24 +100,8 @@ export async function getAccessToken(loginCode: string): Promise<string> {
       }
     );
     return response.data.access_token;
-  } catch (error: any) {
-    // @see: https://axios-http.com/docs/handling_errors
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
-    } else if (error.request) {
-      // The request was made but no response was received
-      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-      // http.ClientRequest in node.js
-      console.log(error.request);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.log("Error", error.message);
-    }
-    console.log(error.config);
+  } catch (error) {
+    logAxiosException(error);
     throw error;
   }
 }
