@@ -18,7 +18,8 @@ export async function LoginRequest(context: Context) {
   return {
     statusCode: 307,
     headers: {
-      location: await SinunaRequests.getLoginRequestUrl(appContext),
+      location: await SinunaRequests.getLoginRequestUrl(appContext.object),
+      "Set-Cookie": `appContext=${appContext.hash}`,
     },
   };
 }
@@ -30,6 +31,7 @@ export async function LoginRequest(context: Context) {
  * @returns AuthenticateResponse -> LoginResponse
  */
 export async function AuthenticateResponse(context: Context) {
+  console.log("AuthenticateResponse", context.request);
   const loginResponse = await SinunaRequests.parseAuthenticateResponse(context.request.query);
   const redirectUrl = `${loginResponse.appContextRedirectUrl}?loginCode=${loginResponse.loginCode}&authProvider=${loginResponse.authProvider}`;
   return {
@@ -48,7 +50,7 @@ export async function AuthenticateResponse(context: Context) {
  */
 export async function AuthTokenRequest(context: Context) {
   parseAppContext(context); // Valites app context
-  const token = await SinunaRequests.getAccessToken(context.request.requestBody.loginCode); // request body already validated by openapi-backend
+  const token = await SinunaRequests.fetchAccessToken(context.request.requestBody.loginCode); // request body already validated by openapi-backend
   return {
     statusCode: 200,
     headers: jsonResponseHeaders,
@@ -68,8 +70,9 @@ export async function LogoutRequest(context: Context) {
   return {
     statusCode: 307,
     headers: {
-      location: await SinunaRequests.getLogoutRequestUrl(appContext),
+      location: await SinunaRequests.getLogoutRequestUrl(appContext.object),
     },
+    "Set-Cookie": `appContext=${appContext.hash}`,
   };
 }
 
@@ -81,8 +84,8 @@ export async function LogoutRequest(context: Context) {
  * @returns
  */
 export async function LogoutResponse(context: Context) {
-  console.log("DEBUG: LogoutResponse");
-  console.log(context.request);
+  console.log("LogoutResponse");
+  console.log(context);
 
   const referrerUrl = String(context.request.headers.referer);
   const appContextUrl = ifValidUrl(referrerUrl) ? referrerUrl : Settings.getAppContextFallbackURL();
