@@ -7,24 +7,23 @@ import { AppContext } from "./types";
  *
  * @param context openapi-backend context
  * @throws ValidationError if invalid app context
- * @returns parsed app context, hash
+ * @returns parsed app context
  */
-export function parseAppContext(context: Context): { object: AppContext; hash: string } {
-  let appContextHash;
+export function parseAppContext(context: Context): AppContext {
+  let appContext;
 
   if (typeof context.request.query?.appContext === "string") {
-    appContextHash = context.request.query.appContext;
+    appContext = context.request.query.appContext;
   } else if (typeof context.request.requestBody?.appContext === "string") {
-    appContextHash = context.request.requestBody.appContext;
+    appContext = context.request.requestBody.appContext;
   }
 
-  if (typeof appContextHash !== "string") {
+  if (typeof appContext !== "string") {
     throw new ValidationError("No app context");
   }
 
-  let appContext;
   try {
-    appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(appContextHash)));
+    appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(appContext)));
   } catch (error) {
     throw new ValidationError("Bad app context");
   }
@@ -33,8 +32,5 @@ export function parseAppContext(context: Context): { object: AppContext; hash: s
     throw new ValidationError("Invalid app context");
   }
 
-  return {
-    object: appContext,
-    hash: appContextHash,
-  };
+  return appContext;
 }

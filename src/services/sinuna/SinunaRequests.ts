@@ -77,7 +77,7 @@ export function prepareLogoutRedirectUrl(redirectUrl: string): string {
  * @param loginCode
  * @returns
  */
-export async function fetchAccessToken(loginCode: string): Promise<string> {
+export async function getAccessToken(loginCode: string): Promise<string> {
   await initializeSinunaRequests();
   const SCOPE = "openid frontend";
 
