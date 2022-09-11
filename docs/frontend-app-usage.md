@@ -4,7 +4,7 @@
 
 The example login app is a simple dependency-free html document that demonstrates how to use the auth gw in a browser:
 
-[./web/index.html](./web/index.html)
+[./web/index.html](../web/index.html)
 
 Usage: fill the `authAPIHost` variable with the address of the auth gw and open the file in a browser.
 
