@@ -3,7 +3,7 @@ import axios from "axios";
 import { URLSearchParams } from "url";
 import { logAxiosException } from "../../utils/logging";
 import Settings from "../../utils/Settings";
-import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformers";
+import { generateBase64Hash } from "../../utils/transformers";
 
 import { AppContext, LoginResponse } from "../../utils/types";
 import { SinunaStateAttributor, parseSinunaAuthenticateResponse } from "./SinunaResponseParsers";
