@@ -83,7 +83,7 @@ export async function LogoutRequest(context: Context) {
  */
 export async function LogoutResponse(context: Context) {
   console.log("LogoutResponse");
-  console.log(context);
+  console.log(context.request);
 
   const referrerUrl = String(context.request.headers.referer);
   const appContextUrl = ifValidUrl(referrerUrl) ? referrerUrl : Settings.getAppContextFallbackURL();
