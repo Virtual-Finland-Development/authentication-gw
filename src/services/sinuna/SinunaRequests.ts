@@ -1,5 +1,6 @@
 // @see: https://developer.sinuna.fi/integration_documentation/
 import axios from "axios";
+import { URLSearchParams } from "url";
 import { logAxiosException } from "../../utils/logging";
 import Settings from "../../utils/Settings";
 import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformers";
@@ -86,12 +87,12 @@ export async function getAccessToken(loginCode: string): Promise<string> {
   try {
     const response = await axios.post(
       `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,
-      {
+      new URLSearchParams({
         grant_type: "authorization_code",
         code: loginCode,
         scope: SCOPE,
         redirect_uri: REDIRECT_URI,
-      },
+      }).toString(),
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
