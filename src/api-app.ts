@@ -18,7 +18,16 @@ api.init();
 // Lambda http event handler
 export const handler = async (event: APIGatewayProxyEventV2, context: APIGatewayContext) => {
   try {
-    console.log(event);
+    // Handle options request
+    if (event.requestContext.http.method === "OPTIONS") {
+      return {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      };
+    }
+
     return await api.handleRequest(
       {
         method: event.requestContext.http.method,
