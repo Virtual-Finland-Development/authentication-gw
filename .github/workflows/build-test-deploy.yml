@@ -39,8 +39,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Fix example index url
-        run: |
-          sed -i 's/authAPIHost: "",/authAPIHost: "'${{ secrets.AUTH_PROVIDER_REDIRECT_BACK_HOST }}'",/' ./web/index.html
+        run: ./scripts/fix-example-index-url.sh
+        env:
+          AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{ secrets.AUTH_PROVIDER_REDIRECT_BACK_HOST }}
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
