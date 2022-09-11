@@ -18,6 +18,7 @@ api.init();
 // Lambda http event handler
 export const handler = async (event: APIGatewayProxyEventV2, context: APIGatewayContext) => {
   try {
+    console.log(event);
     return await api.handleRequest(
       {
         method: event.requestContext.http.method,
