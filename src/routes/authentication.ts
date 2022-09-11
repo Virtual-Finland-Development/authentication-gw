@@ -3,6 +3,7 @@ import * as SinunaRequests from "../services/sinuna/SinunaRequests";
 import { prepareLogoutRedirectUrl } from "../services/sinuna/SinunaRequests";
 import { jsonResponseHeaders } from "../utils/default-headers";
 import Settings from "../utils/Settings";
+import { ifValidUrl } from "../utils/transformers";
 import { parseAppContext } from "../utils/validators";
 
 /**
@@ -80,10 +81,14 @@ export async function LogoutRequest(context: Context) {
  * @returns
  */
 export async function LogoutResponse(context: Context) {
-  const redirectUrl = prepareLogoutRedirectUrl(Settings.getAppContextFallbackURL());
   console.log("DEBUG: LogoutResponse");
   console.log(context.request);
+
+  const referrerUrl = String(context.request.headers.referer);
+  const appContextUrl = ifValidUrl(referrerUrl) ? referrerUrl : Settings.getAppContextFallbackURL();
+  const redirectUrl = prepareLogoutRedirectUrl(appContextUrl);
   console.log(redirectUrl);
+
   return {
     statusCode: 307,
     headers: {

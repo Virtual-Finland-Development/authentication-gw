@@ -99,3 +99,17 @@ export function ensureUrlQueryParam(url: string, param: string, value: string): 
   urlObj.searchParams.set(param, value);
   return urlObj.toString();
 }
+
+/**
+ *
+ * @param url
+ * @returns
+ */
+export function ifValidUrl(url: string): boolean {
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}

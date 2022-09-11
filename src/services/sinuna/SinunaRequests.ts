@@ -3,7 +3,7 @@ import axios from "axios";
 import { URLSearchParams } from "url";
 import { logAxiosException } from "../../utils/logging";
 import Settings from "../../utils/Settings";
-import { generateBase64Hash } from "../../utils/transformers";
+import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformers";
 
 import { AppContext, LoginResponse } from "../../utils/types";
 import { SinunaStateAttributor, parseSinunaAuthenticateResponse } from "./SinunaResponseParsers";
@@ -27,7 +27,7 @@ export async function getLoginRequestUrl(appContext: AppContext): Promise<string
   const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID", "client_id");
   const SCOPE = "openid frontend";
   const STATE = SinunaStateAttributor.generate(appContext); // Throws if appContext is invalid
-  const REDIRECT_URI = Settings.getAuthRedirectUrl();
+  const REDIRECT_URI = Settings.getLoginRedirectUrl();
   return `https://login.iam.qa.sinuna.fi/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
 }
 
@@ -57,8 +57,9 @@ export async function parseAuthenticateResponse(queryParams: { [key: string]: st
 export async function getLogoutRequestUrl(appContext: AppContext): Promise<string> {
   await initializeSinunaRequests();
   // Redirecting straight to the app context might work, but not tested
-  const logoutRedirectUrl = prepareLogoutRedirectUrl(appContext.redirectUrl);
-  return `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${logoutRedirectUrl}`;
+  //const logoutRedirectUrl = prepareLogoutRedirectUrl(appContext.redirectUrl);
+  const REDIRECT_URI = Settings.getLogoutRedirectUrl();
+  return `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${REDIRECT_URI}`;
 }
 
 /**
@@ -67,7 +68,7 @@ export async function getLogoutRequestUrl(appContext: AppContext): Promise<strin
  * @returns
  */
 export function prepareLogoutRedirectUrl(redirectUrl: string): string {
-  return "https://c7ig58qwk1.execute-api.eu-north-1.amazonaws.com/auth/openid/logout-response"; // ensureUrlQueryParam(redirectUrl, "logout", "success");
+  return ensureUrlQueryParam(redirectUrl, "logout", "success");
 }
 
 /**
@@ -83,7 +84,7 @@ export async function getAccessToken(loginCode: string): Promise<string> {
   const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID", "client_id");
   const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET", "client_secret");
 
-  const REDIRECT_URI = Settings.getAuthRedirectUrl();
+  const REDIRECT_URI = Settings.getLoginRedirectUrl();
   try {
     const response = await axios.post(
       `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,
