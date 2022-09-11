@@ -18,7 +18,7 @@ export async function LoginRequest(context: Context) {
   return {
     statusCode: 307,
     headers: {
-      location: await SinunaRequests.getLoginRequestUrl(appContext),
+      Location: await SinunaRequests.getLoginRequestUrl(appContext),
     },
   };
 }
@@ -35,7 +35,7 @@ export async function AuthenticateResponse(context: Context) {
   return {
     statusCode: 307,
     headers: {
-      location: redirectUrl,
+      Location: redirectUrl,
     },
   };
 }
@@ -68,7 +68,8 @@ export async function LogoutRequest(context: Context) {
   return {
     statusCode: 307,
     headers: {
-      location: await SinunaRequests.getLogoutRequestUrl(appContext),
+      Location: await SinunaRequests.getLogoutRequestUrl(),
+      Referer: appContext.redirectUrl,
     },
   };
 }
@@ -92,7 +93,7 @@ export async function LogoutResponse(context: Context) {
   return {
     statusCode: 307,
     headers: {
-      location: redirectUrl,
+      Location: redirectUrl,
     },
   };
 }
