@@ -24,6 +24,8 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
         statusCode: 200,
         headers: {
           "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "*",
         },
       };
     }
