@@ -27,7 +27,7 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authAPIHost: "MORO", // the authentication gw host
+        authAPIHost: "", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname,
         generateAppContext() {
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
