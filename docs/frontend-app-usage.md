@@ -1,5 +1,15 @@
 # Frontend app usage
 
+## Example login app
+
+The example login app is a simple dependency-free html document that demonstrates how to use the auth gw in a browser:
+
+[./web/index.html](./web/index.html)
+
+Usage: fill the `authAPIHost` variable with the address of the auth gw and open the file in a browser.
+
+## Requests
+
 Requests to the backend are accompanied with an `appContext` token which is a base64 encoded and url encoded string of the following JSON object:
 
 ```json
