@@ -1,7 +1,12 @@
 export const defaultHeaders = {
-  "access-control-allow-origin": "*",
+  "Access-Control-Allow-Origin": "*",
 };
 export const jsonResponseHeaders = {
   ...defaultHeaders,
-  "content-type": "application/json",
+  "Content-Type": "application/json",
+};
+export const CORSHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "*",
 };

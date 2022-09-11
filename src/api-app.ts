@@ -2,6 +2,7 @@ import { APIGatewayProxyEventV2, Context as APIGatewayContext } from "aws-lambda
 import OpenAPIBackend from "openapi-backend";
 import * as AuthenticationRoutes from "./routes/authentication";
 import BaseRoutes, { InternalServerErrorHandler } from "./routes/base-routes";
+import { CORSHeaders } from "./utils/default-headers";
 
 // Setup the OpenAPI backend
 const api = new OpenAPIBackend({ definition: "./openapi/authentication-gw.yml" });
@@ -22,11 +23,7 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
     if (event.requestContext.http.method === "OPTIONS") {
       return {
         statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
-          "Access-Control-Allow-Headers": "*",
-        },
+        headers: CORSHeaders,
       };
     }
 

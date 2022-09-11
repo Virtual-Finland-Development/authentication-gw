@@ -5,6 +5,7 @@ import { exceptionToObject } from "../utils/transformers";
 
 export function InternalServerErrorHandler(error: any) {
   const exception = exceptionToObject(error);
+  console.log(exception);
 
   let statusCode = 500;
   if (exception.statusCode) {
