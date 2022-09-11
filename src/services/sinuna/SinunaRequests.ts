@@ -82,20 +82,41 @@ export async function getAccessToken(loginCode: string): Promise<string> {
   const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET", "client_secret");
 
   const REDIRECT_URI = Settings.getAuthRedirectUrl();
-  const response = await axios.post(
-    `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,
-    {
-      grant_type: "authorization_code",
-      code: loginCode,
-      scope: SCOPE,
-      redirect_uri: REDIRECT_URI,
-    },
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: "Basic " + generateBase64Hash(`${CLIENT_ID}:${CLIENT_SECRET}`),
+  try {
+    const response = await axios.post(
+      `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,
+      {
+        grant_type: "authorization_code",
+        code: loginCode,
+        scope: SCOPE,
+        redirect_uri: REDIRECT_URI,
       },
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: "Basic " + generateBase64Hash(`${CLIENT_ID}:${CLIENT_SECRET}`),
+        },
+      }
+    );
+    return response.data.access_token;
+  } catch (error: any) {
+    // @see: https://axios-http.com/docs/handling_errors
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+      // http.ClientRequest in node.js
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log("Error", error.message);
     }
-  );
-  return response.data.access_token;
+    console.log(error.config);
+    throw error;
+  }
 }
