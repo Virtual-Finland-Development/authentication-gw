@@ -10,6 +10,8 @@ provider:
   runtime: nodejs16.x
   stage: ${opt:stage, 'dev'}
   region: eu-north-1
+  httpApi:
+    cors: true
 
 custom:
   serverless-offline-ssm:

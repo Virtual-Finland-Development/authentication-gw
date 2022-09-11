@@ -42,7 +42,7 @@ window.location.href = `https://${authEndpointHost}/auth/openid/login-request?ap
 
 After the auth process is done, the user is redirected to the `redirectUrl` predefined in the `appContext`-variable with a `loginCode` token as a query parameter.
 
-eg: `https://${frontendAppHost}/login-handler.html?code={loginCode}`
+eg: `https://${frontendAppHost}/login-handler.html?loginCode={loginCode}`
 
 ## AuthTokenRequest
 
