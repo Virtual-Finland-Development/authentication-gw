@@ -74,7 +74,7 @@
         },
         async handleLoggedIn() {
             try {
-                this.user.email = await AuthService.fetchUserEmail("bbaz");
+                this.user.email = await AuthService.fetchUserEmail(this.getAuthToken());
             } catch (error) {
                 // Auth invalidated
                 log("AuthState", "login invalidated");
