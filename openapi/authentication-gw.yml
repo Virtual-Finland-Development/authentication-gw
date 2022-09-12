@@ -194,3 +194,12 @@ paths:
                     type: string
                   email:
                     type: string
+        "401":
+          description: "Login invalid or expired"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string

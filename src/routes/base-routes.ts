@@ -1,6 +1,6 @@
 import { Context } from "openapi-backend";
 import { jsonResponseHeaders } from "../utils/default-headers";
-import { ValidationError } from "../utils/exceptions";
+import { AccessDeniedException, ValidationError } from "../utils/exceptions";
 import { exceptionToObject } from "../utils/transformers";
 
 export function InternalServerErrorHandler(error: any) {
@@ -12,6 +12,8 @@ export function InternalServerErrorHandler(error: any) {
     statusCode = exception.statusCode;
   } else if (error instanceof ValidationError) {
     statusCode = 422;
+  } else if (error instanceof AccessDeniedException) {
+    statusCode = 401;
   }
 
   return {

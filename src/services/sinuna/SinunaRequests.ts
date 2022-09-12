@@ -1,6 +1,7 @@
 // @see: https://developer.sinuna.fi/integration_documentation/
 import axios from "axios";
 import { URLSearchParams } from "url";
+import { AccessDeniedException } from "../../utils/exceptions";
 import { logAxiosException } from "../../utils/logging";
 import Settings from "../../utils/Settings";
 import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformers";
@@ -123,6 +124,6 @@ export async function fetchUserInfo(accessToken: string): Promise<any> {
     return response.data;
   } catch (error) {
     logAxiosException(error);
-    throw error;
+    throw new AccessDeniedException(String(error));
   }
 }

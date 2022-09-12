@@ -27,7 +27,7 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authAPIHost: "https://c7ig58qwk1.execute-api.eu-north-1.amazonaws.com", // the authentication gw host
+        authAPIHost: "", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
         generateAppContext() {
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
