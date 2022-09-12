@@ -113,3 +113,13 @@ export function ifValidUrl(url: string): boolean {
     return false;
   }
 }
+
+/**
+ *
+ * @param text
+ * @param minLength
+ * @returns
+ */
+export function ifString(text: any, minLength = 1): boolean {
+  return typeof text === "string" && text.length >= minLength;
+}

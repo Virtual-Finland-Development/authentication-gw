@@ -1,6 +1,6 @@
 import { Context } from "openapi-backend";
 import { ValidationError } from "./exceptions";
-import { resolveBase64Hash, ifAllObjectKeysAreDefined } from "./transformers";
+import { resolveBase64Hash, ifAllObjectKeysAreDefined, ifString } from "./transformers";
 import { AppContext } from "./types";
 
 /**
@@ -9,21 +9,25 @@ import { AppContext } from "./types";
  * @throws ValidationError if invalid app context
  * @returns parsed app context
  */
-export function parseAppContext(context: Context): AppContext {
-  let appContext;
+export function parseAppContext(context: Context): { object: AppContext; hash: string } {
+  let appContextHash;
 
-  if (typeof context.request.query?.appContext === "string") {
-    appContext = context.request.query.appContext;
-  } else if (typeof context.request.requestBody?.appContext === "string") {
-    appContext = context.request.requestBody.appContext;
+  if (ifString(context.request.query?.appContext)) {
+    appContextHash = context.request.query.appContext;
+  } else if (ifString(context.request.requestBody?.appContext)) {
+    appContextHash = context.request.requestBody.appContext;
+  } else if (ifString(context.request.cookies?.appContext)) {
+    appContextHash = context.request.cookies.appContext;
   }
 
-  if (typeof appContext !== "string") {
+  if (!ifString(appContextHash)) {
     throw new ValidationError("No app context");
   }
 
+  let appContext;
+
   try {
-    appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(appContext)));
+    appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(appContextHash)));
   } catch (error) {
     throw new ValidationError("Bad app context");
   }
@@ -32,5 +36,8 @@ export function parseAppContext(context: Context): AppContext {
     throw new ValidationError("Invalid app context");
   }
 
-  return appContext;
+  return {
+    object: appContext,
+    hash: appContextHash,
+  };
 }

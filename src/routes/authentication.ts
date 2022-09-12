@@ -2,8 +2,6 @@ import { Context } from "openapi-backend";
 import * as SinunaRequests from "../services/sinuna/SinunaRequests";
 import { prepareLogoutRedirectUrl } from "../services/sinuna/SinunaRequests";
 import { jsonResponseHeaders } from "../utils/default-headers";
-import Settings from "../utils/Settings";
-import { ifValidUrl } from "../utils/transformers";
 import { parseAppContext } from "../utils/validators";
 
 /**
@@ -17,7 +15,8 @@ export async function LoginRequest(context: Context) {
   return {
     statusCode: 307,
     headers: {
-      Location: await SinunaRequests.getLoginRequestUrl(appContext),
+      Location: await SinunaRequests.getLoginRequestUrl(appContext.object),
+      "Set-Cookie": `appContext=${appContext.hash};`,
     },
   };
 }
@@ -29,12 +28,14 @@ export async function LoginRequest(context: Context) {
  * @returns AuthenticateResponse -> LoginResponse
  */
 export async function AuthenticateResponse(context: Context) {
+  const appContext = parseAppContext(context);
   const loginResponse = await SinunaRequests.parseAuthenticateResponse(context.request.query);
-  const redirectUrl = `${loginResponse.appContextRedirectUrl}?loginCode=${loginResponse.loginCode}&authProvider=${loginResponse.authProvider}`;
+  const redirectUrl = `${appContext.object.redirectUrl}?loginCode=${loginResponse.loginCode}&authProvider=${loginResponse.authProvider}`;
   return {
     statusCode: 307,
     headers: {
       Location: redirectUrl,
+      "Set-Cookie": `appContext='';`,
     },
   };
 }
@@ -63,13 +64,12 @@ export async function AuthTokenRequest(context: Context) {
  */
 export async function LogoutRequest(context: Context) {
   const appContext = parseAppContext(context);
-  console.log("LogoutRequest: appContext", appContext);
 
   return {
     statusCode: 307,
     headers: {
       Location: await SinunaRequests.getLogoutRequestUrl(),
-      referer: appContext.redirectUrl,
+      "Set-Cookie": `appContext=${appContext.hash};`,
     },
   };
 }
@@ -82,18 +82,17 @@ export async function LogoutRequest(context: Context) {
  * @returns
  */
 export async function LogoutResponse(context: Context) {
+  const appContext = parseAppContext(context);
   console.log("LogoutResponse");
   console.log(context.request);
-
-  const referrerUrl = String(context.request.headers.referer);
-  const appContextUrl = ifValidUrl(referrerUrl) ? referrerUrl : Settings.getAppContextFallbackURL();
-  const redirectUrl = prepareLogoutRedirectUrl(appContextUrl);
+  const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl);
   console.log(redirectUrl);
 
   return {
     statusCode: 307,
     headers: {
       Location: redirectUrl,
+      "Set-Cookie": `appContext='';`,
     },
   };
 }
