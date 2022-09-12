@@ -168,7 +168,7 @@ paths:
                   token:
                     type: string
   "/auth/openid/user-info-request":
-    get:
+    post:
       operationId: UserInfoRequest
       requestBody:
         description: Retrieve user info from the auth provider service
