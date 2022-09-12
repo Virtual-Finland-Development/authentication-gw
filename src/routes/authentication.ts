@@ -27,7 +27,7 @@ export async function LoginRequest(context: Context) {
  * @param context
  * @returns AuthenticateResponse -> LoginResponse
  */
-export async function AuthenticateResponse(context: Context, coo: any) {
+export async function AuthenticateResponse(context: Context) {
   const appContext = parseAppContext(context);
   const loginResponse = await SinunaRequests.parseAuthenticateResponse(context.request.query);
   const redirectUrl = `${appContext.object.redirectUrl}?loginCode=${loginResponse.loginCode}&authProvider=${loginResponse.authProvider}`;
@@ -91,5 +91,21 @@ export async function LogoutResponse(context: Context) {
       Location: redirectUrl,
       "Set-Cookie": `appContext='';`,
     },
+  };
+}
+
+/**
+ *  GET: get user info from with the access token
+ *
+ * @param context
+ * @returns
+ */
+export async function UserInfoRequest(context: Context) {
+  parseAppContext(context); // Valites app context
+  const response = await SinunaRequests.fetchUserInfo(context.request.requestBody.token);
+  return {
+    statusCode: 200,
+    headers: jsonResponseHeaders,
+    body: JSON.stringify(response),
   };
 }

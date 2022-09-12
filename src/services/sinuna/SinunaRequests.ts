@@ -99,8 +99,28 @@ export async function fetchAccessToken(loginCode: string): Promise<string> {
         },
       }
     );
-    console.log(response.data);
     return response.data.access_token;
+  } catch (error) {
+    logAxiosException(error);
+    throw error;
+  }
+}
+
+/**
+ * UserInfoRequest
+ *
+ * @param accessToken
+ * @returns
+ */
+export async function fetchUserInfo(accessToken: string): Promise<any> {
+  await initializeSinunaRequests();
+  try {
+    const response = await axios.get(`https://login.iam.qa.sinuna.fi/oxauth/restv1/userinfo`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
   } catch (error) {
     logAxiosException(error);
     throw error;

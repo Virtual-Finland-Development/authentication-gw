@@ -167,3 +167,30 @@ paths:
                 properties:
                   token:
                     type: string
+  "/auth/openid/user-info-request":
+    get:
+      operationId: UserInfoRequest
+      requestBody:
+        description: Retrieve user info from the auth provider service
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                appContext:
+                  type: string
+      responses:
+        "200":
+          description: User info object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sub:
+                    type: string
+                  email:
+                    type: string
