@@ -27,7 +27,7 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authAPIHost: "", // the authentication gw host
+        authAPIHost: "https://c7ig58qwk1.execute-api.eu-north-1.amazonaws.com", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
         generateAppContext() {
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
@@ -74,9 +74,10 @@
         },
         async handleLoggedIn() {
             try {
-                this.user.email = await AuthService.fetchUserEmail(this.getAuthToken());
+                this.user.email = await AuthService.fetchUserEmail("bbaz");
             } catch (error) {
                 // Auth invalidated
+                log("AuthState", "login invalidated");
                 this.logout();
                 UIState.resetViewState(); // reset view state
             }
@@ -87,10 +88,10 @@
         login() {
             log("AuthService", "logging in..");
             AppSettings.validateAppSettings();
-            UIState.transitToUrl(`${AppSettings.authAPIHost}/auth/openid/login-request?appContext=${AppSettings.generateAppContext()}`);
+            UIState.transitToUrl(`${AppSettings.authAPIHost}/auth/openid/login-request?appContext=${AppSettings.generateAppContext()}`); // LoginRequest
         },
         async fetchAuthToken(loginCode) {
-            const response = await fetch(`${AppSettings.authAPIHost}/auth/openid/auth-token-request`, {
+            const response = await fetch(`${AppSettings.authAPIHost}/auth/openid/auth-token-request`, { // AuthTokenRequest
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -105,7 +106,7 @@
             return token
         },
         async fetchUserEmail(accessToken) {
-            const response = await fetch(`${AppSettings.authAPIHost}/auth/openid/user-info-request`, {
+            const response = await fetch(`${AppSettings.authAPIHost}/auth/openid/user-info-request`, { // UserInfoRequest
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -115,14 +116,19 @@
                     appContext: AppSettings.generateAppContext(),
                 }),
             });
-
+            if (response.status !== 200) {
+                if (response.status === 401) {
+                    throw new Error("Unauthorized");
+                }
+                throw new Error("Unknown error");
+            }
             const { email } = await response.json();
             return email
         },
         logout() {
             log("AuthService", "logging out..");
             AppSettings.validateAppSettings();
-            UIState.transitToUrl(`${AppSettings.authAPIHost}/auth/openid/logout-request?appContext=${AppSettings.generateAppContext()}`);
+            UIState.transitToUrl(`${AppSettings.authAPIHost}/auth/openid/logout-request?appContext=${AppSettings.generateAppContext()}`); // LogoutRequest
         },
     }
 

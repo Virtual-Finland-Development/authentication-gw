@@ -69,7 +69,6 @@ const response = await fetch(`https://${authEndpointHost}/auth/openid/auth-token
     appContext: appContext, // url-encoded base64 string
   }),
 });
-
 const { token } = await response.json();
 ```
 
@@ -104,7 +103,7 @@ const response = await fetch(`https://${authEndpointHost}/auth/openid/user-info-
 const { email } = await response.json();
 ```
 
-If the request fails with a `401` status code, the token is invalid and the user should be redirected to the login page.
+If the request fails with a `401` status code, the token is expired and the user should be redirected to the login page.
 
 ## LogoutRequest
 
