@@ -26,7 +26,9 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
         headers: CORSHeaders,
       };
     }
-
+    console.log("DEBUG");
+    console.log(event);
+    console.log(context);
     return await api.handleRequest(
       {
         method: event.requestContext.http.method,
