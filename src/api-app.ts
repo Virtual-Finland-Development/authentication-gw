@@ -26,9 +26,13 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
         headers: CORSHeaders,
       };
     }
-    console.log("DEBUG");
-    console.log(event);
-    console.log(context);
+
+    // Pass lambda event cookies to openapi-backend
+    const headers = event.headers;
+    if (event.cookies instanceof Array && event.cookies.length > 0) {
+      headers["Cookie"] = event.cookies.join(";");
+    }
+
     return await api.handleRequest(
       {
         method: event.requestContext.http.method,
@@ -37,7 +41,7 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
         query: event.queryStringParameters,
         body: event.body,
         // @ts-ignore, openapi-backend definition does not define undefined, witch is a valid value
-        headers: event.headers,
+        headers: headers,
       },
       event,
       context
