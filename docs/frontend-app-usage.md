@@ -83,7 +83,28 @@ localStorage.setItem("authToken", token);
 
 ## Using the auth token
 
-The auth token is used for example in the `Authorization` header of the requests to the productizer backends.
+The auth `token` is used for example in the `Authorization` header of the requests to the productizer backends.
+
+### UserInfoRequest
+
+In the frontend app the `token` could be used like this:
+
+```js
+const response = await fetch(`https://${authEndpointHost}/auth/openid/user-info-request`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    token: token,
+    appContext: appContext, // url-encoded base64 string
+  }),
+});
+
+const { email } = await response.json();
+```
+
+If the request fails with a `401` status code, the token is invalid and the user should be redirected to the login page.
 
 ## LogoutRequest
 

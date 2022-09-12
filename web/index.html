@@ -27,7 +27,7 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authAPIHost: "", // the authentication gw host
+        authAPIHost: "https://c7ig58qwk1.execute-api.eu-north-1.amazonaws.com", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
         generateAppContext() {
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
@@ -47,6 +47,9 @@
 
     const AuthState = {
         isInTransition: false,
+        user: {
+            email: null,
+        },
         login(token) {
             this.isInTransition = true;
             if (typeof token === "string") {
@@ -56,6 +59,7 @@
         },
         logout() {
             this.isInTransition = true;
+            this.user.email = null;
             log("AuthState", "logged out");
             localStorage.removeItem("authToken");
         },
@@ -63,10 +67,19 @@
             return this.getAuthToken() !== null;
         },
         isLoading() {
-            return this.isInTransition;
+            return this.isInTransition || (this.isLoggedIn() && this.user.email === null);
         },
         getAuthToken() {
             return localStorage.getItem("authToken")
+        },
+        async handleLoggedIn() {
+            try {
+                this.user.email = await AuthService.fetchUserEmail(this.getAuthToken());
+            } catch (error) {
+                // Auth invalidated
+                this.logout();
+                UIState.resetViewState(); // reset view state
+            }
         },
     }
 
@@ -90,6 +103,21 @@
 
             const { token } = await response.json();
             return token
+        },
+        async fetchUserEmail(accessToken) {
+            const response = await fetch(`${AppSettings.authAPIHost}/auth/openid/user-info-request`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    token: accessToken,
+                    appContext: AppSettings.generateAppContext(),
+                }),
+            });
+
+            const { email } = await response.json();
+            return email
         },
         logout() {
             log("AuthService", "logging out..");
@@ -116,6 +144,7 @@
                 try {
                     const token = await AuthService.fetchAuthToken(loginCode);
                     AuthState.login(token); // Store token in local storage
+                    await AuthState.handleLoggedIn(); // Fetch user info
                     UIState.resetViewState(); // reset view state
                 } catch (error) {
                     log("LoginFlowEventsListener", "Failed to fetch auth token", error);
@@ -131,6 +160,9 @@
                 AuthState.logout();
                 UIState.resetViewState(); // reset view state
             }
+        } else {
+            await AuthState.handleLoggedIn(); // Validate login
+            UIState.handleCurrentState(); // Update UI
         }
     }
 
@@ -146,7 +178,7 @@
             } else if (AuthState.isLoggedIn()) {
                 loginButton.disabled = true;
                 logoutButton.disabled = false;
-                loginState.innerText = "logged in";
+                loginState.innerText = `logged in as ${AuthState.user.email}`;
             } else {
                 loginButton.disabled = false;
                 logoutButton.disabled = true;
