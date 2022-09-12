@@ -28,9 +28,6 @@ export async function LoginRequest(context: Context) {
  * @returns AuthenticateResponse -> LoginResponse
  */
 export async function AuthenticateResponse(context: Context, coo: any) {
-  console.log("AuthenticateResponse");
-  console.log(context);
-  console.log(coo);
   const appContext = parseAppContext(context);
   const loginResponse = await SinunaRequests.parseAuthenticateResponse(context.request.query);
   const redirectUrl = `${appContext.object.redirectUrl}?loginCode=${loginResponse.loginCode}&authProvider=${loginResponse.authProvider}`;
@@ -86,10 +83,7 @@ export async function LogoutRequest(context: Context) {
  */
 export async function LogoutResponse(context: Context) {
   const appContext = parseAppContext(context);
-  console.log("LogoutResponse");
-  console.log(context.request);
   const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl);
-  console.log(redirectUrl);
 
   return {
     statusCode: 307,
