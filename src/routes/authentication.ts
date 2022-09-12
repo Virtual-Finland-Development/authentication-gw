@@ -28,6 +28,8 @@ export async function LoginRequest(context: Context) {
  * @returns AuthenticateResponse -> LoginResponse
  */
 export async function AuthenticateResponse(context: Context) {
+  console.log("AuthenticateResponse");
+  console.log(context.request);
   const appContext = parseAppContext(context);
   const loginResponse = await SinunaRequests.parseAuthenticateResponse(context.request.query);
   const redirectUrl = `${appContext.object.redirectUrl}?loginCode=${loginResponse.loginCode}&authProvider=${loginResponse.authProvider}`;
