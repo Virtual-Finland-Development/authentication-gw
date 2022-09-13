@@ -2,7 +2,8 @@ import { getSecretParameter } from "./libs/AWS";
 
 export default {
   async getSecret(key: string, defaultValue?: string): Promise<string> {
-    if (this.getEnv("NODE_ENV") === "test") {
+    // Skip aws parameter store on test and local environment
+    if (this.getEnv("NODE_ENV") === "test" || this.getEnv("STAGE") === "offline") {
       return this.getEnv(key, defaultValue);
     }
 
@@ -16,6 +17,9 @@ export default {
     }
   },
   getEnv(key: string, defaultValue: string = ""): string {
+    return this.getEnvironmentValue(key, defaultValue);
+  },
+  getEnvironmentValue(key: string, defaultValue: string = ""): string {
     return typeof process.env[key] === "undefined" ? defaultValue : String(process.env[key]);
   },
   getEnvironmentBoolean(key: string, defaultValue?: boolean): boolean {
