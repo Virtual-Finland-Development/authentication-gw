@@ -27,7 +27,6 @@ functions:
           method: any
           path: /{proxy+}
     environment:
-      AWS_REGION: ${self:provider.region}
       STAGE: ${self:provider.stage}
       AUTH_PROVIDER_REDIRECT_BACK_HOST: ${env:AUTH_PROVIDER_REDIRECT_BACK_HOST, 'http://localhost:3000'}
       APP_CONTEXT_REDIRECT_FALLBACK_URL: ${env:APP_CONTEXT_REDIRECT_FALLBACK_URL, 'http://localhost:8000'}
