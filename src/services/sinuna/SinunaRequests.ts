@@ -25,7 +25,7 @@ export async function initializeSinunaRequests() {
  */
 export async function getLoginRequestUrl(appContext: AppContext): Promise<string> {
   await initializeSinunaRequests();
-  const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID", "client_id");
+  const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
   const SCOPE = "openid frontend";
   const STATE = SinunaStateAttributor.generate(appContext); // Throws if appContext is invalid
   const REDIRECT_URI = Settings.getLoginRedirectUrl();
@@ -80,8 +80,8 @@ export async function fetchAccessToken(loginCode: string): Promise<{ access_toke
   await initializeSinunaRequests();
   const SCOPE = "openid frontend";
 
-  const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID", "client_id");
-  const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET", "client_secret");
+  const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
+  const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET");
 
   const REDIRECT_URI = Settings.getLoginRedirectUrl();
   try {
