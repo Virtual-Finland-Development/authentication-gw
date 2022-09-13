@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/Virtual-Finland-Development/authentication-gw#readme",
   "dependencies": {
-    "aws-sdk": "^2.1210.0",
+    "aws-sdk": "^2.1214.0",
     "aws-serverless-swagger-ui": "^1.0.1",
     "axios": "^0.27.2",
     "openapi-backend": "^5.5.0"
