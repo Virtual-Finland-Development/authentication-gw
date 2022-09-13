@@ -76,7 +76,7 @@ export function prepareLogoutRedirectUrl(redirectUrl: string): string {
  * @param loginCode
  * @returns
  */
-export async function fetchAccessToken(loginCode: string): Promise<string> {
+export async function fetchAccessToken(loginCode: string): Promise<{ access_token: string; expires_in: number; scope: string; id_token: string; token_type: string }> {
   await initializeSinunaRequests();
   const SCOPE = "openid frontend";
 
@@ -100,9 +100,9 @@ export async function fetchAccessToken(loginCode: string): Promise<string> {
         },
       }
     );
-    
+
     debug(response.data);
-    return response.data.access_token;
+    return response.data;
   } catch (error) {
     logAxiosException(error);
     throw error;

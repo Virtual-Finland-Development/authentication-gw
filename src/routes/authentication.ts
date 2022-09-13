@@ -48,11 +48,11 @@ export async function AuthenticateResponse(context: Context) {
  */
 export async function AuthTokenRequest(context: Context) {
   parseAppContext(context); // Valites app context
-  const token = await SinunaRequests.fetchAccessToken(context.request.requestBody.loginCode); // request body already validated by openapi-backend
+  const response = await SinunaRequests.fetchAccessToken(context.request.requestBody.loginCode); // request body already validated by openapi-backend
   return {
     statusCode: 200,
     headers: jsonResponseHeaders,
-    body: JSON.stringify({ token: token }),
+    body: JSON.stringify({ token: response.access_token, expiresIn: response.expires_in }),
   };
 }
 

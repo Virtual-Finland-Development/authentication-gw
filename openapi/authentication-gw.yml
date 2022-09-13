@@ -167,6 +167,8 @@ paths:
                 properties:
                   token:
                     type: string
+                  expiresIn:
+                    type: number
   "/auth/openid/user-info-request":
     post:
       operationId: UserInfoRequest
