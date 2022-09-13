@@ -2,6 +2,10 @@ import { getSecretParameter } from "./libs/AWS";
 
 export default {
   async getSecret(key: string, defaultValue?: string): Promise<string> {
+    if (this.getEnv("NODE_ENV") === "test") {
+      return this.getEnv(key, defaultValue);
+    }
+
     try {
       return await getSecretParameter(key);
     } catch (error) {
