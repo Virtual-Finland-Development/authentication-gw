@@ -3,6 +3,7 @@ import OpenAPIBackend from "openapi-backend";
 import * as AuthenticationRoutes from "./routes/authentication";
 import BaseRoutes, { InternalServerErrorHandler } from "./routes/base-routes";
 import { CORSHeaders } from "./utils/default-headers";
+import { log } from "./utils/logging";
 
 // Setup the OpenAPI backend
 const api = new OpenAPIBackend({ definition: "./openapi/authentication-gw.yml" });
@@ -33,6 +34,8 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
       headers["Cookie"] = event.cookies.join(";");
     }
 
+    log(event.requestContext.http.method, event.rawPath);
+    
     return await api.handleRequest(
       {
         method: event.requestContext.http.method,

@@ -2,7 +2,7 @@
 import axios from "axios";
 import { URLSearchParams } from "url";
 import { AccessDeniedException } from "../../utils/exceptions";
-import { logAxiosException } from "../../utils/logging";
+import { debug, logAxiosException } from "../../utils/logging";
 import Settings from "../../utils/Settings";
 import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformers";
 
@@ -100,6 +100,8 @@ export async function fetchAccessToken(loginCode: string): Promise<string> {
         },
       }
     );
+    
+    debug(response.data);
     return response.data.access_token;
   } catch (error) {
     logAxiosException(error);
@@ -121,6 +123,9 @@ export async function fetchUserInfo(accessToken: string): Promise<any> {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+
+    debug(response.data);
+
     return response.data;
   } catch (error) {
     logAxiosException(error);
