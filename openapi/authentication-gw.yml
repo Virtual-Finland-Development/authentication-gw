@@ -205,3 +205,39 @@ paths:
                 properties:
                   message:
                     type: string
+  "/auth/openid/authorize":
+    post:
+      operationId: AuthorizeRequest
+      requestBody:
+        description: Access inspector
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                appContext:
+                  type: string
+      responses:
+        "200":
+          description: Access granted message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Access Granted"
+        "401":
+          description: Access denied message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Access Denied"

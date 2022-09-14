@@ -3,6 +3,7 @@ import * as SinunaRequests from "../services/sinuna/SinunaRequests";
 import { prepareLogoutRedirectUrl } from "../services/sinuna/SinunaRequests";
 import { jsonResponseHeaders } from "../utils/default-headers";
 import { parseAppContext } from "../utils/validators";
+import Authorizator from "../utils/Authorizator";
 
 /**
  * GET->REDIRECT: The route for handling the auth flow initiating process
@@ -95,7 +96,7 @@ export async function LogoutResponse(context: Context) {
 }
 
 /**
- *  GET: get user info from with the access token
+ *  POST: get user info from with the access token
  *
  * @param context
  * @returns
@@ -107,5 +108,25 @@ export async function UserInfoRequest(context: Context) {
     statusCode: 200,
     headers: jsonResponseHeaders,
     body: JSON.stringify(response),
+  };
+}
+
+/**
+ *  POST: authorize request using the access token and app context
+ *
+ * @param context
+ * @returns
+ */
+export async function AuthorizeRequest(context: Context) {
+  const appName = parseAppContext(context).object.appName;
+  const response = await SinunaRequests.fetchUserInfo(context.request.requestBody.token); // Throws AccessDeniedException if token is invalid
+  await Authorizator.authorize("sinuna", appName, response);
+
+  return {
+    statusCode: 200,
+    headers: jsonResponseHeaders,
+    body: JSON.stringify({
+      message: "Access Granted",
+    }),
   };
 }
