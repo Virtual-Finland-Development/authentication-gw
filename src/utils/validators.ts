@@ -32,7 +32,7 @@ export function parseAppContext(context: Context): { object: AppContext; hash: s
     throw new ValidationError("Bad app context");
   }
 
-  if (!ifAllObjectKeysAreDefined(appContext, ["appName", "redirectUrl"])) {
+  if (!ifAllObjectKeysAreDefined(appContext, ["appName"])) {
     throw new ValidationError("Invalid app context");
   }
 
