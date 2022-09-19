@@ -12,6 +12,6 @@
     "noImplicitAny": true,
     "noUnusedLocals": true
   },
-  "include": ["./src", "./pulumi"],
+  "include": ["./src"],
   "exclude": ["./node_modules", "./dist"]
 }
