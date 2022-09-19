@@ -1,5 +1,5 @@
 // @see: https://github.com/pulumi/examples/tree/master/aws-ts-apigatewayv2-http-api
-import pulumi from "@pulumi/pulumi";
+import * as pulumi from "@pulumi/pulumi";
 
 import Settings from "../src/utils/Settings";
 import { apigw, createLambdaFunction, createLambdaRoute, createStage } from "./create-helpers";
@@ -34,7 +34,7 @@ const apiDocsLambdaFunction = createLambdaFunction(
 );
 
 // routes
-const appRoutes = [createLambdaRoute(apiAppLambdaFunction, "ANY", "/{proxy+}"), createLambdaRoute(apiDocsLambdaFunction, "GET", "/docs/{proxy+}")];
+const appRoutes = [createLambdaRoute("api-app", apiAppLambdaFunction, "ANY", "/{proxy+}"), createLambdaRoute("api-docs", apiDocsLambdaFunction, "GET", "/docs/{proxy+}")];
 
 // Api gateway endpoint
 const stage = createStage(apiStage, appRoutes);

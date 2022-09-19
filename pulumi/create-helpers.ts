@@ -1,5 +1,6 @@
 import * as aws from "@pulumi/aws";
-import pulumi from "@pulumi/pulumi";
+import * as pulumi from "@pulumi/pulumi";
+import { ifObjectEmpty } from "../src/utils/transformers";
 
 const projectTag = { Project: "Authenticator" };
 const stack = pulumi.getStack();
@@ -31,20 +32,18 @@ export const apigw = new aws.apigatewayv2.Api("httpApiGateway", {
 
 export function createLambdaFunction(name: string, handler: string, code: any, environment: { [name: string]: string } = {}): aws.lambda.Function {
   const lamdaFunction = new aws.lambda.Function(name, {
-    architectures: ["arm64"],
+    architectures: ["x86_64"],
     runtime: "nodejs16.x",
     role: lambdaRole.arn,
     handler: handler,
     code: code,
     tags: projectTag,
-    environment: {
-      variables: environment,
-    },
+    environment: ifObjectEmpty(environment) ? undefined : { variables: environment },
   });
 
   // Create permission
   new aws.lambda.Permission(
-    "lambdaPermission",
+    `${name}-lambdaPermission`,
     {
       action: "lambda:InvokeFunction",
       principal: "apigateway.amazonaws.com",
@@ -57,8 +56,8 @@ export function createLambdaFunction(name: string, handler: string, code: any, e
   return lamdaFunction;
 }
 
-export function createLambdaRoute(lambdaFunction: aws.lambda.Function, method: "ANY" | "POST" | "GET", path: string): aws.apigatewayv2.Route {
-  const integration = new aws.apigatewayv2.Integration(`${lambdaFunction.name}-lambdaIntegration`, {
+export function createLambdaRoute(name: string, lambdaFunction: aws.lambda.Function, method: "ANY" | "POST" | "GET", path: string): aws.apigatewayv2.Route {
+  const integration = new aws.apigatewayv2.Integration(`${name}-lambdaIntegration`, {
     apiId: apigw.id,
     integrationType: "AWS_PROXY",
     integrationUri: lambdaFunction.arn,
@@ -67,7 +66,7 @@ export function createLambdaRoute(lambdaFunction: aws.lambda.Function, method: "
     passthroughBehavior: "WHEN_NO_MATCH",
   });
 
-  return new aws.apigatewayv2.Route(`${lambdaFunction.name}-apiRoute`, {
+  return new aws.apigatewayv2.Route(`${name}-apiRoute`, {
     apiId: apigw.id,
     routeKey: `${method} ${path}`,
     target: pulumi.interpolate`integrations/${integration.id}`,
