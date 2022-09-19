@@ -9,7 +9,10 @@ import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformer
 import { AppContext, LoginResponse } from "../../utils/types";
 import { SinunaStateAttributor, parseSinunaAuthenticateResponse } from "./SinunaResponseParsers";
 
-const SINUNA_AUTH_PROVIDER_IDENT = "sinuna"; // The auth provider identifier for Sinuna
+const SinunaSettings = {
+  ident: "sinuna", // The identifier for Sinuna
+  scope: "openid frontend sinuna_id", // The auth scope for Sinuna
+};
 
 /**
  * Initializes the SinunaRequests
@@ -26,7 +29,7 @@ export async function initializeSinunaRequests() {
 export async function getLoginRequestUrl(appContext: AppContext): Promise<string> {
   await initializeSinunaRequests();
   const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
-  const SCOPE = "openid frontend";
+  const SCOPE = SinunaSettings.scope;
   const STATE = SinunaStateAttributor.generate(appContext); // Throws if appContext is invalid
   const REDIRECT_URI = Settings.getLoginRedirectUrl();
   return `https://login.iam.qa.sinuna.fi/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
@@ -45,7 +48,7 @@ export async function parseAuthenticateResponse(queryParams: { [key: string]: st
   return {
     loginCode: authenticateResponse.loginCode,
     appContextRedirectUrl: authenticateResponse.appContext.redirectUrl,
-    authProvider: SINUNA_AUTH_PROVIDER_IDENT,
+    authProvider: SinunaSettings.ident,
   };
 }
 
@@ -78,7 +81,7 @@ export function prepareLogoutRedirectUrl(redirectUrl: string): string {
  */
 export async function fetchAccessToken(loginCode: string): Promise<{ access_token: string; expires_in: number; scope: string; id_token: string; token_type: string }> {
   await initializeSinunaRequests();
-  const SCOPE = "openid frontend";
+  const SCOPE = SinunaSettings.scope;
 
   const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
   const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET");
