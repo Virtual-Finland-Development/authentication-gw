@@ -169,6 +169,15 @@ paths:
                     type: string
                   expiresIn:
                     type: number
+        "401":
+          description: "Access token retrieval failed"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
   "/auth/openid/user-info-request":
     post:
       operationId: UserInfoRequest
@@ -193,6 +202,8 @@ paths:
                 type: object
                 properties:
                   sub:
+                    type: string
+                  inum:
                     type: string
                   email:
                     type: string
