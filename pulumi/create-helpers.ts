@@ -30,7 +30,13 @@ export const apigw = new aws.apigatewayv2.Api("httpApiGateway", {
   protocolType: "HTTP",
 });
 
-export function createLambdaFunction(name: string, handler: string, code: any, environment: { [name: string]: string } = {}): aws.lambda.Function {
+export function createLambdaFunction(
+  name: string,
+  handler: string,
+  code: any,
+  environment: { [name: string]: string },
+  nodeModulesLayer: aws.lambda.LayerVersion
+): aws.lambda.Function {
   const lamdaFunction = new aws.lambda.Function(name, {
     architectures: ["x86_64"],
     runtime: "nodejs16.x",
@@ -39,6 +45,7 @@ export function createLambdaFunction(name: string, handler: string, code: any, e
     code: code,
     tags: projectTag,
     environment: ifObjectEmpty(environment) ? undefined : { variables: environment },
+    layers: [nodeModulesLayer.arn],
   });
 
   // Create permission

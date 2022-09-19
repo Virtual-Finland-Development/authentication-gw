@@ -8,8 +8,9 @@
     "serve": "serverless offline --stage offline",
     "watch": "tsc --skipLibCheck -w",
     "test": "jest",
-    "deploy": "serverless deploy --verbose",
-    "clean": "rimraf dist"
+    "predeploy": "./pulumi/scripts/prepare-dependencies-artifact.sh",
+    "deploy": "pulumi -C ./pulumi up",
+    "clean": "rimraf dist pulumi/.lambda"
   },
   "repository": {
     "type": "git",
