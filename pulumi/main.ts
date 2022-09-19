@@ -3,7 +3,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 
 import Settings from "../src/utils/Settings";
-import { apigw, createLambdaFunction, createLambdaRoute, createStage } from "./create-helpers";
+import { apigw, createLambdaFunction, createLambdaRoute, createStage } from "./pulumi-helpers";
 
 const apiStage = "dev";
 
