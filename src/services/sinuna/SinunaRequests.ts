@@ -105,7 +105,7 @@ export async function fetchAccessToken(loginCode: string): Promise<{ access_toke
     return response.data;
   } catch (error) {
     logAxiosException(error);
-    throw error;
+    throw new AccessDeniedException(String(error));
   }
 }
 
