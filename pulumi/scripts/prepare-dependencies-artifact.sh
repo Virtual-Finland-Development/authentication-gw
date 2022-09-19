@@ -13,5 +13,5 @@ cp ${PROJECT_ROOT_DIR}/package-lock.json ${ARCHIVES_ROOT_DIR}/package-lock.json
 
 # Install
 cd $ARCHIVES_ROOT_DIR
-npm ci --production
+npm ci --omit=dev
 cd $PROJECT_ROOT_DIR

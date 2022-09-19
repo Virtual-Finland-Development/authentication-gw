@@ -26,11 +26,14 @@ new aws.iam.RolePolicyAttachment("lambdaRoleAttachment", {
   policyArn: aws.iam.ManagedPolicy.AWSLambdaBasicExecutionRole,
 });
 
-export const apigw = new aws.apigatewayv2.Api("httpApiGateway", {
-  protocolType: "HTTP",
-});
+export function getApiGateway(name: string) {
+  return new aws.apigatewayv2.Api(`${name}-api-gw`, {
+    protocolType: "HTTP",
+  });
+}
 
 export function createLambdaFunction(
+  apigw: aws.apigatewayv2.Api,
   name: string,
   handler: string,
   code: any,
@@ -46,6 +49,7 @@ export function createLambdaFunction(
     tags: projectTag,
     environment: ifObjectEmpty(environment) ? undefined : { variables: environment },
     layers: [nodeModulesLayer.arn],
+    timeout: 15,
   });
 
   // Create permission
@@ -63,7 +67,13 @@ export function createLambdaFunction(
   return lamdaFunction;
 }
 
-export function createLambdaRoute(name: string, lambdaFunction: aws.lambda.Function, method: "ANY" | "POST" | "GET", path: string): aws.apigatewayv2.Route {
+export function createLambdaRoute(
+  apigw: aws.apigatewayv2.Api,
+  name: string,
+  lambdaFunction: aws.lambda.Function,
+  method: "ANY" | "POST" | "GET",
+  path: string
+): aws.apigatewayv2.Route {
   const integration = new aws.apigatewayv2.Integration(`${name}-lambdaIntegration`, {
     apiId: apigw.id,
     integrationType: "AWS_PROXY",
@@ -80,15 +90,15 @@ export function createLambdaRoute(name: string, lambdaFunction: aws.lambda.Funct
   });
 }
 
-export function createStage(apiStage: string, appRoutes: Array<aws.apigatewayv2.Route>) {
+export function createDefaultStage(apigw: aws.apigatewayv2.Api, appRoutes: Array<aws.apigatewayv2.Route>) {
   return new aws.apigatewayv2.Stage(
-    apiStage,
+    "$default",
     {
       apiId: apigw.id,
       name: stack,
-      routeSettings: appRoutes.map((appRoute) => {
+      routeSettings: appRoutes.map((appRoute, index: number) => {
         return {
-          routeKey: appRoute.routeKey,
+          routeKey: index === 0 ? "$default" : appRoute.routeKey,
           throttlingBurstLimit: 5000,
           throttlingRateLimit: 10000,
         };

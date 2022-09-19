@@ -3,26 +3,30 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 
 import Settings from "../src/utils/Settings";
-import { apigw, createLambdaFunction, createLambdaRoute, createStage } from "./pulumi-helpers";
+import { getApiGateway, createLambdaFunction, createLambdaRoute, createDefaultStage } from "./pulumi-helpers";
 
 const apiStage = "dev";
 
+const apiGw = getApiGateway(`${apiStage}-authentication-gw`);
+
 const nodeModulesLayer = new aws.lambda.LayerVersion("authentication-gw-dependenices-layer", {
   code: new pulumi.asset.AssetArchive({
-    "./node_modules": new pulumi.asset.FileArchive("./.lambda/layers/node_modules"),
+    "./nodejs/node_modules": new pulumi.asset.FileArchive("./.lambda/layers/node_modules"),
   }),
   compatibleRuntimes: [aws.lambda.Runtime.NodeJS16dX],
-  layerName: "nodeModulesLayer",
+  layerName: "authentication-gw-dependenices-layer",
 });
 
 /**
  * Api app lambda
  */
 const apiAppLambdaFunction = createLambdaFunction(
+  apiGw,
   "authentication-gw-dev-api-app",
   "api-app.handler",
   new pulumi.asset.AssetArchive({
     ".": new pulumi.asset.FileArchive("../dist"),
+    "./openapi": new pulumi.asset.FileArchive("../openapi"),
   }),
   {
     STAGE: apiStage,
@@ -36,20 +40,25 @@ const apiAppLambdaFunction = createLambdaFunction(
  * Api docs lambda
  */
 const apiDocsLambdaFunction = createLambdaFunction(
+  apiGw,
   "authentication-gw-dev-api-docs",
   "api-docs.handler",
   new pulumi.asset.AssetArchive({
     ".": new pulumi.asset.FileArchive("../dist"),
+    "./openapi": new pulumi.asset.FileArchive("../openapi"),
   }),
   {},
   nodeModulesLayer
 );
 
 // routes
-const appRoutes = [createLambdaRoute("api-app", apiAppLambdaFunction, "ANY", "/{proxy+}"), createLambdaRoute("api-docs", apiDocsLambdaFunction, "GET", "/docs/{proxy+}")];
+const appRoutes = [
+  createLambdaRoute(apiGw, "api-app", apiAppLambdaFunction, "ANY", "/{proxy+}"),
+  createLambdaRoute(apiGw, "api-docs", apiDocsLambdaFunction, "GET", "/docs/{proxy+}"),
+];
 
 // Api gateway endpoint
-const stage = createStage(apiStage, appRoutes);
+createDefaultStage(apiGw, appRoutes);
 
 // Export the endpoint
-export const endpoint = pulumi.interpolate`${apigw.apiEndpoint}/${stage.name}`;
+export const endpoint = pulumi.interpolate`${apiGw.apiEndpoint}`;
