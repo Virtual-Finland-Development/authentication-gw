@@ -45,13 +45,18 @@ export function createStack(apiGatewayName: string, projectTag: string): LambdaA
 /**
  *
  * @param stack
- * @param routeConfiguration
- * @param functionConfiguration
+ * @param configuration
  * @returns
  */
-export function createLambdaRoute(stack: LambdaApiGatewayV2Stack, routeConfiguration: LambdaRouteConfig, functionConfiguration: LambdaFunctionConfig) {
-  const lambdaFunction = createLambdaFunction(stack, functionConfiguration);
-  const route = createApiGatewayRoute(stack, lambdaFunction, routeConfiguration);
+export function createLambdaRoute(
+  stack: LambdaApiGatewayV2Stack,
+  configuration: {
+    route: LambdaRouteConfig;
+    lambdaFunction: LambdaFunctionConfig;
+  }
+) {
+  const lambdaFunction = createLambdaFunction(stack, configuration.lambdaFunction);
+  const route = createApiGatewayRoute(stack, lambdaFunction, configuration.route);
   return route;
 }
 

@@ -30,10 +30,9 @@ const stack = createStack(`${configuration.stage}-authentication-gw`, configurat
  * Routes
  */
 const appRoutes = [
-  createLambdaRoute(
-    stack,
-    { name: "api-app", method: "ANY", path: "/{proxy+}" },
-    {
+  createLambdaRoute(stack, {
+    route: { name: "api-app", method: "ANY", path: "/{proxy+}" },
+    lambdaFunction: {
       name: "authentication-gw-dev-api-app",
       handler: "api-app.handler",
       code: new pulumi.asset.AssetArchive({
@@ -46,12 +45,11 @@ const appRoutes = [
         APP_CONTEXT_REDIRECT_FALLBACK_URL: Settings.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL"),
       },
       nodeModulesLayer: nodeModulesLayer,
-    }
-  ),
-  createLambdaRoute(
-    stack,
-    { name: "api-docs", method: "GET", path: "/docs/{proxy+}" },
-    {
+    },
+  }),
+  createLambdaRoute(stack, {
+    route: { name: "api-docs", method: "GET", path: "/docs/{proxy+}" },
+    lambdaFunction: {
       name: "ntication-gw-dev-api-docs",
       handler: "api-docs.handler",
       code: new pulumi.asset.AssetArchive({
@@ -60,8 +58,8 @@ const appRoutes = [
       }),
       environment: {},
       nodeModulesLayer: nodeModulesLayer,
-    }
-  ),
+    },
+  }),
 ];
 
 // Export the Api gateway endpoint
