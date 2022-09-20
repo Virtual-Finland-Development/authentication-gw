@@ -35,7 +35,7 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
     }
 
     log(event.requestContext.http.method, event.rawPath);
-    
+
     return await api.handleRequest(
       {
         method: event.requestContext.http.method,

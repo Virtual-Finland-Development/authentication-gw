@@ -1,11 +1,12 @@
 import { Context } from "openapi-backend";
 import { jsonResponseHeaders } from "../utils/default-headers";
 import { AccessDeniedException, ValidationError } from "../utils/exceptions";
+import { log } from "../utils/logging";
 import { exceptionToObject } from "../utils/transformers";
 
 export function InternalServerErrorHandler(error: any) {
   const exception = exceptionToObject(error);
-  console.log(exception);
+  log(exception);
 
   let statusCode = 500;
   if (exception.statusCode) {
@@ -25,13 +26,13 @@ export function InternalServerErrorHandler(error: any) {
 
 export default {
   // Base handlers
-  root: async (context: Context) => ({
+  root: async () => ({
     statusCode: 307,
     headers: {
       location: "/docs/",
     },
   }),
-  swagger: async (context: Context) => ({
+  swagger: async () => ({
     statusCode: 307,
     headers: {
       location: "/docs/",

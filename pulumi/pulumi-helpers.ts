@@ -3,7 +3,6 @@ import * as pulumi from "@pulumi/pulumi";
 import { ifObjectEmpty } from "../src/utils/transformers";
 
 const projectTag = { Project: "Authenticator" };
-const stack = pulumi.getStack();
 
 const lambdaRole = new aws.iam.Role("lambdaRole", {
   assumeRolePolicy: {
@@ -26,6 +25,11 @@ new aws.iam.RolePolicyAttachment("lambdaRoleAttachment", {
   policyArn: aws.iam.ManagedPolicy.AWSLambdaBasicExecutionRole,
 });
 
+new aws.iam.RolePolicyAttachment("lambdaRoleSSMAccessAttachment", {
+  role: lambdaRole,
+  policyArn: aws.iam.ManagedPolicy.AmazonSSMFullAccess,
+});
+
 export function getApiGateway(name: string) {
   return new aws.apigatewayv2.Api(`${name}-api-gw`, {
     protocolType: "HTTP",
@@ -41,7 +45,6 @@ export function createLambdaFunction(
   nodeModulesLayer: aws.lambda.LayerVersion
 ): aws.lambda.Function {
   const lamdaFunction = new aws.lambda.Function(name, {
-    architectures: ["x86_64"],
     runtime: "nodejs16.x",
     role: lambdaRole.arn,
     handler: handler,
@@ -50,6 +53,7 @@ export function createLambdaFunction(
     environment: ifObjectEmpty(environment) ? undefined : { variables: environment },
     layers: [nodeModulesLayer.arn],
     timeout: 15,
+    memorySize: 1024,
   });
 
   // Create permission
@@ -95,10 +99,10 @@ export function createDefaultStage(apigw: aws.apigatewayv2.Api, appRoutes: Array
     "$default",
     {
       apiId: apigw.id,
-      name: stack,
+      name: "$default",
       routeSettings: appRoutes.map((appRoute, index: number) => {
         return {
-          routeKey: index === 0 ? "$default" : appRoute.routeKey,
+          routeKey: appRoute.routeKey,
           throttlingBurstLimit: 5000,
           throttlingRateLimit: 10000,
         };
