@@ -3,10 +3,12 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 
 import Settings from "../src/utils/Settings";
-import { createStack, createLambdaRoute, createApiEndpoint } from "./pulumi-helpers";
+import { createStack, createLambdaRoute, createApiEndpoint } from "./resources/LambdaApiGatewayV2";
 
-const projectTag = "Authenticator";
-const apiStage = "dev";
+const configuration = {
+  name: "Authenticator",
+  stage: "dev",
+};
 
 /**
  * Dependencies layer for lambda functions
@@ -22,13 +24,11 @@ const nodeModulesLayer = new aws.lambda.LayerVersion("authentication-gw-dependen
 /**
  * Stack
  */
-const stack = createStack(`${apiStage}-authentication-gw`, projectTag);
+const stack = createStack(`${configuration.stage}-authentication-gw`, configuration.name);
 
 /**
  * Routes
  */
-
-// routes
 const appRoutes = [
   createLambdaRoute(
     stack,
@@ -41,7 +41,7 @@ const appRoutes = [
         "./openapi": new pulumi.asset.FileArchive("../openapi"),
       }),
       environment: {
-        STAGE: apiStage,
+        STAGE: configuration.stage,
         AUTH_PROVIDER_REDIRECT_BACK_HOST: Settings.getEnv("AUTH_PROVIDER_REDIRECT_BACK_HOST"),
         APP_CONTEXT_REDIRECT_FALLBACK_URL: Settings.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL"),
       },
