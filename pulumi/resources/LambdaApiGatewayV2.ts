@@ -4,7 +4,7 @@ import { ifObjectEmpty } from "../../src/utils/transformers";
 
 /* ---------------Types------------------- */
 
-type LambdaApiGatewayV2Stack = {
+export type LambdaApiGatewayV2Stack = {
   role: aws.iam.Role;
   apiGateway: aws.apigatewayv2.Api;
   tags: { Project: string };
@@ -94,12 +94,12 @@ function getLambdaRole() {
   });
 
   new aws.iam.RolePolicyAttachment("lambdaRoleAttachment", {
-    role: lambdaRole,
+    role: lambdaRole.name,
     policyArn: aws.iam.ManagedPolicy.AWSLambdaBasicExecutionRole,
   });
 
   new aws.iam.RolePolicyAttachment("lambdaRoleSSMAccessAttachment", {
-    role: lambdaRole,
+    role: lambdaRole.name,
     policyArn: aws.iam.ManagedPolicy.AmazonSSMFullAccess,
   });
 
@@ -140,7 +140,7 @@ function createLambdaFunction(
     {
       action: "lambda:InvokeFunction",
       principal: "apigateway.amazonaws.com",
-      function: lamdaFunction,
+      function: lamdaFunction.name,
       sourceArn: pulumi.interpolate`${stack.apiGateway.executionArn}/*/*`,
     },
     { dependsOn: [stack.apiGateway, lamdaFunction] }
