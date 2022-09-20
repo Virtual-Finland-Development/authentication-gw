@@ -3,12 +3,14 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 
 import Settings from "../src/utils/Settings";
-import { getApiGateway, createLambdaFunction, createLambdaRoute, createDefaultStage } from "./pulumi-helpers";
+import { createStack, createLambdaRoute, createApiEndpoint } from "./pulumi-helpers";
 
+const projectTag = "Authenticator";
 const apiStage = "dev";
 
-const apiGw = getApiGateway(`${apiStage}-authentication-gw`);
-
+/**
+ * Dependencies layer for lambda functions
+ */
 const nodeModulesLayer = new aws.lambda.LayerVersion("authentication-gw-dependenices-layer", {
   code: new pulumi.asset.AssetArchive({
     "./nodejs/node_modules": new pulumi.asset.FileArchive("./.lambda/layers/node_modules"),
@@ -18,47 +20,49 @@ const nodeModulesLayer = new aws.lambda.LayerVersion("authentication-gw-dependen
 });
 
 /**
- * Api app lambda
+ * Stack
  */
-const apiAppLambdaFunction = createLambdaFunction(
-  apiGw,
-  "authentication-gw-dev-api-app",
-  "api-app.handler",
-  new pulumi.asset.AssetArchive({
-    ".": new pulumi.asset.FileArchive("../dist"),
-    "./openapi": new pulumi.asset.FileArchive("../openapi"),
-  }),
-  {
-    STAGE: apiStage,
-    AUTH_PROVIDER_REDIRECT_BACK_HOST: Settings.getEnv("AUTH_PROVIDER_REDIRECT_BACK_HOST"),
-    APP_CONTEXT_REDIRECT_FALLBACK_URL: Settings.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL"),
-  },
-  nodeModulesLayer
-);
+const stack = createStack(`${apiStage}-authentication-gw`, projectTag);
 
 /**
- * Api docs lambda
+ * Routes
  */
-const apiDocsLambdaFunction = createLambdaFunction(
-  apiGw,
-  "authentication-gw-dev-api-docs",
-  "api-docs.handler",
-  new pulumi.asset.AssetArchive({
-    ".": new pulumi.asset.FileArchive("../dist"),
-    "./openapi": new pulumi.asset.FileArchive("../openapi"),
-  }),
-  {},
-  nodeModulesLayer
-);
 
 // routes
 const appRoutes = [
-  createLambdaRoute(apiGw, "api-app", apiAppLambdaFunction, "ANY", "/{proxy+}"),
-  createLambdaRoute(apiGw, "api-docs", apiDocsLambdaFunction, "GET", "/docs/{proxy+}"),
+  createLambdaRoute(
+    stack,
+    { name: "api-app", method: "ANY", path: "/{proxy+}" },
+    {
+      name: "authentication-gw-dev-api-app",
+      handler: "api-app.handler",
+      code: new pulumi.asset.AssetArchive({
+        ".": new pulumi.asset.FileArchive("../dist"),
+        "./openapi": new pulumi.asset.FileArchive("../openapi"),
+      }),
+      environment: {
+        STAGE: apiStage,
+        AUTH_PROVIDER_REDIRECT_BACK_HOST: Settings.getEnv("AUTH_PROVIDER_REDIRECT_BACK_HOST"),
+        APP_CONTEXT_REDIRECT_FALLBACK_URL: Settings.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL"),
+      },
+      nodeModulesLayer: nodeModulesLayer,
+    }
+  ),
+  createLambdaRoute(
+    stack,
+    { name: "api-docs", method: "GET", path: "/docs/{proxy+}" },
+    {
+      name: "ntication-gw-dev-api-docs",
+      handler: "api-docs.handler",
+      code: new pulumi.asset.AssetArchive({
+        ".": new pulumi.asset.FileArchive("../dist"),
+        "./openapi": new pulumi.asset.FileArchive("../openapi"),
+      }),
+      environment: {},
+      nodeModulesLayer: nodeModulesLayer,
+    }
+  ),
 ];
 
-// Api gateway endpoint
-createDefaultStage(apiGw, appRoutes);
-
-// Export the endpoint
-export const endpoint = pulumi.interpolate`${apiGw.apiEndpoint}`;
+// Export the Api gateway endpoint
+export const endpoint = createApiEndpoint(stack, appRoutes);
