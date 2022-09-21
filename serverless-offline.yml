@@ -1,24 +1,11 @@
-service: authentication-gw
-
+service: authentication-gw-offline
 plugins:
   - serverless-offline
-  - serverless-plugin-include-dependencies
 
 provider:
-  name: aws
-  runtime: nodejs16.x
-  stage: ${opt:stage, 'dev'}
-  region: eu-north-1
-  iamManagedPolicies:
-    - arn:aws:iam::aws:policy/AmazonSSMFullAccess
+  name: "offline"
+  stage: offline
 
-package:
-  excludeDevDependencies: false # serverless-plugin-include-dependencies handles the exclusion
-  patterns:
-    - "!*"
-    - "!**"
-    - "dist/**"
-    - "openapi/**"
 functions:
   api-app:
     handler: dist/api-app.handler
@@ -27,7 +14,7 @@ functions:
           method: any
           path: /{proxy+}
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: "offline"
       AUTH_PROVIDER_REDIRECT_BACK_HOST: ${env:AUTH_PROVIDER_REDIRECT_BACK_HOST, 'http://localhost:3000'}
       APP_CONTEXT_REDIRECT_FALLBACK_URL: ${env:APP_CONTEXT_REDIRECT_FALLBACK_URL, 'http://localhost:8000'}
   api-docs:
