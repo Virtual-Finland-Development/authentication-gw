@@ -8,8 +8,11 @@
     "serve": "serverless offline --stage offline",
     "watch": "tsc --skipLibCheck -w",
     "test": "jest",
-    "deploy": "serverless deploy --verbose",
-    "clean": "rimraf dist"
+    "prepare-dependencies-artifact": "./pulumi/scripts/prepare-dependencies-artifact.sh",
+    "predeploy": "npm-run-all build prepare-dependencies-artifact",
+    "deploy": "pulumi -C ./pulumi up --yes",
+    "deploy-preview": "npm run predeploy && pulumi -C ./pulumi preview",
+    "clean": "rimraf dist pulumi/.lambda"
   },
   "repository": {
     "type": "git",
@@ -28,6 +31,8 @@
     "openapi-backend": "^5.5.0"
   },
   "devDependencies": {
+    "@pulumi/aws": "^5.14.0",
+    "@pulumi/pulumi": "^3.40.0",
     "@types/aws-lambda": "^8.10.102",
     "@types/node": "^18.7.15",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
@@ -37,9 +42,6 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^2.7.1",
     "rimraf": "^3.0.2",
-    "serverless": "^3.22.0",
-    "serverless-offline": "^10.0.0",
-    "serverless-plugin-include-dependencies": "^5.0.0",
     "ts-jest": "^28.0.8",
     "typescript": "^4.8.2"
   }

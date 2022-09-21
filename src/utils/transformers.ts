@@ -31,6 +31,10 @@ export function isObject(value: any): boolean {
   return value !== null && typeof value === "object";
 }
 
+export function ifObjectEmpty(obj: any): boolean {
+  return !isObject(obj) || Object.keys(obj).length === 0;
+}
+
 /**
  *
  * @param obj
