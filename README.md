@@ -12,13 +12,23 @@ Authentication GW is a service that implements the OpenID Connect Authorization 
 
 _Figure: The login requests flow_
 
-## Install
+## Development
 
-`npm install`
+The development setup can be set up using vscode devcontainers or with local tools
+
+### Run with vscode devcontainer
+
+Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/remote/containers
+
+- Open the project folder as devcontainer
+- In the container, start development with a terminal command `npm run start`
+
+### Run with local tools
+
+- `npm install`
+- `npm run start`
 
 ## Usage
-
-`npm run start`
 
 - Swagger docs: http://localhost:3000/docs/
 
