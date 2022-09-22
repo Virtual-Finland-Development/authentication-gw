@@ -2,3 +2,5 @@ node_modules
 dist
 .env
 pulumi/.lambda
+.vscode
+!.vscode/tasks.json
