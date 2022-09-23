@@ -4,3 +4,4 @@ dist
 pulumi/.lambda
 .vscode
 !.vscode/tasks.json
+*.drawio.bkp

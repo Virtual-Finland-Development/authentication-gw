@@ -10,9 +10,17 @@ An autentication flow service
 
 Authentication GW is a service that implements the OpenID Connect Authorization part between the browser client and the authentication provider service.
 
-![./docs/auth-flow-get-token.png](./docs/auth-flow-get-token.png)
+The authtentication request flows redirect the user to the authentication provider service, which in turn redirects the user back to the client with the authorization access token and the related info.
 
-_Figure: The login requests flow_
+![./docs/authgw-authenticate-flow.png](./docs/authgw-authenticate-flow.png)
+
+_Figure: The authenticate requests flow_
+
+The authorization request flows use the access token for validating the user's identity and authorizing the user to access the requested resources.
+
+![./docs/authgw-authorize-flow.png](./docs/authgw-authorize-flow.png)
+
+_Figure: The authorize requests flow_
 
 ## Development
 
