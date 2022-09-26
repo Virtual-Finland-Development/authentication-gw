@@ -1,4 +1,7 @@
 service: authentication-gw-offline
+
+configValidationMode: off
+
 plugins:
   - serverless-offline
 
