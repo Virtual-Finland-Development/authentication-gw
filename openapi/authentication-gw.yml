@@ -252,3 +252,15 @@ paths:
                   message:
                     type: string
                     default: "Access Denied"
+  "/auth/saml2/login-request":
+    get:
+      operationId: Saml2LoginRequest
+      responses:
+        "200":
+          description: Redirect to the authentication provider service
+  "/auth/saml2/login-request-callback":
+    get:
+      operationId: Saml2LoginRequestCallback
+      responses:
+        "200":
+          description: Handle response from the auth provider
