@@ -256,11 +256,33 @@ paths:
     get:
       operationId: Saml2LoginRequest
       responses:
-        "200":
+        "307":
           description: Redirect to the authentication provider service
-  "/auth/saml2/login-request-callback":
+          headers:
+            location:
+              description: Authentication provider service URL
+              schema:
+                type: string
+  "/auth/saml2/authenticate-response":
     get:
-      operationId: Saml2LoginRequestCallback
+      operationId: Saml2AuthenticateResponse
+      responses:
+        "200":
+          description: Handle response from the auth provider
+  "/auth/saml2/logout-request":
+    get:
+      operationId: Saml2LogoutRequest
+      responses:
+        "307":
+          description: Redirect to the authentication provider service
+          headers:
+            location:
+              description: Authentication provider service URL
+              schema:
+                type: string
+  "/auth/saml2/logout-response":
+    get:
+      operationId: Saml2LogoutResponse
       responses:
         "200":
           description: Handle response from the auth provider

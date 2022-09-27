@@ -38,6 +38,7 @@ const appRoutes = [
       code: new pulumi.asset.AssetArchive({
         ".": new pulumi.asset.FileArchive("../dist"),
         "./openapi": new pulumi.asset.FileArchive("../openapi"),
+        "./certificates": new pulumi.asset.FileArchive("../certificates"),
       }),
       environment: {
         STAGE: configuration.stage,
