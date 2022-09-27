@@ -1,6 +1,4 @@
 name: authentication-gw
 description: API Framework for different authentication flows
 runtime: nodejs
-options:
-  typescript: true
 main: main.ts
