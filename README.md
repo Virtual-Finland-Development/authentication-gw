@@ -1,6 +1,6 @@
 # Authentication GW
 
-An autentication flow service
+An autentication flow service for the Virtual Finland Development groups test & experimenting purposes.
 
 [![Build, Test, Deploy](https://github.com/Virtual-Finland-Development/authentication-gw/actions/workflows/build-test-deploy.yml/badge.svg)](https://github.com/Virtual-Finland-Development/authentication-gw/actions/workflows/build-test-deploy.yml)
 
