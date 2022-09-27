@@ -34,6 +34,9 @@ echo
 # No files should not be readable by the rest of the world.
 umask 0077
 
+if [ -f "${OUTFILE}.key" ]; then
+    echo "$PROG: Using existing cert file: \"${OUTFILE}.key\"." >&2
+else
 TEMPLATEFILE="$(mktemp -t mellon_create_sp.XXXXXXXXXX)"
 RANDFILE=./randfile 
 dd if=/dev/urandom of=${RANDFILE} bs=256 count=1 2>/dev/null
@@ -54,6 +57,7 @@ openssl req -utf8 -batch -config "${TEMPLATEFILE}" -new -x509 -days 3652 -nodes 
 
 rm "${RANDFILE}"
 rm -f "${TEMPLATEFILE}"
+fi
 
 CERT="$(grep -v '^-----' "${OUTFILE}.cert")"
 
