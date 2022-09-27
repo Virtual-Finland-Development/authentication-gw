@@ -31,7 +31,8 @@ The development setup can be set up using vscode devcontainers or with local too
 Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/remote/containers
 
 - Open the project folder as devcontainer
-- In the container, start development with a terminal command `npm run start`
+- Browse the API-docs at http://localhost:3000/
+  - In the container, the default `postStartCommand` is set to `npm run start` which should publish the endpoint
 
 ### Run with local tools
 
