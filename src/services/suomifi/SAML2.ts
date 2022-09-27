@@ -8,4 +8,10 @@ export default new SAML({
   signatureAlgorithm: "sha512",
   privateKey: readFileSync("./certificates/virtual_finland_development.key", "utf-8"),
   cert: readFileSync("./certificates/virtual_finland_development.cert", "utf-8"),
+  idpList: [
+    {
+      entries: [],
+      getComplete: "https://testi.apro.tunnistus.fi/static/metadata/idp-metadata.xml",
+    },
+  ],
 });
