@@ -151,9 +151,9 @@ cat >"${OUTFILE}.xml" <<EOF
     <md:OrganizationDisplayName xml:lang="fi">Virtual Finland Development</md:OrganizationDisplayName>
     <md:OrganizationDisplayName xml:lang="sv">Virtual Finland Development</md:OrganizationDisplayName>
     <md:OrganizationDisplayName xml:lang="en">Virtual Finland Development</md:OrganizationDisplayName>
-    <md:OrganizationURL xml:lang="fi">${PUBLIC_SITE_HOST}/</md:OrganizationURL>
-    <md:OrganizationURL xml:lang="sv">${PUBLIC_SITE_HOST}/</md:OrganizationURL>
-    <md:OrganizationURL xml:lang="en">${PUBLIC_SITE_HOST}/</md:OrganizationURL>
+    <md:OrganizationURL xml:lang="fi">${PUBLIC_SITE_HOST}/index.html</md:OrganizationURL>
+    <md:OrganizationURL xml:lang="sv">${PUBLIC_SITE_HOST}/index.html</md:OrganizationURL>
+    <md:OrganizationURL xml:lang="en">${PUBLIC_SITE_HOST}/index.html</md:OrganizationURL>
   </md:Organization>
   <md:ContactPerson contactType="technical">
     <md:GivenName>Lassi</md:GivenName>
