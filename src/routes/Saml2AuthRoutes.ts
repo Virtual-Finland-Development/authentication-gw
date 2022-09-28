@@ -1,7 +1,8 @@
 import { Context } from "openapi-backend";
 import SuomiFiSAML from "../services/suomifi/SAML2";
+import { AccessDeniedException, ValidationError } from "../utils/exceptions";
 import Settings from "../utils/Settings";
-import { parseBase64XMLBody } from "../utils/transformers";
+import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../utils/transformers";
 
 export async function Saml2LoginRequest(context: Context) {
   //const appContext = parseAppContext(context);
@@ -26,18 +27,32 @@ export async function Saml2AuthenticateResponse(context: Context) {
   return {
     statusCode: 200,
     body: JSON.stringify(result),
+    headers: {
+      "Set-Cookie": `loginState=${generateBase64Hash(result)};`,
+    },
   };
 }
 
 export async function Saml2LogoutRequest(context: Context) {
-  const logoutRequestUrl = await SuomiFiSAML.getLogoutUrlAsync("ss:mem:12344aa", Settings.getRequestHost());
-  console.log("Bye", logoutRequestUrl);
-  return {
-    statusCode: 307,
-    headers: {
-      Location: logoutRequestUrl,
-    },
-  };
+  if (context.request.cookies?.loginState) {
+    try {
+      const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.loginState)));
+      if (!loginState.profile) {
+        throw new ValidationError("No profile info on the login state");
+      }
+      const logoutRequestUrl = await SuomiFiSAML.getLogoutUrlAsync(loginState.profile, "ss:mem:12344aa");
+      console.log("PAI", logoutRequestUrl);
+      return {
+        statusCode: 307,
+        headers: {
+          Location: logoutRequestUrl,
+        },
+      };
+    } catch (error) {
+      throw new ValidationError("Bad login profile data");
+    }
+  }
+  throw new AccessDeniedException("Not logged in");
 }
 
 export async function Saml2LogoutResponse(context: Context) {
@@ -46,5 +61,8 @@ export async function Saml2LogoutResponse(context: Context) {
   return {
     statusCode: 200,
     body: JSON.stringify(result),
+    headers: {
+      "Set-Cookie": `loginState=''`,
+    },
   };
 }
