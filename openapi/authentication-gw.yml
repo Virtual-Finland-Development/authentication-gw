@@ -296,6 +296,18 @@ paths:
             type: string
           required: true
           description: "State string"
+        - in: query
+          name: SigAlg
+          schema:
+            type: string
+          required: true
+          description: "SigAlg"
+        - in: query
+          name: Signature
+          schema:
+            type: string
+          required: true
+          description: "Signature"
       responses:
         "200":
           description: Handle response from the auth provider
