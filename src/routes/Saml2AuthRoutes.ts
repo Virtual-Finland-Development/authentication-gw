@@ -1,13 +1,21 @@
 import { Context } from "openapi-backend";
 import SuomiFiSAML from "../services/suomifi/SAML2";
 import { AccessDeniedException, ValidationError } from "../utils/exceptions";
+import { debug } from "../utils/logging";
 import Settings from "../utils/Settings";
 import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../utils/transformers";
 
+/**
+ * GET -> REDIRECT: request to the suomifi auth
+ *
+ * @param context
+ * @returns
+ */
 export async function Saml2LoginRequest(context: Context) {
   //const appContext = parseAppContext(context);
-  const authenticationUrl = await SuomiFiSAML.getAuthorizeUrlAsync("ss:mem:12344aa", Settings.getRequestHost());
-  console.log("MOI", authenticationUrl);
+  const appContextHash = "ss:mem:12344aa";
+  const authenticationUrl = await SuomiFiSAML.getAuthorizeUrlAsync(appContextHash, Settings.getRequestHost());
+  debug("Login redirect URL", authenticationUrl);
   return {
     statusCode: 307,
     headers: {
@@ -17,6 +25,7 @@ export async function Saml2LoginRequest(context: Context) {
 }
 
 /**
+ * POST: response from suomifi auth
  *
  * @param context
  * @returns
@@ -33,6 +42,12 @@ export async function Saml2AuthenticateResponse(context: Context) {
   };
 }
 
+/**
+ * GET -> REDIRECT: request to the suomifi logout
+ *
+ * @param context
+ * @returns
+ */
 export async function Saml2LogoutRequest(context: Context) {
   if (context.request.cookies?.loginState) {
     try {
@@ -40,8 +55,12 @@ export async function Saml2LogoutRequest(context: Context) {
       if (!loginState.profile) {
         throw new ValidationError("No profile info on the login state");
       }
-      const logoutRequestUrl = await SuomiFiSAML.getLogoutUrlAsync(loginState.profile, "ss:mem:12344aa");
-      console.log("PAI", logoutRequestUrl);
+
+      //const appContext = parseAppContext(context);
+      const appContextHash = "ss:mem:12344aa";
+
+      const logoutRequestUrl = await SuomiFiSAML.getLogoutUrlAsync(loginState.profile, appContextHash);
+      debug("Logout redirect URL", logoutRequestUrl);
       return {
         statusCode: 307,
         headers: {
@@ -55,6 +74,12 @@ export async function Saml2LogoutRequest(context: Context) {
   throw new AccessDeniedException("Not logged in");
 }
 
+/**
+ * GET: response from the suomifi logout
+ *
+ * @param context
+ * @returns
+ */
 export async function Saml2LogoutResponse(context: Context) {
   const body = context.request.query;
   const originalQuery = new URLSearchParams(body).toString();
