@@ -1,4 +1,9 @@
+import { APIGatewayProxyEventHeaders } from "aws-lambda";
 import { getSecretParameter } from "./libs/AWS";
+
+const runtime: { host: string } = {
+  host: "",
+};
 
 export default {
   async getSecret(key: string, defaultValue?: string): Promise<string> {
@@ -35,5 +40,11 @@ export default {
   },
   getAppContextFallbackURL(): string {
     return `${this.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL", "http://localhost:8000")}`;
+  },
+  initializeRequest(headers: APIGatewayProxyEventHeaders): void {
+    runtime.host = String(headers.host);
+  },
+  getRequestHost(): string {
+    return runtime.host;
   },
 };

@@ -264,7 +264,7 @@ paths:
               schema:
                 type: string
   "/auth/saml2/authenticate-response":
-    get:
+    post:
       operationId: Saml2AuthenticateResponse
       responses:
         "200":
@@ -280,9 +280,22 @@ paths:
               description: Authentication provider service URL
               schema:
                 type: string
-  "/auth/saml2/logout-response":
+  "/auth/saml2/logout":
     get:
       operationId: Saml2LogoutResponse
+      parameters:
+        - in: query
+          name: SAMLResponse
+          schema:
+            type: string
+          required: true
+          description: "Logout response"
+        - in: query
+          name: RelayState
+          schema:
+            type: string
+          required: true
+          description: "State string"
       responses:
         "200":
           description: Handle response from the auth provider

@@ -127,3 +127,14 @@ export function ifValidUrl(url: string): boolean {
 export function ifString(text: any, minLength = 1): boolean {
   return typeof text === "string" && text.length >= minLength;
 }
+
+/**
+ *
+ * @param body
+ * @returns
+ */
+export function parseBase64XMLBody(body: string): { [attr: string]: any } {
+  const uriComponent = resolveBase64Hash(body);
+  const decoded = new URLSearchParams(uriComponent);
+  return Object.fromEntries(decoded);
+}
