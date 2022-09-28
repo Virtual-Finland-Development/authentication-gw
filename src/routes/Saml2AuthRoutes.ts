@@ -57,7 +57,8 @@ export async function Saml2LogoutRequest(context: Context) {
 
 export async function Saml2LogoutResponse(context: Context) {
   const body = context.request.query;
-  const result = await SuomiFiSAML.validateRedirectAsync(body); // throws
+  const originalQuery = new URLSearchParams(body).toString();
+  const result = await SuomiFiSAML.validateRedirectAsync(body, originalQuery); // throws
   return {
     statusCode: 200,
     body: JSON.stringify(result),
