@@ -55,12 +55,12 @@ export function InternalServerErrorHandler(error: any) {
  */
 export function getAuthProviderRequestHandler(context: Context, defaultProvider?: string): AuthRequestHandler {
   const appContext = parseAppContext(context, defaultProvider);
-  const provider = appContext.object.provider;
+  const provider = String(appContext.object.provider).toLowerCase();
 
   switch (provider) {
-    case SinunaRequestHandler.identityProviderIdent:
+    case SinunaRequestHandler.identityProviderIdent.toLowerCase():
       return new SinunaRequestHandler();
-    case SuomiFIRequestHandler.identityProviderIdent:
+    case SuomiFIRequestHandler.identityProviderIdent.toLowerCase():
       return new SuomiFIRequestHandler();
     default:
       throw new ValidationError(`Unknown auth provider: ${provider}`);
