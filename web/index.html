@@ -42,8 +42,8 @@
         appName: "authflow-test",
         authAPIHost: "", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
-        generateAppContext() {
-            return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
+        generateAppContext(provider) {
+            return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl, provider: provider })));
         },
         validateAppSettings() {
             if (!this.authAPIHost) {
@@ -83,17 +83,15 @@
     class BaseLoginApp {
         name = null;
         endpoints = {
-            login: "/login",
-            logout: "/logout",
-            userInfo: "/userInfo",
-            token: "/token"
+            login: null,
+            logout: null,
+            userInfo: null,
+            token: null,
         }
-        loginCodeIsToken = false;
 
         constructor(configuration) {
             this.name = configuration.name;
             this.endpoints = configuration.endpoints;
-            this.loginCodeIsToken = Boolean(configuration.loginCodeIsToken);
 
             this.UIState = new UIState(this);
             this.AuthState = new AuthState(this);
@@ -168,7 +166,7 @@
         login() {
             this.log("AuthService", "logging in..");
             AppSettings.validateAppSettings();
-            this.UIState.transitToUrl(`${AppSettings.authAPIHost}/${this.endpoints.login}?appContext=${AppSettings.generateAppContext()}`); // LoginRequest
+            this.UIState.transitToUrl(`${AppSettings.authAPIHost}/${this.endpoints.login}?appContext=${AppSettings.generateAppContext(this.getName())}`); // LoginRequest
         }
         async fetchAuthToken(loginCode) {
             if (typeof this.endpoints.token !== "string") {
@@ -183,7 +181,7 @@
                 },
                 body: JSON.stringify({
                     loginCode: loginCode,
-                    appContext: AppSettings.generateAppContext(),
+                    appContext: AppSettings.generateAppContext(this.getName()),
                 }),
             });
 
@@ -198,7 +196,7 @@
                 },
                 body: JSON.stringify({
                     token: accessToken,
-                    appContext: AppSettings.generateAppContext(),
+                    appContext: AppSettings.generateAppContext(this.getName()),
                 }),
             });
             if (response.status !== 200) {
@@ -213,7 +211,7 @@
         logout() {
             this.log("AuthService", "logging out..");
             AppSettings.validateAppSettings();
-            this.UIState.transitToUrl(`${AppSettings.authAPIHost}/${this.endpoints.logout}?appContext=${AppSettings.generateAppContext()}`); // LogoutRequest
+            this.UIState.transitToUrl(`${AppSettings.authAPIHost}/${this.endpoints.logout}?appContext=${AppSettings.generateAppContext(this.getName())}`); // LogoutRequest
         }
     }
 

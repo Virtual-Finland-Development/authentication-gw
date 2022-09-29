@@ -28,7 +28,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context);
+    const appContext = parseAppContext(context, SinunaSettings.ident);
 
     const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
     const SCOPE = SinunaSettings.scope;
@@ -52,7 +52,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
    * @returns AuthenticateResponse -> LoginResponse
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context);
+    const appContext = parseAppContext(context, SinunaSettings.ident);
 
     const authenticateResponse = parseSinunaAuthenticateResponse(context.request.query);
 
@@ -78,7 +78,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async AuthTokenRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context); // Valites app context
+    parseAppContext(context, SinunaSettings.ident); // Valites app context
     const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
 
     const SCOPE = SinunaSettings.scope;
@@ -122,7 +122,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context);
+    const appContext = parseAppContext(context, SinunaSettings.ident);
     const LOGOUT_CALLBACK_REDIRECT_URI = Runtime.getAppUrl("/auth/openid/logout-response");
     const LOGOUT_REQUEST_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${LOGOUT_CALLBACK_REDIRECT_URI}`;
 
@@ -143,7 +143,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutResponse(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context);
+    const appContext = parseAppContext(context, SinunaSettings.ident);
     const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl, "sinuna");
 
     return {
@@ -162,7 +162,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context); // Valites app context
+    parseAppContext(context, SinunaSettings.ident); // Valites app context
 
     const accessToken = context.request.requestBody.token;
 
@@ -194,7 +194,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
    */
   async AuthorizeRequest(context: Context): Promise<HttpResponse> {
     const response = await this.UserInfoRequest(context);
-    const appName = parseAppContext(context).object.appName;
+    const appName = parseAppContext(context, SinunaSettings.ident).object.appName;
     await Authorizator.authorize(SinunaSettings.ident, appName, response);
 
     return {

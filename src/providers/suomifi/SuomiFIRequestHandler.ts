@@ -20,7 +20,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context);
+    const appContext = parseAppContext(context, SuomiFISettings.ident);
     const authenticationUrl = await SuomiFISAML2Client().getAuthorizeUrlAsync(appContext.hash);
     debug("Login redirect URL", authenticationUrl);
     return {
@@ -40,7 +40,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     const body = parseBase64XMLBody(context.request.body);
     const result = await SuomiFISAML2Client().validatePostResponseAsync(body); // throws
-    const appContext = parseAppContext(body.RelayState);
+    const appContext = parseAppContext(body.RelayState, SuomiFISettings.ident);
     return {
       statusCode: 307,
       headers: {
@@ -57,7 +57,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context);
+    const appContext = parseAppContext(context, SuomiFISettings.ident);
     if (context.request.cookies?.loginState) {
       try {
         const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.loginState)));
@@ -91,7 +91,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
     const body = context.request.query;
     const originalQuery = new URLSearchParams(body).toString();
     await SuomiFISAML2Client().validateRedirectAsync(body, originalQuery); // throws
-    const appContext = parseAppContext(String(body.RelayState));
+    const appContext = parseAppContext(String(body.RelayState), SuomiFISettings.ident);
     return {
       statusCode: 307,
       headers: {
@@ -108,7 +108,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context);
+    parseAppContext(context, SuomiFISettings.ident);
     if (context.request.cookies?.loginState) {
       try {
         const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.loginState)));
