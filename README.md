@@ -1,6 +1,6 @@
 # Authentication GW
 
-An autentication flow service
+An authentication / authorization service for test & experimenting purposes of the Virtual Finland Development use-cases.
 
 [![Build, Test, Deploy](https://github.com/Virtual-Finland-Development/authentication-gw/actions/workflows/build-test-deploy.yml/badge.svg)](https://github.com/Virtual-Finland-Development/authentication-gw/actions/workflows/build-test-deploy.yml)
 
@@ -31,7 +31,8 @@ The development setup can be set up using vscode devcontainers or with local too
 Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/remote/containers
 
 - Open the project folder as devcontainer
-- In the container, start development with a terminal command `npm run start`
+- Browse the API-docs at http://localhost:3000/
+  - In the container, the default `postStartCommand` is set to `npm run start` which should publish the endpoint
 
 ### Run with local tools
 
