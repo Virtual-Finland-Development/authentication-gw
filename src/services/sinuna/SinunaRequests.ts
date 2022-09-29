@@ -3,6 +3,7 @@ import axios from "axios";
 import { URLSearchParams } from "url";
 import { AccessDeniedException } from "../../utils/exceptions";
 import { debug, logAxiosException } from "../../utils/logging";
+import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
 import { ensureUrlQueryParam, generateBase64Hash } from "../../utils/transformers";
 
@@ -31,7 +32,7 @@ export async function getLoginRequestUrl(appContext: AppContext): Promise<string
   const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
   const SCOPE = SinunaSettings.scope;
   const STATE = SinunaStateAttributor.generate(appContext); // Throws if appContext is invalid
-  const REDIRECT_URI = Settings.getLoginRedirectUrl();
+  const REDIRECT_URI = `https://${Runtime.getAppHost()}/auth/openid/authenticate-response`;
   return `https://login.iam.qa.sinuna.fi/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
 }
 
@@ -60,7 +61,7 @@ export async function parseAuthenticateResponse(queryParams: { [key: string]: st
  */
 export async function getLogoutRequestUrl(): Promise<string> {
   await initializeSinunaRequests();
-  const REDIRECT_URI = Settings.getLogoutRedirectUrl();
+  const REDIRECT_URI = `https://${Runtime.getAppHost()}/auth/openid/logout-response`;
   return `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${REDIRECT_URI}`;
 }
 
@@ -86,7 +87,7 @@ export async function fetchAccessToken(loginCode: string): Promise<{ access_toke
   const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
   const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET");
 
-  const REDIRECT_URI = Settings.getLoginRedirectUrl();
+  const REDIRECT_URI = `https://${Runtime.getAppHost()}/auth/openid/authenticate-response`;
   try {
     const response = await axios.post(
       `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,

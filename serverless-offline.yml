@@ -18,7 +18,6 @@ functions:
           path: /{proxy+}
     environment:
       STAGE: "offline"
-      AUTH_PROVIDER_REDIRECT_BACK_HOST: ${env:AUTH_PROVIDER_REDIRECT_BACK_HOST, 'http://localhost:3000'}
       APP_CONTEXT_REDIRECT_FALLBACK_URL: ${env:APP_CONTEXT_REDIRECT_FALLBACK_URL, 'http://localhost:8000'}
   api-docs:
     handler: dist/api-docs.handler

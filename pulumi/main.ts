@@ -42,7 +42,6 @@ const appRoutes = [
       }),
       environment: {
         STAGE: configuration.stage,
-        AUTH_PROVIDER_REDIRECT_BACK_HOST: Settings.getEnv("AUTH_PROVIDER_REDIRECT_BACK_HOST"),
         APP_CONTEXT_REDIRECT_FALLBACK_URL: Settings.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL"),
       },
       nodeModulesLayer: nodeModulesLayer,
