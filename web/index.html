@@ -186,7 +186,7 @@
 
         constructor(loginApp) {
             super(loginApp);
-            this.storeKey = `${loginApp.getName()}_authState`;
+            this.storeKey = `${AppSettings.appName}_${loginApp.getName()}_authState`;
         }
 
         login(token) {

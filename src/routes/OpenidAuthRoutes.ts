@@ -11,7 +11,7 @@ import Authorizator from "../utils/Authorizator";
  * @param context
  * @returns
  */
-export async function LoginRequest(context: Context) {
+export async function OpenIdLoginRequest(context: Context) {
   const appContext = parseAppContext(context);
   return {
     statusCode: 307,
@@ -28,7 +28,7 @@ export async function LoginRequest(context: Context) {
  * @param context
  * @returns AuthenticateResponse -> LoginResponse
  */
-export async function AuthenticateResponse(context: Context) {
+export async function OpenIdAuthenticateResponse(context: Context) {
   const appContext = parseAppContext(context);
   const loginResponse = await SinunaRequests.parseAuthenticateResponse(context.request.query);
   const redirectUrl = `${appContext.object.redirectUrl}?loginCode=${loginResponse.loginCode}&authProvider=${loginResponse.authProvider}`;
@@ -47,7 +47,7 @@ export async function AuthenticateResponse(context: Context) {
  * @param context
  * @returns
  */
-export async function AuthTokenRequest(context: Context) {
+export async function OpenIdAuthTokenRequest(context: Context) {
   parseAppContext(context); // Valites app context
   const response = await SinunaRequests.fetchAccessToken(context.request.requestBody.loginCode); // request body already validated by openapi-backend
   return {
@@ -63,7 +63,7 @@ export async function AuthTokenRequest(context: Context) {
  * @param context
  * @returns
  */
-export async function LogoutRequest(context: Context) {
+export async function OpenIdLogoutRequest(context: Context) {
   const appContext = parseAppContext(context);
 
   return {
@@ -82,7 +82,7 @@ export async function LogoutRequest(context: Context) {
  * @param context
  * @returns
  */
-export async function LogoutResponse(context: Context) {
+export async function OpenIdLogoutResponse(context: Context) {
   const appContext = parseAppContext(context);
   const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl);
 
@@ -101,7 +101,7 @@ export async function LogoutResponse(context: Context) {
  * @param context
  * @returns
  */
-export async function UserInfoRequest(context: Context) {
+export async function OpenIdUserInfoRequest(context: Context) {
   parseAppContext(context); // Valites app context
   const response = await SinunaRequests.fetchUserInfo(context.request.requestBody.token);
   return {
@@ -117,7 +117,7 @@ export async function UserInfoRequest(context: Context) {
  * @param context
  * @returns
  */
-export async function AuthorizeRequest(context: Context) {
+export async function OpenIdAuthorizeRequest(context: Context) {
   const appName = parseAppContext(context).object.appName;
   const response = await SinunaRequests.fetchUserInfo(context.request.requestBody.token); // Throws AccessDeniedException if token is invalid
   await Authorizator.authorize("sinuna", appName, response);

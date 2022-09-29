@@ -107,6 +107,11 @@ export async function Saml2UserInfoRequest(context: Context) {
       if (!loginState.profile) {
         throw new ValidationError("No profile info on the login state");
       }
+
+      if (loginState.profile.nameId !== context.request.requestBody.token) {
+        throw new AccessDeniedException("Invalid session token");
+      }
+
       return {
         statusCode: 200,
         headers: jsonResponseHeaders,
