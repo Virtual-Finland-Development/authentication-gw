@@ -35,7 +35,6 @@ export function parseAppContext(context: Context | string, provider?: string): {
       appContext.provider = provider;
     }
   } catch (error) {
-    console.log("DEBUG", error, appContextHash, appContext);
     throw new ValidationError("Bad app context");
   }
 
