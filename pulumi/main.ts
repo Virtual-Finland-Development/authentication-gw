@@ -38,10 +38,10 @@ const appRoutes = [
       code: new pulumi.asset.AssetArchive({
         ".": new pulumi.asset.FileArchive("../dist"),
         "./openapi": new pulumi.asset.FileArchive("../openapi"),
+        "./certificates": new pulumi.asset.FileArchive("../certificates"),
       }),
       environment: {
         STAGE: configuration.stage,
-        AUTH_PROVIDER_REDIRECT_BACK_HOST: Settings.getEnv("AUTH_PROVIDER_REDIRECT_BACK_HOST"),
         APP_CONTEXT_REDIRECT_FALLBACK_URL: Settings.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL"),
       },
       nodeModulesLayer: nodeModulesLayer,

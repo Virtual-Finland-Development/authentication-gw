@@ -107,6 +107,19 @@ export function ensureUrlQueryParam(url: string, param: string, value: string): 
 /**
  *
  * @param url
+ * @param params
+ * @returns
+ */
+export function ensureUrlQueryParams(url: string, params: Array<{ param: string; value: string }>): string {
+  for (const group of params) {
+    url = ensureUrlQueryParam(url, group.param, group.value);
+  }
+  return url;
+}
+
+/**
+ *
+ * @param url
  * @returns
  */
 export function ifValidUrl(url: string): boolean {
@@ -126,4 +139,15 @@ export function ifValidUrl(url: string): boolean {
  */
 export function ifString(text: any, minLength = 1): boolean {
   return typeof text === "string" && text.length >= minLength;
+}
+
+/**
+ *
+ * @param body
+ * @returns
+ */
+export function parseBase64XMLBody(body: string): { [attr: string]: any } {
+  const uriComponent = resolveBase64Hash(body);
+  const decoded = new URLSearchParams(uriComponent);
+  return Object.fromEntries(decoded);
 }

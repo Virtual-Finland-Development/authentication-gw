@@ -29,6 +29,7 @@ jobs:
       - name: Prepare deploy artifacts
         run: |
           npm run predeploy
+          ./certificates/prep-certificates-on-deploy.sh
       - name: Deploy with Pulumi
         uses: pulumi/actions@v3
         with:
@@ -39,7 +40,6 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{ secrets.AUTH_PROVIDER_REDIRECT_BACK_HOST }}
           APP_CONTEXT_REDIRECT_FALLBACK_URL: ${{ secrets.APP_CONTEXT_REDIRECT_FALLBACK_URL }}
   deploy-web:
     runs-on: ubuntu-latest

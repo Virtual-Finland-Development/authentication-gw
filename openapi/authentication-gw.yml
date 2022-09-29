@@ -38,7 +38,7 @@ paths:
                 example: "OK"
   "/auth/openid/login-request":
     get:
-      operationId: LoginRequest
+      operationId: OpenIdLoginRequest
       parameters:
         - in: query
           name: appContext
@@ -47,7 +47,7 @@ paths:
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
         - in: query
-          name: authProvider
+          name: provider
           schema:
             type: string
             default: "sinuna"
@@ -64,7 +64,7 @@ paths:
 
   "/auth/openid/authenticate-response":
     get:
-      operationId: AuthenticateResponse
+      operationId: OpenIdAuthenticateResponse
       parameters:
         - in: query
           name: code
@@ -116,13 +116,13 @@ paths:
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
         - in: query
-          name: authProvider
+          name: provider
           schema:
             type: string
             default: "sinuna"
           required: false
           description: "Auth provider name"
-      operationId: LogoutRequest
+      operationId: OpenIdLogoutRequest
       responses:
         "307":
           description: Redirect to the authentication provider services logout endpoint
@@ -133,7 +133,7 @@ paths:
                 type: string
   "/auth/openid/logout-response":
     get:
-      operationId: LogoutResponse
+      operationId: OpenIdLogoutResponse
       responses:
         "307":
           description: Authentication providers callback url, redirect back to the app context
@@ -144,7 +144,7 @@ paths:
                 type: string
   "/auth/openid/auth-token-request":
     post:
-      operationId: AuthTokenRequest
+      operationId: OpenIdAuthTokenRequest
       requestBody:
         description: Retrieve the authentication token from the auth provider service
         required: true
@@ -180,7 +180,7 @@ paths:
                     type: string
   "/auth/openid/user-info-request":
     post:
-      operationId: UserInfoRequest
+      operationId: OpenIdUserInfoRequest
       requestBody:
         description: Retrieve user info from the auth provider service
         required: true
@@ -218,7 +218,7 @@ paths:
                     type: string
   "/auth/openid/authorize":
     post:
-      operationId: AuthorizeRequest
+      operationId: OpenIdAuthorizeRequest
       requestBody:
         description: Access inspector
         required: true
@@ -252,3 +252,122 @@ paths:
                   message:
                     type: string
                     default: "Access Denied"
+  "/auth/saml2/login-request":
+    get:
+      operationId: Saml2LoginRequest
+      parameters:
+        - in: query
+          name: appContext
+          schema:
+            type: string
+          required: true
+          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+        - in: query
+          name: provider
+          schema:
+            type: string
+            default: "suomifi"
+          required: false
+          description: "Auth provider name"
+      responses:
+        "307":
+          description: Redirect to the authentication provider service
+          headers:
+            location:
+              description: Authentication provider service URL
+              schema:
+                type: string
+  "/auth/saml2/authenticate-response":
+    post:
+      operationId: Saml2AuthenticateResponse
+      responses:
+        "200":
+          description: Handle response from the auth provider
+  "/auth/saml2/logout-request":
+    get:
+      operationId: Saml2LogoutRequest
+      parameters:
+        - in: query
+          name: appContext
+          schema:
+            type: string
+          required: true
+          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+        - in: query
+          name: provider
+          schema:
+            type: string
+            default: "suomifi"
+          required: false
+          description: "Auth provider name"
+      responses:
+        "307":
+          description: Redirect to the authentication provider service
+          headers:
+            location:
+              description: Authentication provider service URL
+              schema:
+                type: string
+  "/auth/saml2/logout":
+    get:
+      operationId: Saml2LogoutResponse
+      parameters:
+        - in: query
+          name: SAMLResponse
+          schema:
+            type: string
+          required: true
+          description: "Logout response"
+        - in: query
+          name: RelayState
+          schema:
+            type: string
+          required: true
+          description: "State string"
+        - in: query
+          name: SigAlg
+          schema:
+            type: string
+          required: true
+          description: "SigAlg"
+        - in: query
+          name: Signature
+          schema:
+            type: string
+          required: true
+          description: "Signature"
+      responses:
+        "307":
+          description: Authentication providers callback url, redirect back to the app context
+          headers:
+            location:
+              description: App context URL
+              schema:
+                type: string
+  "/auth/saml2/user-info-request":
+    post:
+      operationId: Saml2UserInfoRequest
+      requestBody:
+        description: Retrieve user info from the auth provider service
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                appContext:
+                  type: string
+      responses:
+        "200":
+          description: User info object
+        "401":
+          description: "Login invalid or expired"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string

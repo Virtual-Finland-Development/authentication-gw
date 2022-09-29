@@ -1,16 +1,20 @@
 import { APIGatewayProxyEventV2, Context as APIGatewayContext } from "aws-lambda";
 import OpenAPIBackend from "openapi-backend";
-import * as AuthenticationRoutes from "./routes/authentication";
-import BaseRoutes, { InternalServerErrorHandler } from "./routes/base-routes";
+import OpenIdAuthRoutes from "./routes/OpenidAuthRoutes";
+import Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
+import BaseRoutes from "./routes/BaseRoutes";
+import { InternalServerErrorHandler } from "./utils/route-utils";
 import { CORSHeaders } from "./utils/default-headers";
 import { log } from "./utils/logging";
+import Runtime from "./utils/Runtime";
 
 // Setup the OpenAPI backend
 const api = new OpenAPIBackend({ definition: "./openapi/authentication-gw.yml" });
 
 // register your framework specific request handlers here
 api.register({
-  ...AuthenticationRoutes,
+  ...OpenIdAuthRoutes,
+  ...Saml2AuthRoutes,
   ...BaseRoutes,
 });
 
@@ -36,6 +40,10 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
 
     log(event.requestContext.http.method, event.rawPath);
 
+    // Initialize Runtime for the request
+    Runtime.initializeRequest(headers);
+
+    // Exec request handling
     return await api.handleRequest(
       {
         method: event.requestContext.http.method,
