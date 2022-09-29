@@ -6,16 +6,19 @@ import Runtime from "../../utils/Runtime";
 
 let suomiSaml: typeof SAML;
 
+/**
+ * @see: https://github.com/node-saml/node-saml
+ * @returns
+ */
 export default function (): typeof SAML {
   if (!suomiSaml) {
-    const appUrl = Runtime.getAppUrl(); // Throws if not initialized
     const privateKey = readFileSync("./certificates/virtual_finland_development.key", "utf-8");
     suomiSaml = new SAML({
       entryPoint: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SSO",
-      callbackUrl: `${appUrl}/auth/saml2/authenticate-response`,
+      callbackUrl: Runtime.getAppUrl("/auth/saml2/authenticate-response"),
       logoutUrl: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SLO",
-      logoutCallbackUrl: `${appUrl}/auth/saml2/logout`,
-      issuer: `${appUrl}`,
+      logoutCallbackUrl: Runtime.getAppUrl("/auth/saml2/logout"),
+      issuer: Runtime.getAppUrl(),
       signMetadata: true,
       signatureAlgorithm: "sha256",
       digestAlgorithm: "sha256",
@@ -39,7 +42,6 @@ export default function (): typeof SAML {
       decryptionPvk: privateKey,
       wantAssertionsSigned: true,
       wantAuthnResponseSigned: true,
-      //idpIssuer: "https://testi.apro.tunnistus.fi/static/metadata/idp-metadata.xml",
       samlAuthnRequestExtensions: {
         vetuma: {
           "@xmlns": "urn:vetuma:SAML:2.0:extensions",

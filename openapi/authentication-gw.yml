@@ -47,7 +47,7 @@ paths:
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
         - in: query
-          name: authProvider
+          name: provider
           schema:
             type: string
             default: "sinuna"
@@ -116,7 +116,7 @@ paths:
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
         - in: query
-          name: authProvider
+          name: provider
           schema:
             type: string
             default: "sinuna"
@@ -263,7 +263,7 @@ paths:
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
         - in: query
-          name: authProvider
+          name: provider
           schema:
             type: string
             default: "suomifi"
@@ -294,7 +294,7 @@ paths:
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
         - in: query
-          name: authProvider
+          name: provider
           schema:
             type: string
             default: "suomifi"

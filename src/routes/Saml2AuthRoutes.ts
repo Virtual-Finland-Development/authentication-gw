@@ -1,9 +1,10 @@
 import { Context } from "openapi-backend";
-import SuomiFiSAML from "../services/suomifi/SAML2";
+import SuomiFiSAML from "../services/suomifi/SuomiFiSAML2";
 import { jsonResponseHeaders } from "../utils/default-headers";
 import { AccessDeniedException, ValidationError } from "../utils/exceptions";
 import { debug } from "../utils/logging";
-import { ensureUrlQueryParam, generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../utils/transformers";
+import { prepareLogoutRedirectUrl } from "../utils/route-utils";
+import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../utils/transformers";
 import { parseAppContext } from "../utils/validators";
 
 /**
@@ -37,7 +38,7 @@ export async function Saml2AuthenticateResponse(context: Context) {
   return {
     statusCode: 307,
     headers: {
-      Location: `${appContext.object.redirectUrl}?suomifi-session-token=${result.profile.nameId}&authProvider=${result.authProvider}`,
+      Location: `${appContext.object.redirectUrl}?suomifi-session-token=${result.profile.nameId}&provider=${result.provider}`,
       "Set-Cookie": `loginState=${generateBase64Hash(result)};`,
     },
   };
@@ -87,7 +88,7 @@ export async function Saml2LogoutResponse(context: Context) {
   return {
     statusCode: 307,
     headers: {
-      Location: ensureUrlQueryParam(appContext.object.redirectUrl, "suomifi-logout", "success"),
+      Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, "suomifi"),
       "Set-Cookie": `loginState=''`,
     },
   };

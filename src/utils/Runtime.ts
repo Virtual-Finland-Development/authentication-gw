@@ -14,7 +14,11 @@ export default {
     }
     return runtimeState.host;
   },
-  getAppUrl(): string {
-    return `https://${this.getAppHost()}`;
+  getAppUrl(path?: string): string {
+    let postfix = "";
+    if (path) {
+      postfix = `/${path.startsWith("/") ? path.substring(1) : path}`;
+    }
+    return `https://${this.getAppHost()}${postfix}`;
   },
 };

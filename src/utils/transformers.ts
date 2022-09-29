@@ -107,6 +107,19 @@ export function ensureUrlQueryParam(url: string, param: string, value: string): 
 /**
  *
  * @param url
+ * @param params
+ * @returns
+ */
+export function ensureUrlQueryParams(url: string, params: Array<{ param: string; value: string }>): string {
+  for (const group of params) {
+    url = ensureUrlQueryParam(url, group.param, group.value);
+  }
+  return url;
+}
+
+/**
+ *
+ * @param url
  * @returns
  */
 export function ifValidUrl(url: string): boolean {

@@ -1,9 +1,9 @@
 import { Context } from "openapi-backend";
 import * as SinunaRequests from "../services/sinuna/SinunaRequests";
-import { prepareLogoutRedirectUrl } from "../services/sinuna/SinunaRequests";
 import { jsonResponseHeaders } from "../utils/default-headers";
 import { parseAppContext } from "../utils/validators";
 import Authorizator from "../utils/Authorizator";
+import { prepareLogoutRedirectUrl } from "../utils/route-utils";
 
 /**
  * GET->REDIRECT: The route for handling the auth flow initiating process
@@ -31,7 +31,7 @@ export async function OpenIdLoginRequest(context: Context) {
 export async function OpenIdAuthenticateResponse(context: Context) {
   const appContext = parseAppContext(context);
   const loginResponse = await SinunaRequests.parseAuthenticateResponse(context.request.query);
-  const redirectUrl = `${appContext.object.redirectUrl}?loginCode=${loginResponse.loginCode}&authProvider=${loginResponse.authProvider}`;
+  const redirectUrl = `${appContext.object.redirectUrl}?loginCode=${loginResponse.loginCode}&provider=${loginResponse.provider}`;
   return {
     statusCode: 307,
     headers: {
@@ -84,7 +84,7 @@ export async function OpenIdLogoutRequest(context: Context) {
  */
 export async function OpenIdLogoutResponse(context: Context) {
   const appContext = parseAppContext(context);
-  const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl);
+  const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl, "sinuna");
 
   return {
     statusCode: 307,
