@@ -311,3 +311,32 @@ paths:
       responses:
         "200":
           description: Handle response from the auth provider
+  "/auth/saml2/user-info-request":
+    post:
+      operationId: Saml2UserInfoRequest
+      requestBody:
+        description: Retrieve user info from the auth provider service
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                appContext:
+                  type: string
+      responses:
+        "200":
+          description: User info object
+          content:
+            application/json:
+        "401":
+          description: "Login invalid or expired"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string

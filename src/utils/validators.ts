@@ -9,10 +9,12 @@ import { AppContext } from "./types";
  * @throws ValidationError if invalid app context
  * @returns parsed app context
  */
-export function parseAppContext(context: Context): { object: AppContext; hash: string } {
+export function parseAppContext(context: Context | string): { object: AppContext; hash: string } {
   let appContextHash;
 
-  if (ifString(context.request.query?.appContext)) {
+  if (typeof context === "string") {
+    appContextHash = context;
+  } else if (ifString(context.request.query?.appContext)) {
     appContextHash = context.request.query.appContext;
   } else if (ifString(context.request.requestBody?.appContext)) {
     appContextHash = context.request.requestBody.appContext;

@@ -7,14 +7,25 @@
 
     <h2>Login flow examples / tests</h2>
 
-    <div id="sinuna">
+    <div id="Sinuna">
         <div>
             <b>Sinuna login state:</b> <span class="loginState">...</span>
         </div>
         <hr>
         <div>
-            <button class="login" disabled="disabled" onclick="Sinuna.AuthService.login()">Login</button>
-            <button class="logout" disabled="disabled" onclick="Sinuna.AuthService.logout()">Logout</button>
+            <button class="login" disabled="disabled" onclick="sinuna.AuthService.login()">Login</button>
+            <button class="logout" disabled="disabled" onclick="sinuna.AuthService.logout()">Logout</button>
+        </div>
+    </div>
+
+    <div id="SuomiFi">
+        <div>
+            <b>Suomi.fi login state:</b> <span class="loginState">...</span>
+        </div>
+        <hr>
+        <div>
+            <button class="login" disabled="disabled" onclick="suomifi.AuthService.login()">Login</button>
+            <button class="logout" disabled="disabled" onclick="suomifi.AuthService.logout()">Logout</button>
         </div>
     </div>
 
@@ -47,96 +58,65 @@
         console.log(context, "->", message, ...args);
     }
 
-    class Sinuna {
-        static log(...messages) {
-            log("Sinuna", ...messages);
+    /**************************************************************************
+     * 
+     * Login service defs
+     * 
+    /**************************************************************************/
+    class BaseAppComponent {
+        parent = null;
+        constructor(parent) {
+            this.parent = parent;
+            this.getName = this.parent.getName.bind(parent);
+            this.log = this.parent.log.bind(parent);
+            this.endpoints = this.parent.endpoints;
         }
 
-        static AuthState = {
-            isInTransition: false,
-            user: {
-                email: null,
-            },
-            login(token) {
-                this.isInTransition = true;
-                if (typeof token === "string") {
-                    Sinuna.log("AuthState", "logged in");
-                    localStorage.setItem("authToken", token);
-                }
-            },
-            logout() {
-                this.isInTransition = true;
-                this.user.email = null;
-                Sinuna.log("AuthState", "logged out");
-                localStorage.removeItem("authToken");
-            },
-            isLoggedIn() {
-                return this.getAuthToken() !== null;
-            },
-            isLoading() {
-                return this.isInTransition || (this.isLoggedIn() && this.user.email === null);
-            },
-            getAuthToken() {
-                return localStorage.getItem("authToken")
-            },
-            async handleLoggedIn() {
-                try {
-                    this.user.email = await this.AuthService.fetchUserEmail(this.getAuthToken());
-                } catch (error) {
-                    // Auth invalidated
-                    Sinuna.log("AuthState", "login invalidated");
-                    Sinuna.logout();
-                    Sinuna.UIState.resetViewState(); // reset view state
-                }
-            },
+        initialize() {
+            this.UIState = this.parent.UIState;
+            this.AuthState = this.parent.AuthState;
+            this.AuthService = this.parent.AuthService;
+        }
+    }
+
+
+    class BaseApp {
+        name = null;
+        endpoints = {
+            login: "/login",
+            logout: "/logout",
+            userInfo: "/userInfo",
+            token: "/token"
         }
 
-        static AuthService = {
-            login() {
-                Sinuna.log("AuthService", "logging in..");
-                AppSettings.validateAppSettings();
-                Sinuna.UIState.transitToUrl(`${AppSettings.authAPIHost}/auth/openid/login-request?appContext=${AppSettings.generateAppContext()}`); // LoginRequest
-            },
-            async fetchAuthToken(loginCode) {
-                const response = await fetch(`${AppSettings.authAPIHost}/auth/openid/auth-token-request`, { // AuthTokenRequest
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        loginCode: loginCode,
-                        appContext: AppSettings.generateAppContext(),
-                    }),
-                });
+        constructor(name) {
+            this.name = name;
+            this.UIState = new UIState(this);
+            this.AuthState = new AuthState(this);
+            this.AuthService = new AuthService(this);
+        }
 
-                const { token } = await response.json();
-                return token
-            },
-            async fetchUserEmail(accessToken) {
-                const response = await fetch(`${AppSettings.authAPIHost}/auth/openid/user-info-request`, { // UserInfoRequest
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        token: accessToken,
-                        appContext: AppSettings.generateAppContext(),
-                    }),
-                });
-                if (response.status !== 200) {
-                    if (response.status === 401) {
-                        throw new Error("Unauthorized");
-                    }
-                    throw new Error("Unknown error");
-                }
-                const { email } = await response.json();
-                return email
-            },
-            logout() {
-                Sinuna.log("AuthService", "logging out..");
-                AppSettings.validateAppSettings();
-                Sinuna.UIState.transitToUrl(`${AppSettings.authAPIHost}/auth/openid/logout-request?appContext=${AppSettings.generateAppContext()}`); // LogoutRequest
-            },
+        initialize() {
+            this.UIState.initialize();
+            this.AuthState.initialize();
+            this.AuthService.initialize();
+        }
+
+        getName() {
+            if (!this.name) {
+                throw new Error("name is not defined");
+            }
+            return this.name;
+        }
+
+        log(...messages) {
+            log(`[${this.getName()}]`, ...messages);
+        }
+
+        engage() {
+            this.initialize();
+            this.UIState.handleCurrentState();
+            this.engageLoginFlowEventsListener();
         }
 
         /**************************************************************************
@@ -144,85 +124,258 @@
          * Event listeners
          * 
         /**************************************************************************/
-        static LoginFlowEventsListener = async function () {
+        async engageLoginFlowEventsListener() {
+            throw new Error("Must be implemented");
+        }
+    }
+
+    class AuthService extends BaseAppComponent {
+        login() {
+            this.log("AuthService", "logging in..");
+            AppSettings.validateAppSettings();
+            this.UIState.transitToUrl(`${AppSettings.authAPIHost}/${this.endpoints.login}?appContext=${AppSettings.generateAppContext()}`); // LoginRequest
+        }
+        async fetchAuthToken(loginCode) {
+            const response = await fetch(`${AppSettings.authAPIHost}/${this.endpoints.token}`, { // AuthTokenRequest
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    loginCode: loginCode,
+                    appContext: AppSettings.generateAppContext(),
+                }),
+            });
+
+            const { token } = await response.json();
+            return token
+        }
+        async fetchUserEmail(accessToken) {
+            const response = await fetch(`${AppSettings.authAPIHost}/${this.endpoints.userInfo}`, { // UserInfoRequest
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    token: accessToken,
+                    appContext: AppSettings.generateAppContext(),
+                }),
+            });
+            if (response.status !== 200) {
+                if (response.status === 401) {
+                    throw new Error("Unauthorized");
+                }
+                throw new Error("Unknown error");
+            }
+            const { email } = await response.json();
+            return email
+        }
+        logout() {
+            this.log("AuthService", "logging out..");
+            AppSettings.validateAppSettings();
+            this.UIState.transitToUrl(`${AppSettings.authAPIHost}/${this.endpoints.logout}?appContext=${AppSettings.generateAppContext()}`); // LogoutRequest
+        }
+    }
+
+    class AuthState extends BaseAppComponent {
+        storeKey = null
+        isInTransition = false
+        user = {
+            email: null,
+        }
+
+        constructor(loginApp) {
+            super(loginApp);
+            this.storeKey = `${loginApp.getName()}_authState`;
+        }
+
+        login(token) {
+            this.isInTransition = true;
+            if (typeof token === "string") {
+                this.log("AuthState", "logged in");
+                localStorage.setItem(this.storeKey, token);
+            }
+        }
+        logout() {
+            this.isInTransition = true;
+            this.user.email = null;
+            this.log("AuthState", "logged out");
+            localStorage.removeItem(this.storeKey);
+        }
+        isLoggedIn() {
+            return this.getAuthToken() !== null;
+        }
+        isLoading() {
+            return this.isInTransition || (this.isLoggedIn() && this.user.email === null);
+        }
+        getAuthToken() {
+            return localStorage.getItem(this.storeKey)
+        }
+        async handleLoggedIn() {
+            try {
+                this.user.email = await this.AuthService.fetchUserEmail(this.getAuthToken());
+            } catch (error) {
+                // Auth invalidated
+                this.log("AuthState", "login invalidated");
+                this.logout();
+                this.UIState.resetViewState(); // reset view state
+            }
+        }
+    }
+
+    class UIState extends BaseAppComponent {
+        handleCurrentState() {
+            const loginButton = document.querySelector(`#${this.getName()} .login`);
+            const logoutButton = document.querySelector(`#${this.getName()} .logout`);
+            const loginState = document.querySelector(`#${this.getName()} .loginState`);
+            if (this.AuthState.isLoading()) {
+                loginButton.disabled = true;
+                logoutButton.disabled = true;
+                loginState.innerText = "loading..";
+            } else if (this.AuthState.isLoggedIn()) {
+                loginButton.disabled = true;
+                logoutButton.disabled = false;
+                loginState.innerText = `logged in as ${this.AuthState.user.email}`;
+            } else {
+                loginButton.disabled = false;
+                logoutButton.disabled = true;
+                loginState.innerText = "logged out";
+            }
+        }
+        flagTransition() {
+            this.AuthState.isInTransition = true;
+            this.handleCurrentState();
+        }
+        transitToUrl(url) {
+            this.flagTransition();
+            window.location.href = url;
+        }
+        resetViewState() {
+            window.history.replaceState({}, document.title, window.location.pathname); // clear url params
+            this.AuthState.isInTransition = false;
+            this.handleCurrentState();
+        }
+    }
+
+    /**************************************************************************
+     * 
+     * login services
+     * 
+    /**************************************************************************/
+
+    class Sinuna extends BaseApp {
+        constructor(name) {
+            super(name);
+            this.endpoints = {
+                login: "/auth/openid/login-request",
+                logout: "/auth/openid/logout-request",
+                userInfo: "/auth/openid/user-info-request",
+                token: "/auth/openid/auth-token-request"
+            };
+        }
+
+        /**************************************************************************
+         * 
+         * Event listeners
+         * 
+        /**************************************************************************/
+        async engageLoginFlowEventsListener() {
             const urlParams = new URLSearchParams(window.location.search);
 
             if (!this.AuthState.isLoggedIn()) {
                 if (urlParams.has("loginCode")) {
-                    Sinuna.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
+                    this.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
                     //
                     // Handle login response
                     //
                     const loginCode = urlParams.get('loginCode');
                     try {
-                        const token = await Sinuna.AuthService.fetchAuthToken(loginCode);
-                        Sinuna.AuthState.login(token); // Store token in local storage
-                        await Sinuna.AuthState.handleLoggedIn(); // Fetch user info
-                        Sinuna.UIState.resetViewState(); // reset view state
+                        const token = await this.AuthService.fetchAuthToken(loginCode);
+                        this.AuthState.login(token); // Store token in local storage
+                        await this.AuthState.handleLoggedIn(); // Fetch user info
+                        this.UIState.resetViewState(); // reset view state
                     } catch (error) {
-                        Sinuna.log("LoginFlowEventsListener", "Failed to fetch auth token", error);
+                        this.log("LoginFlowEventsListener", "Failed to fetch auth token", error);
                     }
                 }
             } else if (urlParams.has("logout")) {
-                Sinuna.log("LoginFlowEventsListener", "Logout event received, logging out");
+                this.log("LoginFlowEventsListener", "Logout event received, logging out");
                 //
                 // Handle logout response
                 //
                 const logoutResponse = urlParams.get('logout');
                 if (logoutResponse === "success") {
-                    Sinuna.AuthState.logout();
-                    Sinuna.UIState.resetViewState(); // reset view state
+                    this.AuthState.logout();
+                    this.UIState.resetViewState(); // reset view state
                 }
             } else {
-                await Sinuna.AuthState.handleLoggedIn(); // Validate login
-                Sinuna.UIState.handleCurrentState(); // Update UI
+                await this.AuthState.handleLoggedIn(); // Validate login
+                this.UIState.handleCurrentState(); // Update UI
             }
-        }
-
-        static UIState = {
-            handleCurrentState() {
-                const loginButton = document.querySelector("#sinuna .login");
-                const logoutButton = document.querySelector("#sinuna .logout");
-                const loginState = document.querySelector("#sinuna .loginState");
-                if (Sinuna.AuthState.isLoading()) {
-                    loginButton.disabled = true;
-                    logoutButton.disabled = true;
-                    loginState.innerText = "loading..";
-                } else if (Sinuna.AuthState.isLoggedIn()) {
-                    loginButton.disabled = true;
-                    logoutButton.disabled = false;
-                    loginState.innerText = `logged in as ${Sinuna.AuthState.user.email}`;
-                } else {
-                    loginButton.disabled = false;
-                    logoutButton.disabled = true;
-                    loginState.innerText = "logged out";
-                }
-            },
-            flagTransition() {
-                Sinuna.AuthState.isInTransition = true;
-                this.handleCurrentState();
-            },
-            transitToUrl(url) {
-                this.flagTransition();
-                window.location.href = url;
-            },
-            resetViewState() {
-                window.history.replaceState({}, document.title, window.location.pathname); // clear url params
-                Sinuna.AuthState.isInTransition = false;
-                this.handleCurrentState();
-            },
         }
     }
 
+
+    class SuomiFi extends BaseApp {
+        constructor(name) {
+            super(name);
+            this.endpoints = {
+                login: "/auth/saml2/login-request",
+                logout: "/auth/saml2/logout-request",
+                userInfo: "/auth/saml2/user-info-request",
+                token: "/auth/saml2/auth-token-request"
+            };
+        }
+
+        /**************************************************************************
+         * 
+         * Event listeners
+         * 
+        /**************************************************************************/
+        async engageLoginFlowEventsListener() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (!this.AuthState.isLoggedIn()) {
+                if (urlParams.has("suomifi-session-token")) {
+                    this.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
+                    //
+                    // Handle login response
+                    //
+                    const token = urlParams.get('suomifi-session-token');
+                    try {
+                        this.AuthState.login(token); // Store token in local storage
+                        await this.AuthState.handleLoggedIn(); // Fetch user info
+                        this.UIState.resetViewState(); // reset view state
+                    } catch (error) {
+                        this.log("LoginFlowEventsListener", "Failed to fetch auth token", error);
+                    }
+                }
+            } else if (urlParams.has("suomifi-logout")) {
+                this.log("LoginFlowEventsListener", "Logout event received, logging out");
+                //
+                // Handle logout response
+                //
+                const logoutResponse = urlParams.get('suomifi-logout');
+                if (logoutResponse === "success") {
+                    this.AuthState.logout();
+                    this.UIState.resetViewState(); // reset view state
+                }
+            } else {
+                await this.AuthState.handleLoggedIn(); // Validate login
+                this.UIState.handleCurrentState(); // Update UI
+            }
+        }
+    }
 
     /**************************************************************************
      * 
      * Execution
      * 
     /**************************************************************************/
-    Sinuna.UIState.handleCurrentState();
-    Sinuna.LoginFlowEventsListener();
-
+    const sinuna = new Sinuna("Sinuna");
+    sinuna.engage();
+    const suomifi = new SuomiFi("SuomiFi");
+    suomifi.engage();
 </script>
 
 </html>
