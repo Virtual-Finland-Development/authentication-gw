@@ -1,4 +1,5 @@
 import { AccessDeniedException } from "./exceptions";
+import SinunaSettings from "../providers/sinuna/Sinuna.config";
 
 async function authorizeSinuna(appName: string, authData: any): Promise<void> {
   // Authorize
@@ -17,7 +18,7 @@ export default {
    * @returns
    */
   async authorize(provider: string, appName: string, authData: any): Promise<void> {
-    if (provider === "sinuna") {
+    if (provider === SinunaSettings.ident) {
       return await authorizeSinuna(appName, authData);
     } else {
       throw new Error("Unknown auth provider");

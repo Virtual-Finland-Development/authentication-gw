@@ -195,7 +195,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
   async AuthorizeRequest(context: Context): Promise<HttpResponse> {
     const response = await this.UserInfoRequest(context);
     const appName = parseAppContext(context, SinunaSettings.ident).object.appName;
-    await Authorizator.authorize(SinunaSettings.ident, appName, response);
+    await Authorizator.authorize(SinunaSettings.ident, appName, JSON.parse(String(response.body)));
 
     return {
       statusCode: 200,
