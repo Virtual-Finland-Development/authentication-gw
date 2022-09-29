@@ -3,6 +3,7 @@ import { ValidationError } from "../../utils/exceptions";
 import Settings from "../../utils/Settings";
 import { generateBase64Hash, omitObjectKeys, resolveBase64Hash, isObject } from "../../utils/transformers";
 import { AppContext } from "../../utils/types";
+import SinunaSettings from "./SinunaSettings";
 import { SinunaAuthenticateResponse } from "./SinunaTypes";
 
 /**
@@ -72,10 +73,10 @@ export function parseSinunaAuthenticateResponse(queryParams: { [key: string]: st
   }
 
   const loginCode = queryParams.code;
-  const appContext = SinunaStateAttributor.parse(queryParams.state);
+  SinunaStateAttributor.parse(queryParams.state); // Throws
 
   return {
     loginCode: loginCode,
-    appContext: appContext,
+    provider: SinunaSettings.ident,
   };
 }

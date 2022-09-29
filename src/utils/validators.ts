@@ -5,11 +5,12 @@ import { AppContext } from "./types";
 
 /**
  *
- * @param context openapi-backend context
+ * @param context openapi-backend context or app context hash string
+ * @param provider default auth provider
  * @throws ValidationError if invalid app context
  * @returns parsed app context
  */
-export function parseAppContext(context: Context | string): { object: AppContext; hash: string } {
+export function parseAppContext(context: Context | string, provider?: string): { object: AppContext; hash: string } {
   let appContextHash;
 
   if (typeof context === "string") {
@@ -30,11 +31,14 @@ export function parseAppContext(context: Context | string): { object: AppContext
 
   try {
     appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(appContextHash)));
+    if (typeof appContext.provider !== "string") {
+      appContext.provider = provider;
+    }
   } catch (error) {
     throw new ValidationError("Bad app context");
   }
 
-  if (!ifAllObjectKeysAreDefined(appContext, ["appName"])) {
+  if (!ifAllObjectKeysAreDefined(appContext, ["appName", "provider"])) {
     throw new ValidationError("Invalid app context");
   }
 

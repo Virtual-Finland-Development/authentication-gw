@@ -254,7 +254,7 @@ paths:
                     default: "Access Denied"
   "/auth/saml2/login-request":
     get:
-      operationId: Saml2
+      operationId: Saml2LoginRequest
       parameters:
         - in: query
           name: appContext
@@ -362,8 +362,6 @@ paths:
       responses:
         "200":
           description: User info object
-          content:
-            application/json:
         "401":
           description: "Login invalid or expired"
           content:

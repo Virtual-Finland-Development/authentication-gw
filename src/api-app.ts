@@ -1,7 +1,7 @@
 import { APIGatewayProxyEventV2, Context as APIGatewayContext } from "aws-lambda";
 import OpenAPIBackend from "openapi-backend";
-import * as OpenIdAuthRoutes from "./routes/OpenidAuthRoutes";
-import * as Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
+import OpenIdAuthRoutes from "./routes/OpenidAuthRoutes";
+import Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
 import BaseRoutes from "./routes/BaseRoutes";
 import { InternalServerErrorHandler } from "./utils/route-utils";
 import { CORSHeaders } from "./utils/default-headers";
