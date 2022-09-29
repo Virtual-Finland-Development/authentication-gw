@@ -5,7 +5,7 @@ import * as Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
 import BaseRoutes, { InternalServerErrorHandler } from "./routes/BaseRoutes";
 import { CORSHeaders } from "./utils/default-headers";
 import { log } from "./utils/logging";
-import Settings from "./utils/Settings";
+import Runtime from "./utils/Runtime";
 
 // Setup the OpenAPI backend
 const api = new OpenAPIBackend({ definition: "./openapi/authentication-gw.yml" });
@@ -39,8 +39,8 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
 
     log(event.requestContext.http.method, event.rawPath);
 
-    // Initialize settings for the request
-    Settings.initializeRequest(headers);
+    // Initialize Runtime for the request
+    Runtime.initializeRequest(headers);
 
     // Exec request handling
     return await api.handleRequest(
