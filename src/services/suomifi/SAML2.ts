@@ -8,17 +8,18 @@ let suomiSaml: typeof SAML;
 
 export default function (): typeof SAML {
   if (!suomiSaml) {
-    const appHost = Runtime.getAppHost(); // Throws if not initialized
+    const appUrl = Runtime.getAppUrl(); // Throws if not initialized
+    const privateKey = readFileSync("./certificates/virtual_finland_development.key", "utf-8");
     suomiSaml = new SAML({
       entryPoint: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SSO",
-      callbackUrl: `https://${appHost}/auth/saml2/authenticate-response`,
+      callbackUrl: `${appUrl}/auth/saml2/authenticate-response`,
       logoutUrl: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SLO",
-      logoutCallbackUrl: `https://${appHost}/auth/saml2/logout`,
-      issuer: `https://${appHost}`,
+      logoutCallbackUrl: `${appUrl}/auth/saml2/logout`,
+      issuer: `${appUrl}`,
       signMetadata: true,
       signatureAlgorithm: "sha256",
       digestAlgorithm: "sha256",
-      privateKey: readFileSync("./certificates/virtual_finland_development.key", "utf-8"),
+      privateKey: privateKey,
       cert: async function (callback: (err: any, certs?: Array<string>) => void) {
         try {
           const response = await axios.get("https://testi.apro.tunnistus.fi/static/metadata/idp-metadata.xml");
@@ -35,7 +36,7 @@ export default function (): typeof SAML {
           callback(error);
         }
       },
-      decryptionPvk: readFileSync("./certificates/virtual_finland_development.key", "utf-8"),
+      decryptionPvk: privateKey,
       wantAssertionsSigned: true,
       wantAuthnResponseSigned: true,
       //idpIssuer: "https://testi.apro.tunnistus.fi/static/metadata/idp-metadata.xml",

@@ -14,4 +14,7 @@ export default {
     }
     return runtimeState.host;
   },
+  getAppUrl(): string {
+    return `https://${this.getAppHost()}`;
+  },
 };
