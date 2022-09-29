@@ -12,7 +12,7 @@ import Runtime from "../../utils/Runtime";
 import { generateBase64Hash } from "../../utils/transformers";
 import { debug, logAxiosException } from "../../utils/logging";
 import { AccessDeniedException } from "../../utils/exceptions";
-import SinunaSettings from "./SinunaSettings";
+import SinunaSettings from "./Sinuna.config";
 
 export default class SinunaRequestHandler implements AuthRequestHandler {
   static identityProviderIdent = SinunaSettings.ident;

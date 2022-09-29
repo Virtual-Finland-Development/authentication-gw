@@ -78,7 +78,7 @@ export function getAuthProviderRequestHandler(context: Context, defaultProvider?
 export function generateRequestHandlers(operationNames: Array<string>, operationPrefix: string, defaultAuthProviderIdent?: string): any {
   return operationNames.reduce((operations: Record<string, (context: Context) => Promise<HttpResponse>>, operationName: string) => {
     operations[`${operationPrefix}${operationName}`] = async (context: Context) => {
-      const handler: any = getAuthProviderRequestHandler(context, defaultAuthProviderIdent);
+      const handler: any = getAuthProviderRequestHandler(context, defaultAuthProviderIdent); // @TODO: fix this any
       await handler.initialize();
       return handler[operationName](context);
     };

@@ -6,11 +6,11 @@ import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { debug } from "../../utils/logging";
 import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../../utils/transformers";
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
-import SuomiFiSAML2Client from "./SuomiFiSAML2Client";
-import SuomiFiSettings from "./SuomiFiSettings";
+import SuomiFISAML2Client from "./SuomiFISAML2Client";
+import SuomiFISettings from "./SuomiFI.config";
 
 export default class SuomiFIRequestHandler implements AuthRequestHandler {
-  static identityProviderIdent = SuomiFiSettings.ident;
+  static identityProviderIdent = SuomiFISettings.ident;
   async initialize(): Promise<void> {}
 
   /**
@@ -21,7 +21,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
     const appContext = parseAppContext(context);
-    const authenticationUrl = await SuomiFiSAML2Client().getAuthorizeUrlAsync(appContext.hash);
+    const authenticationUrl = await SuomiFISAML2Client().getAuthorizeUrlAsync(appContext.hash);
     debug("Login redirect URL", authenticationUrl);
     return {
       statusCode: 307,
@@ -39,7 +39,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     const body = parseBase64XMLBody(context.request.body);
-    const result = await SuomiFiSAML2Client().validatePostResponseAsync(body); // throws
+    const result = await SuomiFISAML2Client().validatePostResponseAsync(body); // throws
     const appContext = parseAppContext(body.RelayState);
     return {
       statusCode: 307,
@@ -65,7 +65,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
           throw new ValidationError("No profile info on the login state");
         }
 
-        const logoutRequestUrl = await SuomiFiSAML2Client().getLogoutUrlAsync(loginState.profile, appContext.hash);
+        const logoutRequestUrl = await SuomiFISAML2Client().getLogoutUrlAsync(loginState.profile, appContext.hash);
         debug("Logout redirect URL", logoutRequestUrl);
         return {
           statusCode: 307,
@@ -90,7 +90,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
   async LogoutResponse(context: Context): Promise<HttpResponse> {
     const body = context.request.query;
     const originalQuery = new URLSearchParams(body).toString();
-    await SuomiFiSAML2Client().validateRedirectAsync(body, originalQuery); // throws
+    await SuomiFISAML2Client().validateRedirectAsync(body, originalQuery); // throws
     const appContext = parseAppContext(String(body.RelayState));
     return {
       statusCode: 307,

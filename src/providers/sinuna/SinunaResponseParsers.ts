@@ -3,7 +3,7 @@ import { ValidationError } from "../../utils/exceptions";
 import Settings from "../../utils/Settings";
 import { generateBase64Hash, omitObjectKeys, resolveBase64Hash, isObject } from "../../utils/transformers";
 import { AppContext } from "../../utils/types";
-import SinunaSettings from "./SinunaSettings";
+import SinunaSettings from "./Sinuna.config";
 import { SinunaAuthenticateResponse } from "./SinunaTypes";
 
 /**

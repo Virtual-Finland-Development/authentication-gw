@@ -18,7 +18,7 @@
         </div>
     </div>
 
-    <div id="SuomiFi">
+    <div id="SuomiFI">
         <div>
             <b>Suomi.fi login state:</b> <span class="loginState">...</span>
         </div>
@@ -80,7 +80,7 @@
     }
 
 
-    class BaseApp {
+    class BaseLoginApp {
         name = null;
         endpoints = {
             login: "/login",
@@ -88,9 +88,13 @@
             userInfo: "/userInfo",
             token: "/token"
         }
+        loginCodeIsToken = false;
 
-        constructor(name) {
-            this.name = name;
+        constructor(configuration) {
+            this.name = configuration.name;
+            this.endpoints = configuration.endpoints;
+            this.loginCodeIsToken = Boolean(configuration.loginCodeIsToken);
+
             this.UIState = new UIState(this);
             this.AuthState = new AuthState(this);
             this.AuthService = new AuthService(this);
@@ -120,12 +124,43 @@
         }
 
         /**************************************************************************
-         * 
-         * Event listeners
-         * 
-        /**************************************************************************/
+          * 
+          * Event listeners
+          * 
+         /**************************************************************************/
         async engageLoginFlowEventsListener() {
-            throw new Error("Must be implemented");
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (!this.AuthState.isLoggedIn()) {
+                if (urlParams.has("loginCode")) {
+                    this.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
+                    //
+                    // Handle login response
+                    //
+                    const loginCode = urlParams.get('loginCode');
+                    try {
+                        const token = await this.AuthService.fetchAuthToken(loginCode);
+                        this.AuthState.login(token); // Store token in local storage
+                        await this.AuthState.handleLoggedIn(); // Fetch user info
+                        this.UIState.resetViewState(); // reset view state
+                    } catch (error) {
+                        this.log("LoginFlowEventsListener", "Failed to fetch auth token", error);
+                    }
+                }
+            } else if (urlParams.has("logout")) {
+                this.log("LoginFlowEventsListener", "Logout event received, logging out");
+                //
+                // Handle logout response
+                //
+                const logoutResponse = urlParams.get('logout');
+                if (logoutResponse === "success") {
+                    this.AuthState.logout();
+                    this.UIState.resetViewState(); // reset view state
+                }
+            } else {
+                await this.AuthState.handleLoggedIn(); // Validate login
+                this.UIState.handleCurrentState(); // Update UI
+            }
         }
     }
 
@@ -136,6 +171,11 @@
             this.UIState.transitToUrl(`${AppSettings.authAPIHost}/${this.endpoints.login}?appContext=${AppSettings.generateAppContext()}`); // LoginRequest
         }
         async fetchAuthToken(loginCode) {
+            if (typeof this.endpoints.token !== "string") {
+                // No token endpoint defined, login code is the token
+                return loginCode;
+            }
+
             const response = await fetch(`${AppSettings.authAPIHost}/${this.endpoints.token}`, { // AuthTokenRequest
                 method: "POST",
                 headers: {
@@ -262,119 +302,30 @@
      * login services
      * 
     /**************************************************************************/
-
-    class Sinuna extends BaseApp {
-        constructor(name) {
-            super(name);
-            this.endpoints = {
-                login: "/auth/openid/login-request",
-                logout: "/auth/openid/logout-request",
-                userInfo: "/auth/openid/user-info-request",
-                token: "/auth/openid/auth-token-request"
-            };
-        }
-
-        /**************************************************************************
-         * 
-         * Event listeners
-         * 
-        /**************************************************************************/
-        async engageLoginFlowEventsListener() {
-            const urlParams = new URLSearchParams(window.location.search);
-
-            if (!this.AuthState.isLoggedIn()) {
-                if (urlParams.has("loginCode")) {
-                    this.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
-                    //
-                    // Handle login response
-                    //
-                    const loginCode = urlParams.get('loginCode');
-                    try {
-                        const token = await this.AuthService.fetchAuthToken(loginCode);
-                        this.AuthState.login(token); // Store token in local storage
-                        await this.AuthState.handleLoggedIn(); // Fetch user info
-                        this.UIState.resetViewState(); // reset view state
-                    } catch (error) {
-                        this.log("LoginFlowEventsListener", "Failed to fetch auth token", error);
-                    }
-                }
-            } else if (urlParams.has("logout")) {
-                this.log("LoginFlowEventsListener", "Logout event received, logging out");
-                //
-                // Handle logout response
-                //
-                const logoutResponse = urlParams.get('logout');
-                if (logoutResponse === "success") {
-                    this.AuthState.logout();
-                    this.UIState.resetViewState(); // reset view state
-                }
-            } else {
-                await this.AuthState.handleLoggedIn(); // Validate login
-                this.UIState.handleCurrentState(); // Update UI
-            }
-        }
-    }
-
-
-    class SuomiFi extends BaseApp {
-        constructor(name) {
-            super(name);
-            this.endpoints = {
-                login: "/auth/saml2/login-request",
-                logout: "/auth/saml2/logout-request",
-                userInfo: "/auth/saml2/user-info-request",
-                token: "/auth/saml2/auth-token-request"
-            };
-        }
-
-        /**************************************************************************
-         * 
-         * Event listeners
-         * 
-        /**************************************************************************/
-        async engageLoginFlowEventsListener() {
-            const urlParams = new URLSearchParams(window.location.search);
-
-            if (!this.AuthState.isLoggedIn()) {
-                if (urlParams.has("suomifi-session-token")) {
-                    this.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
-                    //
-                    // Handle login response
-                    //
-                    const token = urlParams.get('suomifi-session-token');
-                    try {
-                        this.AuthState.login(token); // Store token in local storage
-                        await this.AuthState.handleLoggedIn(); // Fetch user info
-                        this.UIState.resetViewState(); // reset view state
-                    } catch (error) {
-                        this.log("LoginFlowEventsListener", "Failed to fetch auth token", error);
-                    }
-                }
-            } else if (urlParams.has("suomifi-logout")) {
-                this.log("LoginFlowEventsListener", "Logout event received, logging out");
-                //
-                // Handle logout response
-                //
-                const logoutResponse = urlParams.get('suomifi-logout');
-                if (logoutResponse === "success") {
-                    this.AuthState.logout();
-                    this.UIState.resetViewState(); // reset view state
-                }
-            } else {
-                await this.AuthState.handleLoggedIn(); // Validate login
-                this.UIState.handleCurrentState(); // Update UI
-            }
-        }
-    }
+    const sinuna = new BaseLoginApp({
+        name: "Sinuna",
+        endpoints: {
+            login: "/auth/openid/login-request",
+            logout: "/auth/openid/logout-request",
+            userInfo: "/auth/openid/user-info-request",
+            token: "/auth/openid/auth-token-request"
+        },
+    });
+    const suomifi = new BaseLoginApp({
+        name: "SuomiFI",
+        endpoints: {
+            login: "/auth/saml2/login-request",
+            logout: "/auth/saml2/logout-request",
+            userInfo: "/auth/saml2/user-info-request",
+        },
+    });
 
     /**************************************************************************
      * 
      * Execution
      * 
     /**************************************************************************/
-    const sinuna = new Sinuna("Sinuna");
     sinuna.engage();
-    const suomifi = new SuomiFi("SuomiFi");
     suomifi.engage();
 </script>
 
