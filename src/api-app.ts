@@ -5,7 +5,7 @@ import Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
 import BaseRoutes from "./routes/BaseRoutes";
 import { InternalServerErrorHandler } from "./utils/route-utils";
 import { CORSHeaders } from "./utils/default-headers";
-import { log } from "./utils/logging";
+import { debug, log } from "./utils/logging";
 import Runtime from "./utils/Runtime";
 
 // Setup the OpenAPI backend
@@ -32,13 +32,14 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
       };
     }
 
+    log(event.requestContext.http.method, event.rawPath);
+
     // Pass lambda event cookies to openapi-backend
     const headers = event.headers;
     if (event.cookies instanceof Array && event.cookies.length > 0) {
       headers["Cookie"] = event.cookies.join(";");
+      debug("Cookies", headers["Cookie"]);
     }
-
-    log(event.requestContext.http.method, event.rawPath);
 
     // Initialize Runtime for the request
     Runtime.initializeRequest(headers);
