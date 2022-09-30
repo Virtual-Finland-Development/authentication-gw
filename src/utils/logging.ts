@@ -6,7 +6,16 @@ export function log(...messages: Array<any>) {
 
 export function debug(...messages: Array<any>) {
   if (Settings.getEnvironmentBoolean("DEBUG_MODE")) {
-    log("DEBUG", ...messages);
+    const debugMessages = [];
+    for (const message of messages) {
+      if (typeof message === "function") {
+        // lazy evaluation
+        debugMessages.push(message());
+      } else {
+        debugMessages.push(message);
+      }
+    }
+    log("DEBUG", ...debugMessages);
   }
 }
 
