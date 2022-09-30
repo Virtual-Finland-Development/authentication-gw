@@ -1,20 +1,13 @@
 import { Context } from "openapi-backend";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
-import { parseAppContext } from "../../utils/validators";
-import {
-  prepareLoginRedirectUrl,
-  prepareLogoutRedirectUrl,
-} from "../../utils/route-utils";
-import { AuthRequestHandler, HttpResponse } from "../../utils/types";
-import { debug, log } from "../../utils/logging";
-import {
-  generateBase64Hash,
-  parseBase64XMLBody,
-  resolveBase64Hash,
-} from "../../utils/transformers";
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
-import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
+import { debug, log } from "../../utils/logging";
+import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../../utils/transformers";
+import { AuthRequestHandler, HttpResponse } from "../../utils/types";
+import { parseAppContext } from "../../utils/validators";
 import SuomiFISettings from "./SuomiFI.config";
+import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
 
 export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   identityProviderIdent = SuomiFISettings.ident;
@@ -29,9 +22,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   async LoginRequest(context: Context): Promise<HttpResponse> {
     const appContext = parseAppContext(context, this.identityProviderIdent);
     const samlClient = await getSuomiFISAML2Client();
-    const authenticationUrl = await samlClient.getAuthorizeUrlAsync(
-      appContext.hash
-    );
+    const authenticationUrl = await samlClient.getAuthorizeUrlAsync(appContext.hash);
 
     return {
       statusCode: 303,
@@ -51,24 +42,14 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const body = parseBase64XMLBody(context.request.body);
     const samlClient = await getSuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
-    const appContext = parseAppContext(
-      body.RelayState,
-      this.identityProviderIdent
-    );
-    const redirectUrl = prepareLoginRedirectUrl(
-      appContext.object.redirectUrl,
-      result.profile.nameID,
-      this.identityProviderIdent
-    );
+    const appContext = parseAppContext(body.RelayState, this.identityProviderIdent);
+    const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameID, this.identityProviderIdent);
 
     try {
       const suomiFiLoginState = {
         profile: result.profile,
         context: {
-          AuthnContextClassRef:
-            result.profile.getAssertion()["Assertion"]["AuthnStatement"][0][
-              "AuthnContext"
-            ][0]["AuthnContextClassRef"][0]["_"],
+          AuthnContextClassRef: result.profile.getAssertion()["Assertion"]["AuthnStatement"][0]["AuthnContext"][0]["AuthnContextClassRef"][0]["_"],
         },
       };
 
@@ -76,9 +57,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         statusCode: 303,
         headers: {
           Location: redirectUrl,
-          "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(
-            suomiFiLoginState
-          )};`,
+          "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(suomiFiLoginState)};`,
         },
       };
     } catch (err) {
@@ -97,18 +76,13 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const appContext = parseAppContext(context, this.identityProviderIdent);
     if (context.request.cookies?.suomiFiLoginState) {
       try {
-        const loginState = JSON.parse(
-          resolveBase64Hash(String(context.request.cookies.suomiFiLoginState))
-        );
+        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
         if (!loginState.profile) {
           throw new ValidationError("No profile info on the login state");
         }
 
         const samlClient = await getSuomiFISAML2Client();
-        const logoutRequestUrl = await samlClient.getLogoutUrlAsync(
-          loginState.profile,
-          appContext.hash
-        );
+        const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, appContext.hash);
 
         return {
           statusCode: 303,
@@ -139,18 +113,12 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     } catch (error) {
       log("Error", "LogoutResponse", error);
     }
-    const appContext = parseAppContext(
-      String(body.RelayState),
-      this.identityProviderIdent
-    );
+    const appContext = parseAppContext(String(body.RelayState), this.identityProviderIdent);
 
     return {
       statusCode: 303,
       headers: {
-        Location: prepareLogoutRedirectUrl(
-          appContext.object.redirectUrl,
-          this.identityProviderIdent
-        ),
+        Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, this.identityProviderIdent),
         "Set-Cookie": `suomiFiLoginState=`,
       },
     };
@@ -166,9 +134,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     parseAppContext(context, this.identityProviderIdent);
     if (context.request.cookies?.suomiFiLoginState) {
       try {
-        const loginState = JSON.parse(
-          resolveBase64Hash(String(context.request.cookies.suomiFiLoginState))
-        );
+        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
         if (!loginState.profile) {
           throw new ValidationError("No profile info on the login state");
         }
@@ -181,13 +147,10 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         return {
           statusCode: 200,
           headers: getJSONResponseHeaders(),
-          body: JSON.stringify(loginState.profile),
+          body: JSON.stringify(loginState),
         };
       } catch (error) {
-        if (
-          error instanceof ValidationError ||
-          error instanceof AccessDeniedException
-        ) {
+        if (error instanceof ValidationError || error instanceof AccessDeniedException) {
           throw error;
         }
         debug(error);
