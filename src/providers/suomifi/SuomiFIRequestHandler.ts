@@ -51,12 +51,6 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const body = parseBase64XMLBody(context.request.body);
     const samlClient = await getSuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
-    debug("AuthenticateResponse", () => {
-      return {
-        assertionXml: result.profile.getAssertionXml(),
-        samlResponseXml: result.profile.getSamlResponseXml(),
-      };
-    });
     const appContext = parseAppContext(
       body.RelayState,
       this.identityProviderIdent
@@ -67,13 +61,30 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
       this.identityProviderIdent
     );
 
-    return {
-      statusCode: 303,
-      headers: {
-        Location: redirectUrl,
-        "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(result)};`,
-      },
-    };
+    try {
+      const suomiFiLoginState = {
+        profile: result.profile,
+        context: {
+          AuthnContextClassRef:
+            result.profile.getAssertion()["Assertion"]["AuthnStatement"][0][
+              "AuthnContext"
+            ][0]["AuthnContextClassRef"][0]["_"],
+        },
+      };
+
+      return {
+        statusCode: 303,
+        headers: {
+          Location: redirectUrl,
+          "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(
+            suomiFiLoginState
+          )};`,
+        },
+      };
+    } catch (err) {
+      debug("AuthenticateResponse", err, () => result.profile.getAssertion());
+      throw new ValidationError("Bad login profile data: AuthnContextClassRef");
+    }
   }
 
   /**

@@ -10,7 +10,12 @@ export function debug(...messages: Array<any>) {
     for (const message of messages) {
       if (typeof message === "function") {
         // lazy evaluation
-        debugMessages.push(message());
+        try {
+          debugMessages.push(JSON.stringify(message()));
+        } catch (error) {
+          debugMessages.push("Failed to stringify debug message");
+          debugMessages.push(error);
+        }
       } else {
         debugMessages.push(message);
       }
