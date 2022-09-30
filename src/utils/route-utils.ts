@@ -2,7 +2,7 @@ import { Context } from "openapi-backend";
 import SinunaRequestHandler from "../providers/sinuna/SinunaRequestHandler";
 import SuomiFIRequestHandler from "../providers/suomifi/SuomiFIRequestHandler";
 import { AccessDeniedException, ValidationError } from "../utils/exceptions";
-import { log } from "../utils/logging";
+import { debug, log } from "../utils/logging";
 import { ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
 import { jsonResponseHeaders } from "./default-headers";
 import { AuthRequestHandler, HttpResponse } from "./types";
@@ -120,7 +120,9 @@ export function generateRequestHandlers(operationNames: Array<string>, operation
     operations[`${operationPrefix}${operationName}`] = async (context: Context) => {
       const handler: any = getAuthProviderRequestHandler(context, defaultAuthProviderIdent); // @TODO: fix this any by defining the operationName type
       await handler.initialize();
-      return handler[operationName](context);
+      const response = await handler[operationName](context);
+      debug(response);
+      return response;
     };
     return operations;
   }, {});

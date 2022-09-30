@@ -38,7 +38,7 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
     const headers = event.headers;
     if (event.cookies instanceof Array && event.cookies.length > 0) {
       headers["Cookie"] = event.cookies.join(";");
-      debug("Cookies", headers["Cookie"]);
+      debug("Cookies", JSON.stringify(headers["Cookie"]));
     }
 
     // Initialize Runtime for the request
