@@ -49,7 +49,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: redirectUrl,
-        "Set-Cookie": `loginState=${generateBase64Hash(result)};`,
+        "Set-Cookie": `suomiFiLoginState="${generateBase64Hash(result)}";`,
       },
     };
   }
@@ -62,9 +62,9 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
     const appContext = parseAppContext(context, SuomiFISettings.ident);
-    if (context.request.cookies?.loginState) {
+    if (context.request.cookies?.suomiFiLoginState) {
       try {
-        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.loginState)));
+        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
         if (!loginState.profile) {
           throw new ValidationError("No profile info on the login state");
         }
@@ -100,7 +100,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, SuomiFISettings.ident),
-        "Set-Cookie": `loginState=`,
+        "Set-Cookie": `suomiFiLoginState=""`,
       },
     };
   }
@@ -113,9 +113,9 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
    */
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
     parseAppContext(context, SuomiFISettings.ident);
-    if (context.request.cookies?.loginState) {
+    if (context.request.cookies?.suomiFiLoginState) {
       try {
-        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.loginState)));
+        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
         if (!loginState.profile) {
           throw new ValidationError("No profile info on the login state");
         }
