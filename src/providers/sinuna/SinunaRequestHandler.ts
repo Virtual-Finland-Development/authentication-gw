@@ -40,7 +40,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: SINUNA_LOGIN_URL,
-        "Set-Cookie": `sinunaAppContext=${appContext.hash};Max-Age=900`,
+        "Set-Cookie": `appContext=${appContext.hash};`,
       },
     };
   }
@@ -59,7 +59,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: redirectUrl,
-        "Set-Cookie": `sinunaAppContext=;`,
+        "Set-Cookie": `appContext=;`,
       },
     };
   }
@@ -128,7 +128,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: LOGOUT_REQUEST_URL,
-        "Set-Cookie": `sinunaAppContext=${appContext.hash};Max-Age=900`,
+        "Set-Cookie": `appContext=${appContext.hash};`,
       },
     };
   }
@@ -153,7 +153,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: redirectUrl,
-        "Set-Cookie": `sinunaAppContext=;`,
+        "Set-Cookie": `appContext=;`,
       },
     };
   }
