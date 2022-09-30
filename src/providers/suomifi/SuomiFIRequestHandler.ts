@@ -124,7 +124,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
           throw new ValidationError("No profile info on the login state");
         }
 
-        if (loginState.profile.nameId !== context.request.requestBody.token) {
+        if (loginState.profile.nameID !== context.request.requestBody.token) {
           debug(loginState, context.request);
           throw new AccessDeniedException("Invalid session token");
         }
