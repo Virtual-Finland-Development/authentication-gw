@@ -99,9 +99,9 @@ export function getAuthProviderRequestHandler(context: Context, defaultProvider?
 
   switch (provider.toLowerCase()) {
     case SinunaRequestHandler.identityProviderIdent.toLowerCase():
-      return new SinunaRequestHandler();
+      return SinunaRequestHandler;
     case SuomiFIRequestHandler.identityProviderIdent.toLowerCase():
-      return new SuomiFIRequestHandler();
+      return SuomiFIRequestHandler;
     default:
       throw new ValidationError(`Unknown auth provider: ${provider}`);
   }
@@ -121,7 +121,7 @@ export function generateRequestHandlers(operationNames: Array<string>, operation
       const handler: any = getAuthProviderRequestHandler(context, defaultAuthProviderIdent); // @TODO: fix this any by defining the operationName type
       await handler.initialize();
       const response = await handler[operationName](context);
-      debug(response);
+      debug("Response", response);
       return response;
     };
     return operations;

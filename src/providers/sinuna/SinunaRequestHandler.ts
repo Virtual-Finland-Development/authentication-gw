@@ -14,8 +14,8 @@ import { debug, logAxiosException } from "../../utils/logging";
 import { AccessDeniedException } from "../../utils/exceptions";
 import SinunaSettings from "./Sinuna.config";
 
-export default class SinunaRequestHandler implements AuthRequestHandler {
-  static identityProviderIdent = SinunaSettings.ident;
+export default new (class SinunaRequestHandler implements AuthRequestHandler {
+  identityProviderIdent = SinunaSettings.ident;
 
   async initialize(): Promise<void> {
     await SinunaStateAttributor.initialize();
@@ -208,4 +208,4 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
       }),
     };
   }
-}
+})();

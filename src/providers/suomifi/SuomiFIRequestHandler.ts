@@ -9,8 +9,8 @@ import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import SuomiFISAML2Client from "./SuomiFISAML2Client";
 import SuomiFISettings from "./SuomiFI.config";
 
-export default class SuomiFIRequestHandler implements AuthRequestHandler {
-  static identityProviderIdent = SuomiFISettings.ident;
+export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
+  identityProviderIdent = SuomiFISettings.ident;
   async initialize(): Promise<void> {}
 
   /**
@@ -139,4 +139,4 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
     }
     throw new AccessDeniedException("Not logged in");
   }
-}
+})();
