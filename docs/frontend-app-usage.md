@@ -6,6 +6,8 @@ The example login app is a simple dependency-free html document that demonstrate
 
 [../web/index.html](../web/index.html)
 
+See the auth provider specifics at [./auth-providers.md](./auth-providers.md).
+
 Usage: fill the `authAPIHost` variable with the address of the auth gw and open the file in a browser.
 
 ## Requests
