@@ -48,7 +48,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
     debug("AuthenticateResponse redirect URL", redirectUrl);
 
     return {
-      statusCode: 307,
+      statusCode: 303,
       headers: {
         Location: redirectUrl,
         "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(result)};`,
