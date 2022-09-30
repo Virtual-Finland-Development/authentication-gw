@@ -40,6 +40,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     const body = parseBase64XMLBody(context.request.body);
+    debug("AuthenticateResponse", body);
     const samlClient = await SuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
     const appContext = parseAppContext(body.RelayState, SuomiFISettings.ident);
