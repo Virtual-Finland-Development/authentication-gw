@@ -4,7 +4,7 @@ import SuomiFIRequestHandler from "../providers/suomifi/SuomiFIRequestHandler";
 import { AccessDeniedException, ValidationError } from "../utils/exceptions";
 import { debug, log } from "../utils/logging";
 import { ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
-import { jsonResponseHeaders } from "./default-headers";
+import { getJSONResponseHeaders } from "./default-headers";
 import { AuthRequestHandler, HttpResponse } from "./types";
 import { parseAppContext } from "./validators";
 
@@ -55,7 +55,7 @@ export function InternalServerErrorHandler(error: any) {
   return {
     statusCode: statusCode,
     body: JSON.stringify({ message: exception.message }),
-    headers: jsonResponseHeaders,
+    headers: getJSONResponseHeaders(),
   };
 }
 

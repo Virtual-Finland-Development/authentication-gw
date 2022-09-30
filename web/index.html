@@ -181,6 +181,7 @@
 
             const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.token)}`, { // AuthTokenRequest
                 method: "POST",
+                credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -196,6 +197,7 @@
         async fetchUserEmail(accessToken) {
             const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.userInfo)}`, { // UserInfoRequest
                 method: "POST",
+                credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
                 },

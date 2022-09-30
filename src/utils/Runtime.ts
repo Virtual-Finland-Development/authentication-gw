@@ -1,12 +1,14 @@
 import { APIGatewayProxyEventHeaders } from "aws-lambda";
 
-const runtimeState: { host: string } = {
+const runtimeState = {
   host: "",
+  origin: "",
 };
 
 export default {
   initializeRequest(headers: APIGatewayProxyEventHeaders): void {
     runtimeState.host = String(headers?.host);
+    runtimeState.origin = String(headers?.origin);
   },
   getAppHost(): string {
     if (!runtimeState.host) {
@@ -20,5 +22,8 @@ export default {
       postfix = `/${path.startsWith("/") ? path.substring(1) : path}`;
     }
     return `https://${this.getAppHost()}${postfix}`;
+  },
+  getRequestOrigin(): string {
+    return runtimeState.origin;
   },
 };

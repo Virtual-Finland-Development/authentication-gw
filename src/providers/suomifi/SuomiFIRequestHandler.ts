@@ -1,5 +1,5 @@
 import { Context } from "openapi-backend";
-import { jsonResponseHeaders } from "../../utils/default-headers";
+import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { parseAppContext } from "../../utils/validators";
 import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
@@ -130,7 +130,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
 
         return {
           statusCode: 200,
-          headers: jsonResponseHeaders,
+          headers: getJSONResponseHeaders(),
           body: JSON.stringify(loginState.profile),
         };
       } catch (error) {

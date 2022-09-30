@@ -1,7 +1,7 @@
 import { Context } from "openapi-backend";
 import axios from "axios";
 
-import { jsonResponseHeaders } from "../../utils/default-headers";
+import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { parseAppContext } from "../../utils/validators";
 import Authorizator from "../../utils/Authorizator";
 import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
@@ -99,7 +99,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
 
       return {
         statusCode: 200,
-        headers: jsonResponseHeaders,
+        headers: getJSONResponseHeaders(),
         body: JSON.stringify({ token: response.data.access_token, expiresIn: response.data.expires_in }),
       };
     } catch (error) {
@@ -170,7 +170,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
 
       return {
         statusCode: 200,
-        headers: jsonResponseHeaders,
+        headers: getJSONResponseHeaders(),
         body: JSON.stringify(response.data),
       };
     } catch (error) {
@@ -192,7 +192,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
 
     return {
       statusCode: 200,
-      headers: jsonResponseHeaders,
+      headers: getJSONResponseHeaders(),
       body: JSON.stringify({
         message: "Access Granted",
       }),

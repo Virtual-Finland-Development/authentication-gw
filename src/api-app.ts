@@ -4,7 +4,7 @@ import OpenIdAuthRoutes from "./routes/OpenidAuthRoutes";
 import Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
 import BaseRoutes from "./routes/BaseRoutes";
 import { InternalServerErrorHandler } from "./utils/route-utils";
-import { CORSHeaders } from "./utils/default-headers";
+import { getCORSHeaders } from "./utils/default-headers";
 import { debug, log } from "./utils/logging";
 import Runtime from "./utils/Runtime";
 
@@ -24,25 +24,25 @@ api.init();
 // Lambda http event handler
 export const handler = async (event: APIGatewayProxyEventV2, context: APIGatewayContext) => {
   try {
+    // Initialize Runtime for the request
+    const headers = event.headers;
+    Runtime.initializeRequest(headers);
+
     // Handle options request
     if (event.requestContext.http.method === "OPTIONS") {
       return {
         statusCode: 200,
-        headers: CORSHeaders,
+        headers: getCORSHeaders(),
       };
     }
 
     log(event.requestContext.http.method, event.rawPath);
 
     // Pass lambda event cookies to openapi-backend
-    const headers = event.headers;
     if (event.cookies instanceof Array && event.cookies.length > 0) {
       headers["Cookie"] = event.cookies.join(";");
       debug("Cookies", JSON.stringify(headers["Cookie"]));
     }
-
-    // Initialize Runtime for the request
-    Runtime.initializeRequest(headers);
 
     // Exec request handling
     return await api.handleRequest(

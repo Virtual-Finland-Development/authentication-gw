@@ -1,5 +1,5 @@
 import { Context } from "openapi-backend";
-import { jsonResponseHeaders } from "../utils/default-headers";
+import { getJSONResponseHeaders } from "../utils/default-headers";
 
 export default {
   // Base handlers
@@ -24,16 +24,16 @@ export default {
   notFound: async () => ({
     statusCode: 404,
     body: JSON.stringify({ message: "Not found" }),
-    headers: jsonResponseHeaders,
+    headers: getJSONResponseHeaders(),
   }),
   methodNotAllowed: async () => ({
     statusCode: 405,
     body: JSON.stringify({ message: "Method not allowed" }),
-    headers: jsonResponseHeaders,
+    headers: getJSONResponseHeaders(),
   }),
   validationFail: async (context: Context) => ({
     statusCode: 400,
     body: JSON.stringify({ message: context.validation.errors }),
-    headers: jsonResponseHeaders,
+    headers: getJSONResponseHeaders(),
   }),
 };
