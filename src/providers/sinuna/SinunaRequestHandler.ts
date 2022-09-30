@@ -37,7 +37,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
     const SINUNA_LOGIN_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
 
     return {
-      statusCode: 307,
+      statusCode: 303,
       headers: {
         Location: SINUNA_LOGIN_URL,
         "Set-Cookie": `appContext=${appContext.hash};`,
@@ -56,7 +56,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
     const appContextObj = authenticateResponse.appContextObj;
     const redirectUrl = prepareLoginRedirectUrl(appContextObj.redirectUrl, authenticateResponse.loginCode, SinunaSettings.ident);
     return {
-      statusCode: 307,
+      statusCode: 303,
       headers: {
         Location: redirectUrl,
         "Set-Cookie": `appContext=;`,
@@ -125,7 +125,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
     });
 
     return {
-      statusCode: 307,
+      statusCode: 303,
       headers: {
         Location: LOGOUT_REQUEST_URL,
         "Set-Cookie": `appContext=${appContext.hash};`,
@@ -150,10 +150,10 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
     });
 
     return {
-      statusCode: 307,
+      statusCode: 303,
       headers: {
         Location: redirectUrl,
-        "Set-Cookie": `appContext=;`,
+        //"Set-Cookie": `appContext=;`,
       },
     };
   }

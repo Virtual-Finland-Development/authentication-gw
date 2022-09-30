@@ -25,7 +25,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const authenticationUrl = await samlClient.getAuthorizeUrlAsync(appContext.hash);
     debug("Login redirect URL", authenticationUrl);
     return {
-      statusCode: 307,
+      statusCode: 303,
       headers: {
         Location: authenticationUrl,
       },
@@ -75,7 +75,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, appContext.hash);
         debug("Logout redirect URL", logoutRequestUrl);
         return {
-          statusCode: 307,
+          statusCode: 303,
           headers: {
             Location: logoutRequestUrl,
           },
@@ -101,7 +101,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     await samlClient.validateRedirectAsync(body, originalQuery); // throws
     const appContext = parseAppContext(String(body.RelayState), SuomiFISettings.ident);
     return {
-      statusCode: 307,
+      statusCode: 303,
       headers: {
         Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, SuomiFISettings.ident),
         "Set-Cookie": `suomiFiLoginState=`,
