@@ -44,7 +44,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const result = await samlClient.validatePostResponseAsync(body); // throws
     const appContext = parseAppContext(body.RelayState, SuomiFISettings.ident);
 
-    const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameId, result.provider);
+    const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameID, SuomiFISettings.ident);
     debug("AuthenticateResponse redirect URL", redirectUrl);
 
     return {
