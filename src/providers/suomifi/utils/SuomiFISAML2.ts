@@ -1,8 +1,8 @@
 import axios from "axios";
 import { parseXml2JsFromString } from "node-saml/lib/xml";
 const { SAML } = require("node-saml");
-import Runtime from "../../utils/Runtime";
-import Settings from "../../utils/Settings";
+import Runtime from "../../../utils/Runtime";
+import Settings from "../../../utils/Settings";
 
 let suomiSaml: typeof SAML;
 
@@ -10,7 +10,7 @@ let suomiSaml: typeof SAML;
  * @see: https://github.com/node-saml/node-saml
  * @returns
  */
-export default async function (): Promise<typeof SAML> {
+export const getSuomiFISAML2Client = async function (): Promise<typeof SAML> {
   if (!suomiSaml) {
     const privateKey = await Settings.getSecret("SUOMIFI_PRIVATE_KEY");
     suomiSaml = new SAML({
@@ -55,4 +55,4 @@ export default async function (): Promise<typeof SAML> {
     });
   }
   return suomiSaml;
-}
+};

@@ -6,7 +6,7 @@ import { parseAppContext } from "../../utils/validators";
 import Authorizator from "../../utils/Authorizator";
 import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
-import { parseSinunaAuthenticateResponse, SinunaStateAttributor } from "./SinunaResponseParsers";
+import { parseSinunaAuthenticateResponse, SinunaStateAttributor } from "./utils/SinunaResponseParsers";
 import Settings from "../../utils/Settings";
 import Runtime from "../../utils/Runtime";
 import { generateBase64Hash } from "../../utils/transformers";
@@ -28,7 +28,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, SinunaSettings.ident);
+    const appContext = parseAppContext(context, this.identityProviderIdent);
 
     const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
     const SCOPE = SinunaSettings.scope;
@@ -54,7 +54,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     const authenticateResponse = parseSinunaAuthenticateResponse(context.request.query);
     const appContextObj = authenticateResponse.appContextObj;
-    const redirectUrl = prepareLoginRedirectUrl(appContextObj.redirectUrl, authenticateResponse.loginCode, SinunaSettings.ident);
+    const redirectUrl = prepareLoginRedirectUrl(appContextObj.redirectUrl, authenticateResponse.loginCode, this.identityProviderIdent);
     return {
       statusCode: 303,
       headers: {
@@ -71,7 +71,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async AuthTokenRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, SinunaSettings.ident); // Valites app context
+    parseAppContext(context, this.identityProviderIdent); // Valites app context
     const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
 
     const SCOPE = SinunaSettings.scope;
@@ -115,7 +115,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, SinunaSettings.ident);
+    const appContext = parseAppContext(context, this.identityProviderIdent);
     const LOGOUT_CALLBACK_REDIRECT_URI = Runtime.getAppUrl("/auth/openid/logout-response");
     const LOGOUT_REQUEST_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${LOGOUT_CALLBACK_REDIRECT_URI}`;
 
@@ -136,8 +136,8 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutResponse(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, SinunaSettings.ident);
-    const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl, SinunaSettings.ident);
+    const appContext = parseAppContext(context, this.identityProviderIdent);
+    const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl, this.identityProviderIdent);
 
     return {
       statusCode: 303,
@@ -155,7 +155,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, SinunaSettings.ident); // Valites app context
+    parseAppContext(context, this.identityProviderIdent); // Valites app context
 
     const accessToken = context.request.requestBody.token;
 
@@ -187,8 +187,8 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    */
   async AuthorizeRequest(context: Context): Promise<HttpResponse> {
     const response = await this.UserInfoRequest(context);
-    const appName = parseAppContext(context, SinunaSettings.ident).object.appName;
-    await Authorizator.authorize(SinunaSettings.ident, appName, JSON.parse(String(response.body)));
+    const appName = parseAppContext(context, this.identityProviderIdent).object.appName;
+    await Authorizator.authorize(this.identityProviderIdent, appName, JSON.parse(String(response.body)));
 
     return {
       statusCode: 200,

@@ -1,15 +1,15 @@
 import { createHmac } from "crypto";
-import { ValidationError } from "../../utils/exceptions";
-import Settings from "../../utils/Settings";
-import { generateBase64Hash, omitObjectKeys, resolveBase64Hash, isObject } from "../../utils/transformers";
-import { AppContext } from "../../utils/types";
-import SinunaSettings from "./Sinuna.config";
+import { ValidationError } from "../../../utils/exceptions";
+import Settings from "../../../utils/Settings";
+import { generateBase64Hash, omitObjectKeys, resolveBase64Hash, isObject } from "../../../utils/transformers";
+import { AppContext } from "../../../utils/types";
+import SinunaSettings from "../Sinuna.config";
 import { SinunaAuthenticateResponse } from "./SinunaTypes";
 
 /**
  *  Parses the state attribute from the Sinuna requests
  */
-export const SinunaStateAttributor = new (class ___SinunaStateAttributor {
+export const SinunaStateAttributor = new (class SinunaStateAttributor {
   runtimeToken: string = "";
 
   /**
