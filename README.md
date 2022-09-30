@@ -45,6 +45,8 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 
 - Documentation for using the service in frontend apps: [./docs/frontend-app-usage.md](docs/frontend-app-usage.md)
 
+- Documentation for different auth providers: [./docs/auth-providers.md](docs/auth-providers.md)
+
 ## References
 
 - https://developer.sinuna.fi/integration_documentation/

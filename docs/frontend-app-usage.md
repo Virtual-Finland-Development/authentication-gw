@@ -15,7 +15,8 @@ Requests to the backend are accompanied with an `appContext` token which is a ba
 ```json
 {
   "appName": "app-name",
-  "redirectUrl": "url-back-to-the-login-handler-in-the-app"
+  "redirectUrl": "url-back-to-the-login-handler-in-the-app",
+  "provider": "sinuna"
 }
 ```
 
@@ -33,6 +34,7 @@ Example token generating function in typescript:
 type AppContextObject = {
   appName: string;
   redirectUrl: string;
+  provider?: string;
 };
 
 export function generateAppContext(appContextObject: AppContextObject): string {
@@ -54,7 +56,9 @@ After the auth process is done, the user is redirected to the `redirectUrl` pred
 
 eg: `https://${frontendAppHost}/login-handler.html?loginCode={loginCode}`
 
-## AuthTokenRequest
+The login code is either a temporary code that can be exchanged for an access token or for some auth providers it is the access token itself.
+
+## AuthTokenRequest (if needed by the login method)
 
 The received `loginCode` is a temporary code which is used in retrieving the actual auth token from the `/auth/openid/auth-token-request`-endpoint.
 
@@ -84,6 +88,19 @@ localStorage.setItem("authToken", token);
 
 The auth `token` is used for example in the `Authorization` header of the requests to the productizer backends.
 
+eg:
+
+```
+fetch(`https://data-product-endpoint.example`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+    "X-authorization-provider": "sinuna",
+  },
+});
+```
+
 ### UserInfoRequest
 
 In the frontend app the `token` could be used like this:
@@ -91,6 +108,7 @@ In the frontend app the `token` could be used like this:
 ```js
 const response = await fetch(`https://${authEndpointHost}/auth/openid/user-info-request`, {
   method: "POST",
+  credentials: "include", // Make sure to include cookies
   headers: {
     "Content-Type": "application/json",
   },
