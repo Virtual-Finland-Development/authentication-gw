@@ -73,10 +73,11 @@ export function parseSinunaAuthenticateResponse(queryParams: { [key: string]: st
   }
 
   const loginCode = queryParams.code;
-  SinunaStateAttributor.parse(queryParams.state); // Throws
+  const appContextObj = SinunaStateAttributor.parse(queryParams.state); // Throws
 
   return {
     loginCode: loginCode,
     provider: SinunaSettings.ident,
+    appContextObj: appContextObj,
   };
 }

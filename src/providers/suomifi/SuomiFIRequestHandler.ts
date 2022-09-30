@@ -44,7 +44,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
     return {
       statusCode: 307,
       headers: {
-        Location: `${appContext.object.redirectUrl}?suomifi-session-token=${result.profile.nameId}&provider=${result.provider}`,
+        Location: `${appContext.object.redirectUrl}?token=${result.profile.nameId}&provider=${result.provider}`,
         "Set-Cookie": `loginState=${generateBase64Hash(result)};`,
       },
     };

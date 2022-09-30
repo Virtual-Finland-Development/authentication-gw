@@ -52,16 +52,15 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
    * @returns AuthenticateResponse -> LoginResponse
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, SinunaSettings.ident);
-
     const authenticateResponse = parseSinunaAuthenticateResponse(context.request.query);
+    const appContextObj = authenticateResponse.appContextObj;
 
     const loginResponse = {
       loginCode: authenticateResponse.loginCode,
       provider: SinunaSettings.ident,
     };
 
-    const redirectUrl = `${appContext.object.redirectUrl}?loginCode=${loginResponse.loginCode}&provider=${loginResponse.provider}`;
+    const redirectUrl = `${appContextObj.redirectUrl}?loginCode=${loginResponse.loginCode}&provider=${loginResponse.provider}`;
     return {
       statusCode: 307,
       headers: {
