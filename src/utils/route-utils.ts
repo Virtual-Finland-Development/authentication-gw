@@ -67,11 +67,11 @@ export function InternalServerErrorHandler(error: any) {
  */
 export function resolveProvider(context: Context, defaultProvider: string | undefined) {
   let provider = defaultProvider;
-  if (context.request.query.provider) {
+  if (context.request.query?.provider) {
     provider = String(context.request.query.provider);
-  } else if (context.request.requestBody.provider) {
+  } else if (context.request.requestBody?.provider) {
     provider = String(context.request.requestBody.provider);
-  } else if (context.request.headers["x-provider"]) {
+  } else if (context.request.headers?.["x-provider"]) {
     provider = String(context.request.headers["x-provider"]);
   } else {
     try {
