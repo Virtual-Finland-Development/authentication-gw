@@ -100,7 +100,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, SuomiFISettings.ident),
-        "Set-Cookie": `loginState=''`,
+        "Set-Cookie": `loginState=`,
       },
     };
   }

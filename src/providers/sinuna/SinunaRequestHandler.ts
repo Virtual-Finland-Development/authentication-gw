@@ -40,7 +40,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: SINUNA_LOGIN_URL,
-        "Set-Cookie": `appContext=${appContext.hash};`,
+        "Set-Cookie": `sinunaAppContext=${appContext.hash};Max-Age=900`,
       },
     };
   }
@@ -59,7 +59,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: redirectUrl,
-        "Set-Cookie": `appContext='';`,
+        "Set-Cookie": `sinunaAppContext=;`,
       },
     };
   }
@@ -119,11 +119,16 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
     const LOGOUT_CALLBACK_REDIRECT_URI = Runtime.getAppUrl("/auth/openid/logout-response");
     const LOGOUT_REQUEST_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${LOGOUT_CALLBACK_REDIRECT_URI}`;
 
+    debug("LogoutRequest", {
+      appContext: appContext,
+      LOGOUT_REQUEST_URL: LOGOUT_REQUEST_URL,
+    });
+
     return {
       statusCode: 307,
       headers: {
         Location: LOGOUT_REQUEST_URL,
-        "Set-Cookie": `appContext=${appContext.hash};`,
+        "Set-Cookie": `sinunaAppContext=${appContext.hash};Max-Age=900`,
       },
     };
   }
@@ -139,11 +144,16 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
     const appContext = parseAppContext(context, SinunaSettings.ident);
     const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl, SinunaSettings.ident);
 
+    debug("LogoutResponse", {
+      appContext: appContext,
+      redirectUrl: redirectUrl,
+    });
+
     return {
       statusCode: 307,
       headers: {
         Location: redirectUrl,
-        "Set-Cookie": `appContext='';`,
+        "Set-Cookie": `sinunaAppContext=;`,
       },
     };
   }
