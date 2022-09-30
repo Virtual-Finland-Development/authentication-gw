@@ -40,11 +40,15 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     const body = parseBase64XMLBody(context.request.body);
-    debug("AuthenticateResponse", () => resolveBase64Hash(body.SAMLResponse));
     const samlClient = await getSuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
+    debug("AuthenticateResponse", () => {
+      return {
+        assertionXml: result.profile.getAssertionXml(),
+        samlResponseXml: result.profile.getSamlResponseXml(),
+      };
+    });
     const appContext = parseAppContext(body.RelayState, this.identityProviderIdent);
-
     const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameID, this.identityProviderIdent);
 
     return {
