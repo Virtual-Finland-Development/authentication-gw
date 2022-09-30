@@ -56,7 +56,7 @@ window.location.href = `https://${authEndpointHost}/auth/openid/login-request?ap
 
 After the auth process is done, the user is redirected to the `redirectUrl` predefined in the `appContext`-variable with a `loginCode` token as a query parameter.
 
-eg: `https://${frontendAppHost}/login-handler.html?loginCode={loginCode}`
+eg: `https://${frontendAppHost}/login-handler.html?loginCode={loginCode}&provider=sinuna`
 
 The login code is either a temporary code that can be exchanged for an access token or for some auth providers it is the access token itself.
 
