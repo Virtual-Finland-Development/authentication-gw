@@ -1,3 +1,4 @@
+import { debug } from "./logging";
 import { Context } from "openapi-backend";
 import { ValidationError } from "./exceptions";
 import { resolveBase64Hash, ifAllObjectKeysAreDefined, ifString } from "./transformers";
@@ -35,6 +36,7 @@ export function parseAppContext(context: Context | string, provider?: string): {
       appContext.provider = provider;
     }
   } catch (error) {
+    debug(error, appContextHash);
     throw new ValidationError("Bad app context");
   }
 
