@@ -97,7 +97,7 @@ export function resolveProvider(context: Context, defaultProvider: string | unde
 export function getAuthProviderRequestHandler(context: Context, defaultProvider?: string): AuthRequestHandler {
   const provider = resolveProvider(context, defaultProvider);
 
-  switch (provider) {
+  switch (provider.toLowerCase()) {
     case SinunaRequestHandler.identityProviderIdent.toLowerCase():
       return new SinunaRequestHandler();
     case SuomiFIRequestHandler.identityProviderIdent.toLowerCase():
