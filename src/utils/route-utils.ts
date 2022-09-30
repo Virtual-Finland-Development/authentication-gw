@@ -60,6 +60,34 @@ export function InternalServerErrorHandler(error: any) {
 }
 
 /**
+ *
+ * @param context
+ * @param defaultProvider
+ * @returns
+ */
+export function resolveProvider(context: Context, defaultProvider: string | undefined) {
+  let provider = defaultProvider;
+  if (context.request.query.provider) {
+    provider = String(context.request.query.provider);
+  } else if (context.request.requestBody.provider) {
+    provider = String(context.request.requestBody.provider);
+  } else if (context.request.headers["x-provider"]) {
+    provider = String(context.request.headers["x-provider"]);
+  } else {
+    try {
+      const appContext = parseAppContext(context, defaultProvider);
+      provider = String(appContext.object.provider);
+    } catch (error) {}
+  }
+
+  if (!provider) {
+    throw new ValidationError("Provider not specified");
+  }
+
+  return provider;
+}
+
+/**
  * Utility function for selecting the correct request handler based on the provider ident.
  *
  * @param context
@@ -67,8 +95,7 @@ export function InternalServerErrorHandler(error: any) {
  * @returns
  */
 export function getAuthProviderRequestHandler(context: Context, defaultProvider?: string): AuthRequestHandler {
-  const appContext = parseAppContext(context, defaultProvider);
-  const provider = String(appContext.object.provider).toLowerCase();
+  const provider = resolveProvider(context, defaultProvider);
 
   switch (provider) {
     case SinunaRequestHandler.identityProviderIdent.toLowerCase():
