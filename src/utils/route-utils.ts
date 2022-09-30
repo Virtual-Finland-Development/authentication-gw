@@ -14,6 +14,19 @@ import { parseAppContext } from "./validators";
  * @param providerIdent
  * @returns
  */
+export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, providerIdent: string): string {
+  return ensureUrlQueryParams(redirectUrl, [
+    { param: "loginCode", value: loginCode },
+    { param: "provider", value: providerIdent },
+  ]);
+}
+
+/**
+ *
+ * @param redirectUrl
+ * @param providerIdent
+ * @returns
+ */
 export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: string): string {
   return ensureUrlQueryParams(redirectUrl, [
     { param: "logout", value: "success" },

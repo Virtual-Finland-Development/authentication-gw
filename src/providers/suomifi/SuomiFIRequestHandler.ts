@@ -1,7 +1,7 @@
 import { Context } from "openapi-backend";
 import { jsonResponseHeaders } from "../../utils/default-headers";
 import { parseAppContext } from "../../utils/validators";
-import { prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { debug } from "../../utils/logging";
 import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../../utils/transformers";
@@ -41,10 +41,14 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
     const body = parseBase64XMLBody(context.request.body);
     const result = await SuomiFISAML2Client().validatePostResponseAsync(body); // throws
     const appContext = parseAppContext(body.RelayState, SuomiFISettings.ident);
+
+    const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameId, result.provider);
+    debug("AuthenticateResponse redirect URL", appContext.object.redirectUrl);
+
     return {
       statusCode: 307,
       headers: {
-        Location: `${appContext.object.redirectUrl}?token=${result.profile.nameId}&provider=${result.provider}`,
+        Location: redirectUrl,
         "Set-Cookie": `loginState=${generateBase64Hash(result)};`,
       },
     };
@@ -95,7 +99,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
     return {
       statusCode: 307,
       headers: {
-        Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, "suomifi"),
+        Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, SuomiFISettings.ident),
         "Set-Cookie": `loginState=''`,
       },
     };

@@ -4,7 +4,7 @@ import axios from "axios";
 import { jsonResponseHeaders } from "../../utils/default-headers";
 import { parseAppContext } from "../../utils/validators";
 import Authorizator from "../../utils/Authorizator";
-import { prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseSinunaAuthenticateResponse, SinunaStateAttributor } from "./SinunaResponseParsers";
 import Settings from "../../utils/Settings";
@@ -54,13 +54,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     const authenticateResponse = parseSinunaAuthenticateResponse(context.request.query);
     const appContextObj = authenticateResponse.appContextObj;
-
-    const loginResponse = {
-      loginCode: authenticateResponse.loginCode,
-      provider: SinunaSettings.ident,
-    };
-
-    const redirectUrl = `${appContextObj.redirectUrl}?loginCode=${loginResponse.loginCode}&provider=${loginResponse.provider}`;
+    const redirectUrl = prepareLoginRedirectUrl(appContextObj.redirectUrl, authenticateResponse.loginCode, SinunaSettings.ident);
     return {
       statusCode: 307,
       headers: {
@@ -143,7 +137,7 @@ export default class SinunaRequestHandler implements AuthRequestHandler {
    */
   async LogoutResponse(context: Context): Promise<HttpResponse> {
     const appContext = parseAppContext(context, SinunaSettings.ident);
-    const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl, "sinuna");
+    const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl, SinunaSettings.ident);
 
     return {
       statusCode: 307,
