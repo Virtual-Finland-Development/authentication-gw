@@ -22,7 +22,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
   async LoginRequest(context: Context): Promise<HttpResponse> {
     const appContext = parseAppContext(context, SuomiFISettings.ident);
     const samlClient = await SuomiFISAML2Client();
-    const authenticationUrl = samlClient.getAuthorizeUrlAsync(appContext.hash);
+    const authenticationUrl = await samlClient.getAuthorizeUrlAsync(appContext.hash);
     debug("Login redirect URL", authenticationUrl);
     return {
       statusCode: 307,
