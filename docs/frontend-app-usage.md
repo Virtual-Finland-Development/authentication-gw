@@ -60,7 +60,7 @@ eg: `https://${frontendAppHost}/login-handler.html?loginCode={loginCode}&provide
 
 The login code is either a temporary code that can be exchanged for an access token or for some auth providers it is the access token itself.
 
-## AuthTokenRequest (if needed by the login method)
+## AuthTokenRequest (if needed by the auth provider)
 
 The received `loginCode` is a temporary code which is used in retrieving the actual auth token from the `/auth/openid/auth-token-request`-endpoint.
 
@@ -83,7 +83,7 @@ Store the token in the browser's local storage.
 eg.
 
 ```js
-localStorage.setItem("authToken", token);
+localStorage.setItem(`authToken_sinuna`, token);
 ```
 
 ## Using the auth token
