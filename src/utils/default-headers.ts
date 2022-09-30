@@ -16,7 +16,7 @@ export function getJSONResponseHeaders() {
 
 export function getCORSHeaders() {
   return {
-    "Access-Control-Allow-Origin": Runtime.getRequestOrigin(),
+    ...getDefaultHeaders(),
     "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
     "Access-Control-Allow-Headers": "*",
   };
