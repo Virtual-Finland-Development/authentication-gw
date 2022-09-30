@@ -3,7 +3,7 @@ import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { parseAppContext } from "../../utils/validators";
 import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
-import { debug } from "../../utils/logging";
+import { debug, log } from "../../utils/logging";
 import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../../utils/transformers";
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import SuomiFISAML2Client from "./SuomiFISAML2Client";
@@ -23,7 +23,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const appContext = parseAppContext(context, SuomiFISettings.ident);
     const samlClient = await SuomiFISAML2Client();
     const authenticationUrl = await samlClient.getAuthorizeUrlAsync(appContext.hash);
-    debug("Login redirect URL", authenticationUrl);
+
     return {
       statusCode: 303,
       headers: {
@@ -97,7 +97,11 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const body = context.request.query;
     const originalQuery = new URLSearchParams(body).toString();
     const samlClient = await SuomiFISAML2Client();
-    await samlClient.validateRedirectAsync(body, originalQuery); // throws
+    try {
+      await samlClient.validateRedirectAsync(body, originalQuery); // throws
+    } catch (error) {
+      log("Error", "LogoutResponse", error);
+    }
     const appContext = parseAppContext(String(body.RelayState), SuomiFISettings.ident);
 
     return {
