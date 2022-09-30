@@ -280,7 +280,7 @@
             } else if (this.AuthState.isLoggedIn()) {
                 loginButton.disabled = true;
                 logoutButton.disabled = false;
-                loginState.innerText = `logged in as ${this.AuthState.user.email}`;
+                loginState.innerText = this.AuthState.user.email ? `logged in as ${this.AuthState.user.email}` : "logged in";
             } else {
                 loginButton.disabled = false;
                 logoutButton.disabled = true;

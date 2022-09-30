@@ -13,6 +13,8 @@ Sinuna is an Openid Connect -type authentication provider with the following end
 
 The login flow gets a `loginCode` and uses it to get an access token. The access token is then used to get user info.
 
+The `provider` reference ident for the login is: `sinuna`.
+
 ## SuomiFi
 
 SuomiFi is an SAML2 -type authentication provider with the following endpoints:
@@ -22,3 +24,5 @@ SuomiFi is an SAML2 -type authentication provider with the following endpoints:
 - logout: `/auth/saml2/logout-request`
 
 The login flow gets a `loginCode` which is an user identifier (nameID). The user identifier is then used to get user info.
+
+The `provider` reference ident for the login is: `suomifi`.
