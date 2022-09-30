@@ -8,6 +8,7 @@
     "serve": "serverless offline --config ./serverless-offline.yml",
     "watch": "tsc --skipLibCheck -w",
     "test": "jest",
+    "lint": "prettier --write 'src/**/*.ts'",
     "prepare-dependencies-artifact": "./pulumi/scripts/prepare-dependencies-artifact.sh",
     "predeploy": "npm-run-all build prepare-dependencies-artifact",
     "deploy": "pulumi -C ./pulumi up --yes",

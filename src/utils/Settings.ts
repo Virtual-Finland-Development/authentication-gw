@@ -3,7 +3,10 @@ import { getSecretParameter } from "./libs/AWS";
 export default {
   async getSecret(key: string, defaultValue?: string): Promise<string> {
     // Skip aws parameter store on test and local environment
-    if (this.getEnv("NODE_ENV") === "test" || this.getEnv("STAGE") === "offline") {
+    if (
+      this.getEnv("NODE_ENV") === "test" ||
+      this.getEnv("STAGE") === "offline"
+    ) {
       return this.getEnv(key, defaultValue);
     }
 
@@ -20,12 +23,19 @@ export default {
     return this.getEnvironmentValue(key, defaultValue);
   },
   getEnvironmentValue(key: string, defaultValue: string = ""): string {
-    return typeof process.env[key] === "undefined" ? defaultValue : String(process.env[key]);
+    return typeof process.env[key] === "undefined"
+      ? defaultValue
+      : String(process.env[key]);
   },
   getEnvironmentBoolean(key: string, defaultValue?: boolean): boolean {
-    return typeof process.env[key] === "undefined" ? Boolean(defaultValue) : process.env[key]?.toLowerCase() === "true" || process.env[key] === "1";
+    return typeof process.env[key] === "undefined"
+      ? Boolean(defaultValue)
+      : process.env[key]?.toLowerCase() === "true" || process.env[key] === "1";
   },
   getAppContextFallbackURL(): string {
-    return `${this.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL", "http://localhost:8000")}`;
+    return `${this.getEnv(
+      "APP_CONTEXT_REDIRECT_FALLBACK_URL",
+      "http://localhost:8000"
+    )}`;
   },
 };

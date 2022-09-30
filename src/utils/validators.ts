@@ -1,7 +1,11 @@
 import { debug } from "./logging";
 import { Context } from "openapi-backend";
 import { ValidationError } from "./exceptions";
-import { resolveBase64Hash, ifAllObjectKeysAreDefined, ifString } from "./transformers";
+import {
+  resolveBase64Hash,
+  ifAllObjectKeysAreDefined,
+  ifString,
+} from "./transformers";
 import { AppContext } from "./types";
 
 /**
@@ -11,7 +15,10 @@ import { AppContext } from "./types";
  * @throws ValidationError if invalid app context
  * @returns parsed app context
  */
-export function parseAppContext(context: Context | string, provider?: string): { object: AppContext; hash: string } {
+export function parseAppContext(
+  context: Context | string,
+  provider?: string
+): { object: AppContext; hash: string } {
   let appContextHash;
 
   if (typeof context === "string") {
@@ -31,7 +38,9 @@ export function parseAppContext(context: Context | string, provider?: string): {
   let appContext;
 
   try {
-    appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(appContextHash)));
+    appContext = JSON.parse(
+      resolveBase64Hash(decodeURIComponent(appContextHash))
+    );
     if (typeof appContext.provider !== "string") {
       appContext.provider = provider;
     }

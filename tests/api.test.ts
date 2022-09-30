@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { SinunaStateAttributor } from "../src/providers/sinuna/SinunaResponseParsers";
+import { SinunaStateAttributor } from "../src/providers/sinuna/utils/SinunaResponseParsers";
 import { ValidationError } from "../src/utils/exceptions";
 import { ensureUrlQueryParam } from "../src/utils/transformers";
 import { testRequestEvent } from "./__mocks__/mockApiApp";

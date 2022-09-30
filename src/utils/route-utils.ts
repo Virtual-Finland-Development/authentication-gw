@@ -14,7 +14,11 @@ import { parseAppContext } from "./validators";
  * @param providerIdent
  * @returns
  */
-export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, providerIdent: string): string {
+export function prepareLoginRedirectUrl(
+  redirectUrl: string,
+  loginCode: string,
+  providerIdent: string
+): string {
   return ensureUrlQueryParams(redirectUrl, [
     { param: "loginCode", value: loginCode },
     { param: "provider", value: providerIdent },
@@ -27,7 +31,10 @@ export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, 
  * @param providerIdent
  * @returns
  */
-export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: string): string {
+export function prepareLogoutRedirectUrl(
+  redirectUrl: string,
+  providerIdent: string
+): string {
   return ensureUrlQueryParams(redirectUrl, [
     { param: "logout", value: "success" },
     { param: "provider", value: providerIdent },
@@ -65,7 +72,10 @@ export function InternalServerErrorHandler(error: any) {
  * @param defaultProvider
  * @returns
  */
-export function resolveProvider(context: Context, defaultProvider: string | undefined) {
+export function resolveProvider(
+  context: Context,
+  defaultProvider: string | undefined
+) {
   let provider = defaultProvider;
   if (context.request.query?.provider) {
     provider = String(context.request.query.provider);
@@ -94,7 +104,10 @@ export function resolveProvider(context: Context, defaultProvider: string | unde
  * @param defaultProvider
  * @returns
  */
-export function getAuthProviderRequestHandler(context: Context, defaultProvider?: string): AuthRequestHandler {
+export function getAuthProviderRequestHandler(
+  context: Context,
+  defaultProvider?: string
+): AuthRequestHandler {
   const provider = resolveProvider(context, defaultProvider);
 
   switch (provider.toLowerCase()) {
@@ -115,15 +128,30 @@ export function getAuthProviderRequestHandler(context: Context, defaultProvider?
  * @param defaultAuthProviderIdent
  * @returns
  */
-export function generateRequestHandlers(operationNames: Array<string>, operationPrefix: string, defaultAuthProviderIdent?: string): any {
-  return operationNames.reduce((operations: Record<string, (context: Context) => Promise<HttpResponse>>, operationName: string) => {
-    operations[`${operationPrefix}${operationName}`] = async (context: Context) => {
-      const handler: any = getAuthProviderRequestHandler(context, defaultAuthProviderIdent); // @TODO: fix this any by defining the operationName type
-      await handler.initialize();
-      const response = await handler[operationName](context);
-      debug("Response", response);
-      return response;
-    };
-    return operations;
-  }, {});
+export function generateRequestHandlers(
+  operationNames: Array<string>,
+  operationPrefix: string,
+  defaultAuthProviderIdent?: string
+): any {
+  return operationNames.reduce(
+    (
+      operations: Record<string, (context: Context) => Promise<HttpResponse>>,
+      operationName: string
+    ) => {
+      operations[`${operationPrefix}${operationName}`] = async (
+        context: Context
+      ) => {
+        const handler: any = getAuthProviderRequestHandler(
+          context,
+          defaultAuthProviderIdent
+        ); // @TODO: fix this any by defining the operationName type
+        await handler.initialize();
+        const response = await handler[operationName](context);
+        debug("Response", response);
+        return response;
+      };
+      return operations;
+    },
+    {}
+  );
 }

@@ -1,6 +1,11 @@
 import { Context } from "openapi-backend";
 
-export type AppContext = { appName: string; redirectUrl: string; guid?: string; provider?: string };
+export type AppContext = {
+  appName: string;
+  redirectUrl: string;
+  guid?: string;
+  provider?: string;
+};
 
 export interface AuthenticateResponse {
   provider: string;

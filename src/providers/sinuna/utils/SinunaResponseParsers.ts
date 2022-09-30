@@ -1,7 +1,12 @@
 import { createHmac } from "crypto";
 import { ValidationError } from "../../../utils/exceptions";
 import Settings from "../../../utils/Settings";
-import { generateBase64Hash, omitObjectKeys, resolveBase64Hash, isObject } from "../../../utils/transformers";
+import {
+  generateBase64Hash,
+  omitObjectKeys,
+  resolveBase64Hash,
+  isObject,
+} from "../../../utils/transformers";
 import { AppContext } from "../../../utils/types";
 import SinunaSettings from "../Sinuna.config";
 import { SinunaAuthenticateResponse } from "./SinunaTypes";
@@ -17,7 +22,10 @@ export const SinunaStateAttributor = new (class SinunaStateAttributor {
    */
   async initialize() {
     if (!this.runtimeToken) {
-      this.runtimeToken = await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN", "no-runtime-token-defined");
+      this.runtimeToken = await Settings.getSecret(
+        "AUTHENTICATION_GW_RUNTIME_TOKEN",
+        "no-runtime-token-defined"
+      );
     }
   }
 
@@ -33,7 +41,11 @@ export const SinunaStateAttributor = new (class SinunaStateAttributor {
     if (!this.runtimeToken) {
       throw new Error("SinunaStateAttributor not initialized");
     }
-    if (!isObject(appContext) || typeof appContext.checksum === "undefined" || appContext.checksum !== this.#createCheckSum(appContext)) {
+    if (
+      !isObject(appContext) ||
+      typeof appContext.checksum === "undefined" ||
+      appContext.checksum !== this.#createCheckSum(appContext)
+    ) {
       throw new ValidationError("Invalid state attribute");
     }
   }
@@ -64,11 +76,16 @@ export const SinunaStateAttributor = new (class SinunaStateAttributor {
  * @throws ValidationError if invalid login response
  * @returns parsed login response
  */
-export function parseSinunaAuthenticateResponse(queryParams: { [key: string]: string | string[] }): SinunaAuthenticateResponse {
+export function parseSinunaAuthenticateResponse(queryParams: {
+  [key: string]: string | string[];
+}): SinunaAuthenticateResponse {
   if (!isObject(queryParams)) {
     throw new ValidationError("Received bad AuthenticateResponse");
   }
-  if (typeof queryParams.code !== "string" || typeof queryParams.state !== "string") {
+  if (
+    typeof queryParams.code !== "string" ||
+    typeof queryParams.state !== "string"
+  ) {
     throw new ValidationError("Received invalid AuthenticateResponse");
   }
 

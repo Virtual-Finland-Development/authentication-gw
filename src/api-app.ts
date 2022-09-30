@@ -1,4 +1,7 @@
-import { APIGatewayProxyEventV2, Context as APIGatewayContext } from "aws-lambda";
+import {
+  APIGatewayProxyEventV2,
+  Context as APIGatewayContext,
+} from "aws-lambda";
 import OpenAPIBackend from "openapi-backend";
 import OpenIdAuthRoutes from "./routes/OpenidAuthRoutes";
 import Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
@@ -9,7 +12,9 @@ import { debug, log } from "./utils/logging";
 import Runtime from "./utils/Runtime";
 
 // Setup the OpenAPI backend
-const api = new OpenAPIBackend({ definition: "./openapi/authentication-gw.yml" });
+const api = new OpenAPIBackend({
+  definition: "./openapi/authentication-gw.yml",
+});
 
 // register your framework specific request handlers here
 api.register({
@@ -22,7 +27,10 @@ api.register({
 api.init();
 
 // Lambda http event handler
-export const handler = async (event: APIGatewayProxyEventV2, context: APIGatewayContext) => {
+export const handler = async (
+  event: APIGatewayProxyEventV2,
+  context: APIGatewayContext
+) => {
   try {
     // Initialize Runtime for the request
     const headers = event.headers;

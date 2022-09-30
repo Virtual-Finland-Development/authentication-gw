@@ -42,7 +42,9 @@ export function ifObjectEmpty(obj: any): boolean {
  * @returns
  */
 export function omitObjectKeys(obj: any, keys: string[]): any {
-  return Object.fromEntries(Object.entries(obj).filter(([key]) => !keys.includes(key)));
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => !keys.includes(key))
+  );
 }
 
 /**
@@ -62,7 +64,12 @@ export function ifAllObjectKeysAreDefined(obj: any, keys: string[]): boolean {
  *
  * @param error
  */
-export function exceptionToObject(error: any): { message: string; name?: string; stack?: any; statusCode?: number } {
+export function exceptionToObject(error: any): {
+  message: string;
+  name?: string;
+  stack?: any;
+  statusCode?: number;
+} {
   let name;
   let stack;
   let message;
@@ -98,7 +105,11 @@ export function exceptionToObject(error: any): { message: string; name?: string;
  * @param value
  * @returns
  */
-export function ensureUrlQueryParam(url: string, param: string, value: string): string {
+export function ensureUrlQueryParam(
+  url: string,
+  param: string,
+  value: string
+): string {
   const urlObj = new URL(url);
   urlObj.searchParams.set(param, value);
   return urlObj.toString();
@@ -110,7 +121,10 @@ export function ensureUrlQueryParam(url: string, param: string, value: string): 
  * @param params
  * @returns
  */
-export function ensureUrlQueryParams(url: string, params: Array<{ param: string; value: string }>): string {
+export function ensureUrlQueryParams(
+  url: string,
+  params: Array<{ param: string; value: string }>
+): string {
   for (const group of params) {
     url = ensureUrlQueryParam(url, group.param, group.value);
   }

@@ -17,7 +17,11 @@ export default {
    * @param authData
    * @returns
    */
-  async authorize(provider: string, appName: string, authData: any): Promise<void> {
+  async authorize(
+    provider: string,
+    appName: string,
+    authData: any
+  ): Promise<void> {
     if (provider.toLowerCase() === SinunaConfig.ident.toLowerCase()) {
       return await authorizeSinuna(appName, authData);
     } else {
