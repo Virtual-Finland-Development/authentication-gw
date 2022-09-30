@@ -45,7 +45,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
     const appContext = parseAppContext(body.RelayState, SuomiFISettings.ident);
 
     const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameId, result.provider);
-    debug("AuthenticateResponse redirect URL", appContext.object.redirectUrl);
+    debug("AuthenticateResponse redirect URL", redirectUrl);
 
     return {
       statusCode: 307,
