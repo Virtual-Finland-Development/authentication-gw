@@ -50,7 +50,7 @@ export default async function (): Promise<typeof SAML> {
           },
         },
       },
-      disableRequestedAuthnContext: false,
+      disableRequestedAuthnContext: true,
       identifierFormat: null,
     });
   }
