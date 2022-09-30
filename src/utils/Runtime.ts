@@ -1,4 +1,5 @@
 import { APIGatewayProxyEventHeaders } from "aws-lambda";
+import { slashTrim } from "./transformers";
 
 const runtimeState = {
   host: "",
@@ -17,10 +18,7 @@ export default {
     return runtimeState.host;
   },
   getAppUrl(path?: string): string {
-    let postfix = "";
-    if (path) {
-      postfix = `/${path.startsWith("/") ? path.substring(1) : path}`;
-    }
+    const postfix = path ? `/${slashTrim(path)}` : "";
     return `https://${this.getAppHost()}${postfix}`;
   },
   getRequestOrigin(): string {

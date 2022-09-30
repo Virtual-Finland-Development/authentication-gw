@@ -151,3 +151,13 @@ export function parseBase64XMLBody(body: string): { [attr: string]: any } {
   const decoded = new URLSearchParams(uriComponent);
   return Object.fromEntries(decoded);
 }
+
+/**
+ * Trims slashes from the beginning and end of a string
+ *
+ * @param str /url/path/
+ * @returns url/path
+ */
+export function slashTrim(str: string): string {
+  return str.replace(/^\/+|\/+$/g, "");
+}
