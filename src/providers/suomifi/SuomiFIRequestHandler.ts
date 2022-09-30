@@ -125,6 +125,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         }
 
         if (loginState.profile.nameId !== context.request.requestBody.token) {
+          debug(loginState, context.request);
           throw new AccessDeniedException("Invalid session token");
         }
 
@@ -134,7 +135,10 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
           body: JSON.stringify(loginState.profile),
         };
       } catch (error) {
-        debug("Error while getting user info", error);
+        if (error instanceof ValidationError || error instanceof AccessDeniedException) {
+          throw error;
+        }
+        debug(error);
         throw new ValidationError("Bad login profile data");
       }
     }
