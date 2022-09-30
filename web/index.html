@@ -58,6 +58,10 @@
         console.log(context, "->", message, ...args);
     }
 
+    const slashTrim = function (str) {
+        return str.replace(/^\/+|\/+$/g, '');
+    }
+
     /**************************************************************************
      * 
      * Login service defs
@@ -167,7 +171,7 @@
         login() {
             this.log("AuthService", "logging in..");
             AppSettings.validateAppSettings();
-            this.UIState.transitToUrl(`${AppSettings.authAPIHost}/${this.endpoints.login}?appContext=${AppSettings.generateAppContext(this.getName())}`); // LoginRequest
+            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.login)}?appContext=${AppSettings.generateAppContext(this.getName())}`); // LoginRequest
         }
         async fetchAuthToken(loginCode) {
             if (typeof this.endpoints.token !== "string") {
@@ -175,7 +179,7 @@
                 return loginCode;
             }
 
-            const response = await fetch(`${AppSettings.authAPIHost}/${this.endpoints.token}`, { // AuthTokenRequest
+            const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.token)}`, { // AuthTokenRequest
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -190,7 +194,7 @@
             return token
         }
         async fetchUserEmail(accessToken) {
-            const response = await fetch(`${AppSettings.authAPIHost}/${this.endpoints.userInfo}`, { // UserInfoRequest
+            const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.userInfo)}`, { // UserInfoRequest
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -212,7 +216,7 @@
         logout() {
             this.log("AuthService", "logging out..");
             AppSettings.validateAppSettings();
-            this.UIState.transitToUrl(`${AppSettings.authAPIHost}/${this.endpoints.logout}?appContext=${AppSettings.generateAppContext(this.getName())}`); // LogoutRequest
+            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.logout)}?appContext=${AppSettings.generateAppContext(this.getName())}`); // LogoutRequest
         }
     }
 
