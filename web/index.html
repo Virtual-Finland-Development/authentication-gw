@@ -129,8 +129,9 @@
         async engageLoginFlowEventsListener() {
             const urlParams = new URLSearchParams(window.location.search);
 
+            const affectsThisApp = urlParams.has("provider") && urlParams.get("provider").tolowerCase() === this.getName().tolowerCase();
             if (!this.AuthState.isLoggedIn()) {
-                if (urlParams.has("loginCode")) {
+                if (affectsThisApp && urlParams.has("loginCode")) {
                     this.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
                     //
                     // Handle login response
@@ -145,7 +146,7 @@
                         this.log("LoginFlowEventsListener", "Failed to fetch auth token", error);
                     }
                 }
-            } else if (urlParams.has("logout")) {
+            } else if (affectsThisApp && urlParams.has("logout")) {
                 this.log("LoginFlowEventsListener", "Logout event received, logging out");
                 //
                 // Handle logout response
