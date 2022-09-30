@@ -134,6 +134,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
           body: JSON.stringify(loginState.profile),
         };
       } catch (error) {
+        debug("Error while getting user info", error);
         throw new ValidationError("Bad login profile data");
       }
     }
