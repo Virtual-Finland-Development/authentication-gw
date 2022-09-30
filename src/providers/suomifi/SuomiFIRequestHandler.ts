@@ -21,7 +21,8 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
     const appContext = parseAppContext(context, SuomiFISettings.ident);
-    const authenticationUrl = await SuomiFISAML2Client().getAuthorizeUrlAsync(appContext.hash);
+    const samlClient = await SuomiFISAML2Client();
+    const authenticationUrl = samlClient.getAuthorizeUrlAsync(appContext.hash);
     debug("Login redirect URL", authenticationUrl);
     return {
       statusCode: 307,
@@ -39,7 +40,8 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     const body = parseBase64XMLBody(context.request.body);
-    const result = await SuomiFISAML2Client().validatePostResponseAsync(body); // throws
+    const samlClient = await SuomiFISAML2Client();
+    const result = await samlClient.validatePostResponseAsync(body); // throws
     const appContext = parseAppContext(body.RelayState, SuomiFISettings.ident);
 
     const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameId, result.provider);
@@ -49,7 +51,7 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
       statusCode: 307,
       headers: {
         Location: redirectUrl,
-        "Set-Cookie": `suomiFiLoginState="${generateBase64Hash(result)}";`,
+        "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(result)};`,
       },
     };
   }
@@ -69,7 +71,8 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
           throw new ValidationError("No profile info on the login state");
         }
 
-        const logoutRequestUrl = await SuomiFISAML2Client().getLogoutUrlAsync(loginState.profile, appContext.hash);
+        const samlClient = await SuomiFISAML2Client();
+        const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, appContext.hash);
         debug("Logout redirect URL", logoutRequestUrl);
         return {
           statusCode: 307,
@@ -94,13 +97,14 @@ export default class SuomiFIRequestHandler implements AuthRequestHandler {
   async LogoutResponse(context: Context): Promise<HttpResponse> {
     const body = context.request.query;
     const originalQuery = new URLSearchParams(body).toString();
-    await SuomiFISAML2Client().validateRedirectAsync(body, originalQuery); // throws
+    const samlClient = await SuomiFISAML2Client();
+    await samlClient.validateRedirectAsync(body, originalQuery); // throws
     const appContext = parseAppContext(String(body.RelayState), SuomiFISettings.ident);
     return {
       statusCode: 307,
       headers: {
         Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, SuomiFISettings.ident),
-        "Set-Cookie": `suomiFiLoginState=""`,
+        "Set-Cookie": `suomiFiLoginState=`,
       },
     };
   }

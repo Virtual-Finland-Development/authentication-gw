@@ -29,9 +29,6 @@ jobs:
       - name: Prepare deploy artifacts
         run: |
           npm run predeploy
-          ./certificates/prep-certificates-on-deploy.sh
-        env:
-          SUOMIFI_PRIVATE_KEY: ${{ secrets.SUOMIFI_PRIVATE_KEY }}
       - name: Deploy with Pulumi
         uses: pulumi/actions@v3
         with:
