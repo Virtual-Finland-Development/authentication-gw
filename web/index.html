@@ -207,15 +207,15 @@
         login() {
             this.log("AuthService", "logging in..");
             AppSettings.validateAppSettings();
-            this.UIState.transitToUrl(`${this.endpoints.login}?appContext=${AppSettings.generateAppContext()}`); // LoginRequest
+            this.UIState.transitToUrl(`${this.endpoints.LoginRequest}?appContext=${AppSettings.generateAppContext()}`);
         }
         async fetchAuthTokens(loginCode) {
-            if (typeof this.endpoints.token !== "string") {
+            if (typeof this.endpoints.AuthTokenRequest !== "string") {
                 // No token endpoint defined, login code is the token
                 return { token: loginCode };
             }
-
-            const response = await fetch(`${this.endpoints.token}`, { // AuthTokenRequest
+            
+            const response = await fetch(`${this.endpoints.AuthTokenRequest}`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
@@ -231,7 +231,7 @@
             return { token: data.token, idToken: data.idToken }
         }
         async fetchUserInfo(accessToken) {
-            const response = await fetch(`${this.endpoints.userInfo}`, { // UserInfoRequest
+            const response = await fetch(`${this.endpoints.UserInfoRequest}`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
@@ -263,8 +263,8 @@
             if (idToken) {
                 urlParams.append("idToken", idToken);
             }
-
-            this.UIState.transitToUrl(`${this.endpoints.logout}?${urlParams.toString()}`); // LogoutRequest
+            
+            this.UIState.transitToUrl(`${this.endpoints.LogoutRequest}?${urlParams.toString()}`);
         }
     }
 
