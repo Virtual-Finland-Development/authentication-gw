@@ -54,6 +54,6 @@ Testbed is an Openid Connect -type authentication provider with the following en
     - `sub`: is the testbed user ID
     - `name` _(disrecard)_: is the user name, but not currently available
 - LogoutRequest: `/auth/openid/logout-request`
-  - ends the testbed login session
+  - uses the `idToken` to end the testbed login session
 
 The _provider_ reference ident for the login is: `testbed`.
