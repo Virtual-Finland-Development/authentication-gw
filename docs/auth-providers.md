@@ -26,3 +26,16 @@ SuomiFi is an SAML2 -type authentication provider with the following endpoints:
 The login flow gets a `loginCode` which is an user identifier (nameID). The user identifier is then used to get user info.
 
 The _provider_ reference ident for the login is: `suomifi`.
+
+## Testbed
+
+Testbed is an Openid Connect -type authentication provider with the following endpoints:
+
+- login: `/auth/openid/login-request`
+- token: `/auth/openid/auth-token-request`
+- userInfo: `/auth/openid/user-info-request`
+- logout: `/auth/openid/logout-request`
+
+The login flow gets a `loginCode` and uses it to get an access token and an id token. The access token is then used to get user info, the id token is used in logging out.
+
+The _provider_ reference ident for the login is: `testbed`.

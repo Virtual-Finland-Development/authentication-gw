@@ -135,6 +135,11 @@ paths:
           schema:
             type: string
           required: false
+        - in: query
+          name: nonce
+          schema:
+            type: string
+          required: false
       responses:
         "307":
           description: Authentication providers callback url, redirect back to the app context, provide loginCode and provider -variables as query params
@@ -159,6 +164,12 @@ paths:
             default: "sinuna"
           required: false
           description: "Auth provider name"
+        - in: query
+          name: idToken
+          schema:
+            type: string
+          required: false
+          description: "id_token value"
       operationId: OpenIdLogoutRequest
       responses:
         "307":
@@ -171,6 +182,13 @@ paths:
   "/auth/openid/logout-response":
     get:
       operationId: OpenIdLogoutResponse
+      parameters:
+        - in: query
+          name: state
+          schema:
+            type: string
+          required: false
+          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
       responses:
         "307":
           description: Authentication providers callback url, redirect back to the app context
