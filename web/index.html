@@ -29,6 +29,17 @@
         </div>
     </div>
 
+    <div id="Testbed">
+        <div>
+            <b>Testbed login state:</b> <span class="loginState">...</span>
+        </div>
+        <hr>
+        <div>
+            <button class="login" disabled="disabled" onclick="testbed.AuthService.login()">Login</button>
+            <button class="logout" disabled="disabled" onclick="testbed.AuthService.logout()">Logout</button>
+        </div>
+    </div>
+
 </body>
 
 <script>
@@ -142,8 +153,8 @@
                     //
                     const loginCode = urlParams.get('loginCode');
                     try {
-                        const token = await this.AuthService.fetchAuthToken(loginCode);
-                        this.AuthState.login(token); // Store token in local storage
+                        const tokens = await this.AuthService.fetchAuthTokens(loginCode);
+                        this.AuthState.login(tokens); // Store token in local storage
                         await this.AuthState.handleLoggedIn(); // Fetch user info
                         this.UIState.resetViewState(); // reset view state
                     } catch (error) {
@@ -173,10 +184,10 @@
             AppSettings.validateAppSettings();
             this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.login)}?appContext=${AppSettings.generateAppContext(this.getName())}`); // LoginRequest
         }
-        async fetchAuthToken(loginCode) {
+        async fetchAuthTokens(loginCode) {
             if (typeof this.endpoints.token !== "string") {
                 // No token endpoint defined, login code is the token
-                return loginCode;
+                return { token: loginCode };
             }
 
             const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.token)}`, { // AuthTokenRequest
@@ -191,8 +202,8 @@
                 }),
             });
 
-            const { token } = await response.json();
-            return token
+            const data = await response.json();
+            return { token: data.token, idToken: data.idToken }
         }
         async fetchUserEmail(accessToken) {
             const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.userInfo)}`, { // UserInfoRequest
@@ -218,7 +229,18 @@
         logout() {
             this.log("AuthService", "logging out..");
             AppSettings.validateAppSettings();
-            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.logout)}?appContext=${AppSettings.generateAppContext(this.getName())}`); // LogoutRequest
+
+            const urlParams = new URLSearchParams({
+                appContext: AppSettings.generateAppContext(this.getName()),
+            });
+
+            const { idToken } = this.AuthState.getAuthTokens();
+
+            if (idToken) {
+                urlParams.append("idToken", idToken);
+            }
+
+            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.logout)}?${urlParams.toString()}`); // LogoutRequest
         }
     }
 
@@ -234,11 +256,20 @@
             this.storeKey = `${AppSettings.appName}_${loginApp.getName()}_authState`;
         }
 
-        login(token) {
+        login(tokens) {
             this.isInTransition = true;
-            if (typeof token === "string") {
-                this.log("AuthState", "logged in");
-                localStorage.setItem(this.storeKey, token);
+            if (typeof tokens === "object" && tokens !== null) {
+                if (typeof tokens.token === "string") {
+                    this.log("AuthState", "logged in");
+                    if (typeof tokens.idToken === "string") {
+                        this.log("AuthState", "--> Id Token received");
+                    }
+                    localStorage.setItem(this.storeKey, JSON.stringify(tokens));
+                } else {
+                    throw new Error("Invalid token response")
+                }
+            } else {
+                throw new Error("Invalid tokens")
             }
         }
         logout() {
@@ -248,17 +279,21 @@
             localStorage.removeItem(this.storeKey);
         }
         isLoggedIn() {
-            return this.getAuthToken() !== null;
+            return this.getAuthTokens() !== null;
         }
         isLoading() {
             return this.isInTransition || (this.isLoggedIn() && this.user.email === null);
         }
-        getAuthToken() {
-            return localStorage.getItem(this.storeKey)
+        getAuthTokens() {
+            try {
+                return JSON.parse(localStorage.getItem(this.storeKey));
+            } catch (error) { }
+            return null;
         }
         async handleLoggedIn() {
             try {
-                this.user.email = await this.AuthService.fetchUserEmail(this.getAuthToken());
+                const tokens = this.getAuthTokens();
+                this.user.email = await this.AuthService.fetchUserEmail(tokens.token);
             } catch (error) {
                 // Auth invalidated
                 this.log("AuthState", "login invalidated");
@@ -325,13 +360,23 @@
         },
     });
 
+    const testbed = new BaseLoginApp({
+        name: "Testbed",
+        endpoints: {
+            login: "/auth/openid/login-request",
+            logout: "/auth/openid/logout-request",
+            userInfo: "/auth/openid/user-info-request",
+            token: "/auth/openid/auth-token-request"
+        },
+    });
     /**************************************************************************
      * 
      * Execution
      * 
     /**************************************************************************/
-    sinuna.engage();
-    suomifi.engage();
+    //sinuna.engage();
+    //suomifi.engage();
+    testbed.engage();
 </script>
 
 </html>
