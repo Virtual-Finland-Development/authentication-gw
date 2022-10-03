@@ -1,18 +1,18 @@
-import { Context } from "openapi-backend";
 import axios from "axios";
+import { Context } from "openapi-backend";
 
-import { getJSONResponseHeaders } from "../../utils/default-headers";
-import { parseAppContext } from "../../utils/validators";
 import Authorizator from "../../utils/Authorizator";
-import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
-import { AuthRequestHandler, HttpResponse } from "../../utils/types";
-import { parseSinunaAuthenticateResponse, SinunaStateAttributor } from "./utils/SinunaResponseParsers";
-import Settings from "../../utils/Settings";
-import Runtime from "../../utils/Runtime";
-import { generateBase64Hash } from "../../utils/transformers";
-import { debug, logAxiosException } from "../../utils/logging";
+import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException } from "../../utils/exceptions";
+import { debug, logAxiosException } from "../../utils/logging";
+import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import Runtime from "../../utils/Runtime";
+import Settings from "../../utils/Settings";
+import { generateBase64Hash } from "../../utils/transformers";
+import { AuthRequestHandler, HttpResponse } from "../../utils/types";
+import { parseAppContext } from "../../utils/validators";
 import SinunaSettings from "./Sinuna.config";
+import { parseSinunaAuthenticateResponse, SinunaStateAttributor } from "./utils/SinunaResponseParsers";
 
 export default new (class SinunaRequestHandler implements AuthRequestHandler {
   identityProviderIdent = SinunaSettings.ident;
