@@ -98,10 +98,10 @@
     class BaseLoginApp {
         name = null;
         endpoints = {
-            login: null,
-            logout: null,
-            userInfo: null,
-            token: null,
+            LoginRequest: null,
+            LogoutRequest: null,
+            UserInfoRequest: null,
+            AuthTokenRequest: null,
         }
 
         constructor(configuration) {
@@ -182,7 +182,7 @@
         login() {
             this.log("AuthService", "logging in..");
             AppSettings.validateAppSettings();
-            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.login)}?appContext=${AppSettings.generateAppContext(this.getName())}`); // LoginRequest
+            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.LoginRequest)}?appContext=${AppSettings.generateAppContext(this.getName())}`);
         }
         async fetchAuthTokens(loginCode) {
             if (typeof this.endpoints.token !== "string") {
@@ -190,7 +190,7 @@
                 return { token: loginCode };
             }
 
-            const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.token)}`, { // AuthTokenRequest
+            const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.AuthTokenRequest)}`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
@@ -206,7 +206,7 @@
             return { token: data.token, idToken: data.idToken }
         }
         async fetchUserInfo(accessToken) {
-            const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.userInfo)}`, { // UserInfoRequest
+            const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.UserInfoRequest)}`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
@@ -239,7 +239,7 @@
                 urlParams.append("idToken", idToken);
             }
 
-            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.logout)}?${urlParams.toString()}`); // LogoutRequest
+            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.LogoutRequest)}?${urlParams.toString()}`);
         }
     }
 
@@ -345,28 +345,28 @@
     const sinuna = new BaseLoginApp({
         name: "Sinuna",
         endpoints: {
-            login: "/auth/openid/login-request",
-            logout: "/auth/openid/logout-request",
-            userInfo: "/auth/openid/user-info-request",
-            token: "/auth/openid/auth-token-request"
+            LoginRequest: "/auth/openid/login-request",
+            LogoutRequest: "/auth/openid/logout-request",
+            UserInfoRequest: "/auth/openid/user-info-request",
+            AuthTokenRequest: "/auth/openid/auth-token-request"
         },
     });
     const suomifi = new BaseLoginApp({
         name: "SuomiFI",
         endpoints: {
-            login: "/auth/saml2/login-request",
-            logout: "/auth/saml2/logout-request",
-            userInfo: "/auth/saml2/user-info-request",
+            LoginRequest: "/auth/saml2/login-request",
+            LogoutRequest: "/auth/saml2/logout-request",
+            UserInfoRequest: "/auth/saml2/user-info-request",
         },
     });
 
     const testbed = new BaseLoginApp({
         name: "Testbed",
         endpoints: {
-            login: "/auth/openid/login-request",
-            logout: "/auth/openid/logout-request",
-            userInfo: "/auth/openid/user-info-request",
-            token: "/auth/openid/auth-token-request"
+            LoginRequest: "/auth/openid/login-request",
+            LogoutRequest: "/auth/openid/logout-request",
+            UserInfoRequest: "/auth/openid/user-info-request",
+            AuthTokenRequest: "/auth/openid/auth-token-request"
         },
     });
     /**************************************************************************

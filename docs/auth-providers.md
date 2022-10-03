@@ -6,12 +6,18 @@ The auth gw currently supports openid connect and saml2 -type authentication flo
 
 Sinuna is an Openid Connect -type authentication provider with the following endpoints:
 
-- login: `/auth/openid/login-request`
-- token: `/auth/openid/auth-token-request`
-- userInfo: `/auth/openid/user-info-request`
-- logout: `/auth/openid/logout-request`
-
-The login flow gets a `loginCode` and uses it to get an access token. The access token is then used to get user info.
+- LoginRequest: `/auth/openid/login-request`
+  - gets a `loginCode`.
+- AuthTokenRequest: `/auth/openid/auth-token-request`
+  - uses the `loginCode` to get an access token: `token`
+- UserInfoRequest: `/auth/openid/user-info-request`
+  - uses the `token` to get user info
+  - example: `{"inum": "bazbar1231231", "sub":"1234567890","email":"John@Doe"}`
+    - `inum`: is the user ID
+    - `email`: is the user email
+    - `sub` _(disrecard)_: is the sinuna service-account specific user ID
+- LogoutRequest: `/auth/openid/logout-request`
+  - ends the sinuna login session
 
 The _provider_ reference ident for the login is: `sinuna`.
 
@@ -19,9 +25,16 @@ The _provider_ reference ident for the login is: `sinuna`.
 
 SuomiFi is an SAML2 -type authentication provider with the following endpoints:
 
-- login: `/auth/saml2/login-request`
-- userInfo: `/auth/saml2/user-info-request`
-- logout: `/auth/saml2/logout-request`
+- LoginRequest: `/auth/saml2/login-request`
+  - gets a `loginCode`
+- UserInfoRequest: `/auth/saml2/user-info-request`
+  - uses the `loginCode` to get user info
+  - example: `{"context": {"AuthnContextClassRef": "http://ftn.ficora.fi/2017/loa2"}, "profile": {"nameID": "a21sxxasxaxas323", "email":"John@Doe"}}`
+    - `context.AuthnContextClassRef`: is the authentication level information
+    - `profile.nameID`: is the user ID
+    - `profile.email`: is the user email (if available)
+- LogoutRequest: `/auth/saml2/logout-request`
+  - ends the suomifi login session
 
 The login flow gets a `loginCode` which is an user identifier (nameID). The user identifier is then used to get user info.
 
@@ -31,11 +44,16 @@ The _provider_ reference ident for the login is: `suomifi`.
 
 Testbed is an Openid Connect -type authentication provider with the following endpoints:
 
-- login: `/auth/openid/login-request`
-- token: `/auth/openid/auth-token-request`
-- userInfo: `/auth/openid/user-info-request`
-- logout: `/auth/openid/logout-request`
-
-The login flow gets a `loginCode` and uses it to get an access token and an id token. The access token is then used to get user info, the id token is used in logging out.
+- LoginRequest: `/auth/openid/login-request`
+  - gets a `loginCode`.
+- AuthTokenRequest: `/auth/openid/auth-token-request`
+  - uses the `loginCode` to get an access token: `token` and `idToken`
+- UserInfoRequest: `/auth/openid/user-info-request`
+  - uses the `token` to get user info
+  - example: `{"sub":"1234567890","name":"1234567890"}`
+    - `sub`: is the testbed user ID
+    - `name` _(disrecard)_: is the user name, but not currently available
+- LogoutRequest: `/auth/openid/logout-request`
+  - ends the testbed login session
 
 The _provider_ reference ident for the login is: `testbed`.
