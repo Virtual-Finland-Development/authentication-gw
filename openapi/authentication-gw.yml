@@ -36,6 +36,43 @@ paths:
               schema:
                 type: string
                 example: "OK"
+  "/auth/authorize":
+    post:
+      operationId: AuthorizeRequest
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+        - in: header
+          name: X-Authorization-Provider
+          schema:
+            type: string
+        - in: header
+          name: X-Authorization-Context
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Access granted message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Access Granted"
+        "401":
+          description: Access denied message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Access Denied"
   "/auth/openid/login-request":
     get:
       operationId: OpenIdLoginRequest
@@ -216,42 +253,6 @@ paths:
                 properties:
                   message:
                     type: string
-  "/auth/openid/authorize":
-    post:
-      operationId: OpenIdAuthorizeRequest
-      requestBody:
-        description: Access inspector
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                token:
-                  type: string
-                appContext:
-                  type: string
-      responses:
-        "200":
-          description: Access granted message
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Access Granted"
-        "401":
-          description: Access denied message
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Access Denied"
   "/auth/saml2/login-request":
     get:
       operationId: Saml2LoginRequest

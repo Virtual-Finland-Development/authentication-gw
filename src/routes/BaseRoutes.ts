@@ -1,5 +1,7 @@
 import { Context } from "openapi-backend";
+import Authorizator from "../utils/Authorizator";
 import { getJSONResponseHeaders } from "../utils/default-headers";
+import { HttpResponse } from "../utils/types";
 
 export default {
   // Base handlers
@@ -20,6 +22,27 @@ export default {
     body: "OK",
     headers: { "Content-Type": "text/plain" },
   }),
+
+  /**
+   *  POST: authorize request using the access token and app context
+   *
+   * @param context
+   * @returns
+   */
+  async AuthorizeRequest(context: Context): Promise<HttpResponse> {
+    const authorization = context.request.headers.authorization;
+    const authorizationProvider = context.request.headers["x-authorization-provider"];
+    const authorizationContext = context.request.headers["x-authorization-context"];
+    await Authorizator.authorize(authorization, authorizationProvider, authorizationContext); // Throws AccessDeniedException if access needs to be denied
+
+    return {
+      statusCode: 200,
+      headers: getJSONResponseHeaders(),
+      body: JSON.stringify({
+        message: "Access Granted",
+      }),
+    };
+  },
   // openapi-backend special handlers
   notFound: async () => ({
     statusCode: 404,

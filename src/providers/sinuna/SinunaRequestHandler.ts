@@ -1,7 +1,6 @@
 import axios from "axios";
 import { Context } from "openapi-backend";
 
-import Authorizator from "../../utils/Authorizator";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException } from "../../utils/exceptions";
 import { debug, logAxiosException } from "../../utils/logging";
@@ -180,25 +179,5 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
       logAxiosException(error);
       throw new AccessDeniedException(String(error));
     }
-  }
-
-  /**
-   *  POST: authorize request using the access token and app context
-   *
-   * @param context
-   * @returns
-   */
-  async AuthorizeRequest(context: Context): Promise<HttpResponse> {
-    const response = await this.UserInfoRequest(context);
-    const appName = parseAppContext(context, this.identityProviderIdent).object.appName;
-    await Authorizator.authorize(this.identityProviderIdent, appName, JSON.parse(String(response.body)));
-
-    return {
-      statusCode: 200,
-      headers: getJSONResponseHeaders(),
-      body: JSON.stringify({
-        message: "Access Granted",
-      }),
-    };
   }
 })();

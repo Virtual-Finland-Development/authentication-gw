@@ -80,3 +80,8 @@ export interface AuthRequestHandler {
    */
   AuthorizeRequest?(context: Context): Promise<HttpResponse>;
 }
+
+/**
+ *
+ */
+export type AuthorizeFunc = (token: string, context: string) => Promise<void>;

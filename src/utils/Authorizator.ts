@@ -1,10 +1,18 @@
 import SinunaConfig from "../providers/sinuna/Sinuna.config";
-import { AccessDeniedException } from "./exceptions";
+import SinunaAuthorizer from "../providers/sinuna/SinunaAuthorizer";
+import SuomiFIConfig from "../providers/suomifi/SuomiFI.config";
+import SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
+import { omitEmptyObjectKeys } from "./transformers";
+import { AuthorizeFunc } from "./types";
 
-async function authorizeSinuna(appName: string, authData: any): Promise<void> {
-  // Authorize
-  if (!appName || !authData?.email) {
-    throw new AccessDeniedException();
+function getAuthorizator(authHeaders: { provider: string; [attr: string]: string }): AuthorizeFunc {
+  const provider = authHeaders.provider?.toLowerCase();
+  if (provider === SinunaConfig.ident.toLowerCase()) {
+    return SinunaAuthorizer;
+  } else if (provider === SuomiFIConfig.ident.toLowerCase()) {
+    return SuomiFIAuthorizer;
+  } else {
+    throw new Error("Unknown auth provider");
   }
 }
 
@@ -17,15 +25,14 @@ export default {
    * @param authData
    * @returns
    */
-  async authorize(
-    provider: string,
-    appName: string,
-    authData: any
-  ): Promise<void> {
-    if (provider.toLowerCase() === SinunaConfig.ident.toLowerCase()) {
-      return await authorizeSinuna(appName, authData);
-    } else {
-      throw new Error("Unknown auth provider");
-    }
+  async authorize(authorization: string | string[], authorizationProvider: string | string[], authorizationContext: string | string[]): Promise<void> {
+    const authHeaders = omitEmptyObjectKeys({
+      authorization: String(authorization),
+      provider: String(authorizationProvider),
+      context: String(authorizationContext),
+    });
+
+    const authorizator = getAuthorizator(authHeaders);
+    return await authorizator(authHeaders.authorization, authHeaders.context);
   },
 };
