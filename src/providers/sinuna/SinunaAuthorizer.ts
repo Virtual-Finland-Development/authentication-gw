@@ -3,13 +3,16 @@ import { AccessDeniedException } from "../../utils/exceptions";
 import { debug, logAxiosException } from "../../utils/logging";
 import { leftTrim } from "../../utils/transformers";
 
+/**
+ *
+ * @param token
+ * @param context - which app source is requesting access
+ */
 export default async function authorize(token: string, context: string): Promise<void> {
-  const accessToken = leftTrim(token, "Bearer ");
-
   try {
     const response = await axios.get(`https://login.iam.qa.sinuna.fi/oxauth/restv1/userinfo`, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${leftTrim(token, "Bearer ")}`,
       },
     });
 
