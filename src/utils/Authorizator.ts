@@ -2,6 +2,9 @@ import SinunaConfig from "../providers/sinuna/Sinuna.config";
 import SinunaAuthorizer from "../providers/sinuna/SinunaAuthorizer";
 import SuomiFIConfig from "../providers/suomifi/SuomiFI.config";
 import SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
+import TestbedConfig from "../providers/testbed/Testbed.config";
+import TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
+
 import { omitEmptyObjectKeys } from "./transformers";
 import { AuthorizeFunc } from "./types";
 
@@ -11,6 +14,8 @@ function getAuthorizator(authHeaders: { provider: string; [attr: string]: string
     return SinunaAuthorizer;
   } else if (provider === SuomiFIConfig.ident.toLowerCase()) {
     return SuomiFIAuthorizer;
+  } else if (provider === TestbedConfig.ident.toLowerCase()) {
+    return TestbedAuthorizer;
   } else {
     throw new Error("Unknown auth provider");
   }
