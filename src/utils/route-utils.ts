@@ -70,12 +70,18 @@ export function InternalServerErrorHandler(error: any) {
  */
 export function resolveProvider(context: Context, defaultProvider: string | undefined) {
   let provider = defaultProvider;
-  if (context.request.query?.provider) {
+  if (context.request.params?.provider) {
+    // Url path params
+    provider = String(context.request.params.provider);
+  } else if (context.request.query?.provider) {
+    // Query params
     provider = String(context.request.query.provider);
   } else if (context.request.requestBody?.provider) {
+    // JSON body
     provider = String(context.request.requestBody.provider);
-  } else if (context.request.headers?.["x-provider"]) {
-    provider = String(context.request.headers["x-provider"]);
+  } else if (context.request.headers?.["x-authentication-provider"]) {
+    // Header
+    provider = String(context.request.headers["x-authentication-provider"]);
   } else {
     try {
       const appContext = parseAppContext(context, defaultProvider);
