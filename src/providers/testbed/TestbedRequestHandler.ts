@@ -35,7 +35,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
       client_id: clientId,
       acr_values: TestbedSettings.acr_values,
       scope: TestbedSettings.scope,
-      redirect_uri: Runtime.getAppUrl("/auth/openid/authenticate-response"),
+      redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/authenticate-response"),
       nonce: String(uuidv4()),
       state: appContext.hash,
     }).toString();
@@ -86,7 +86,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
     const SCOPE = TestbedSettings.scope;
     const CLIENT_ID = await Settings.getSecret("TESTBED_CLIENT_ID");
     const CLIENT_SECRET = await Settings.getSecret("TESTBED_CLIENT_SECRET");
-    const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/authenticate-response");
+    const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/testbed/authenticate-response");
     try {
       const response = await axios.post(
         `https://login.testbed.fi/api/oauth/token`,
@@ -130,7 +130,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
     const appContext = parseAppContext(context, this.identityProviderIdent);
 
     const queryString = new URLSearchParams({
-      post_logout_redirect_uri: Runtime.getAppUrl("/auth/openid/logout-response"),
+      post_logout_redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/logout-response"),
       state: appContext.hash,
       id_token_hint: context.request.query.idToken,
     }).toString();
