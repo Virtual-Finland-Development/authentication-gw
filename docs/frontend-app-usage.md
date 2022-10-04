@@ -17,8 +17,7 @@ Requests to the backend are accompanied with an `appContext` token which is a ba
 ```json
 {
   "appName": "app-name",
-  "redirectUrl": "url-back-to-the-login-handler-in-the-app",
-  "provider": "sinuna"
+  "redirectUrl": "url-back-to-the-login-handler-in-the-app"
 }
 ```
 
@@ -36,7 +35,6 @@ Example token generating function in typescript:
 type AppContextObject = {
   appName: string;
   redirectUrl: string;
-  provider?: string;
 };
 
 export function generateAppContext(appContextObject: AppContextObject): string {
@@ -46,10 +44,10 @@ export function generateAppContext(appContextObject: AppContextObject): string {
 
 ## LoginRequest
 
-Redirect user to the `/auth/openid/login-request`-endpoint with the `appContext` token as a query parameter:
+Redirect user to the `/auth/openid/sinuna/login-request`-endpoint with the `appContext` token as a query parameter:
 
 ```js
-window.location.href = `https://${authEndpointHost}/auth/openid/login-request?appContext=${appContext}`;
+window.location.href = `https://${authEndpointHost}/auth/openid/sinuna/login-request?appContext=${appContext}`;
 ```
 
 ## LoginResponse
@@ -62,10 +60,10 @@ The login code is either a temporary code that can be exchanged for an access to
 
 ## AuthTokenRequest (if needed by the auth provider)
 
-The received `loginCode` is a temporary code which is used in retrieving the actual auth token from the `/auth/openid/auth-token-request`-endpoint.
+The received `loginCode` is a temporary code which is used in retrieving the actual auth token from the `/auth/openid/sinuna/auth-token-request`-endpoint.
 
 ```js
-const response = await fetch(`https://${authEndpointHost}/auth/openid/auth-token-request`, {
+const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/auth-token-request`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -108,7 +106,7 @@ fetch(`https://data-product-endpoint.example`, {
 In the frontend app the `token` could be used like this:
 
 ```js
-const response = await fetch(`https://${authEndpointHost}/auth/openid/user-info-request`, {
+const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/user-info-request`, {
   method: "POST",
   credentials: "include", // Make sure to include cookies
   headers: {
@@ -127,10 +125,10 @@ If the request fails with a `401` status code, the token is expired and the user
 
 ## LogoutRequest
 
-Redirect user to the `/auth/openid/logout-request`-endpoint with the `appContext` token as a query parameter:
+Redirect user to the `/auth/openid/sinuna/logout-request`-endpoint with the `appContext` token as a query parameter:
 
 ```js
-window.location.href = `https://${authEndpointHost}/auth/openid/logout-request?appContext=${appContext}`;
+window.location.href = `https://${authEndpointHost}/auth/openid/sinuna/logout-request?appContext=${appContext}`;
 ```
 
 ## LogoutResponse
