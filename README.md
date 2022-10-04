@@ -12,7 +12,7 @@ Authentication GW is a service that implements the authentication part between t
 
 The _authentication request flow_ redirects the user to the authentication provider service, which in turn redirects the user back to the client with the authorization access token and the related info. With the granted access, the client can access the resource server protected resources with the _authorization request flow_.
 
-The supported protocols for the authentication provider service are: OpenID Connect and SAML2.
+The supported protocols for the authentication provider services are: OpenID Connect and SAML2.
 
 ![./docs/openid-authentication-flow.png](./docs/openid-authentication-flow.png)
 
