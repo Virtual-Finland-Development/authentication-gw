@@ -16,8 +16,8 @@ fi
 HOST="$(echo "${BASEURL}" | sed 's#^[a-z]*://\([^:/]*\).*#\1#')"
 BASEURL="$(echo "${BASEURL}" | sed 's#/$##')"
 
-LOGOUT_URL="${BASEURL}/auth/saml2/logout"
-LOGIN_CALLBACK_URL="${BASEURL}/auth/saml2/authenticate-response"
+LOGOUT_URL="${BASEURL}/auth/saml2/suomifi/logout"
+LOGIN_CALLBACK_URL="${BASEURL}/auth/saml2/suomifi/authenticate-response"
 
 OUTFILE="$(echo "${ENTITYID}" | sed 's/[^0-9A-Za-z.]/_/g' | sed 's/__*/_/g')"
 echo "Output files:"
