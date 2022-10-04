@@ -51,10 +51,10 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authAPIHost: "", // the authentication gw host
+        authAPIHost: "http://localhost:3000", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
-        generateAppContext(provider) {
-            return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl, provider: provider })));
+        generateAppContext() {
+            return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
         },
         validateAppSettings() {
             if (!this.authAPIHost) {
@@ -97,21 +97,48 @@
 
     class BaseLoginApp {
         name = null;
-        endpoints = {
-            LoginRequest: null,
-            LogoutRequest: null,
-            UserInfoRequest: null,
-            AuthTokenRequest: null,
-        }
+        endpoints = null;
 
         constructor(configuration) {
             this.name = configuration.name;
-            this.endpoints = configuration.endpoints;
+            this.endpoints = this.initializeEndpoints(configuration.name, configuration.authProtocol);
 
             this.UIState = new UIState(this);
             this.AuthState = new AuthState(this);
             this.AuthService = new AuthService(this);
         }
+
+        initializeEndpoints(providerName, authProtocol) {
+            const provider = providerName.toLowerCase();
+            const protocol = authProtocol.toLowerCase();
+            const authAPIHost = AppSettings.authAPIHost;
+
+            const endpoints = {
+                LoginRequest: null,
+                LogoutRequest: null,
+                UserInfoRequest: null,
+                AuthTokenRequest: null,
+            }
+
+            switch (protocol) {
+                case "openid":
+                    endpoints.LoginRequest = `${authAPIHost}/auth/openid/${provider}/login-request`;
+                    endpoints.LogoutRequest = `${authAPIHost}/auth/openid/${provider}/logout-request`;
+                    endpoints.UserInfoRequest = `${authAPIHost}/auth/openid/${provider}/user-info-request`;
+                    endpoints.AuthTokenRequest = `${authAPIHost}/auth/openid/${provider}/auth-token-request`;
+                    break;
+                case "saml2":
+                    endpoints.LoginRequest = `${authAPIHost}/auth/saml2/${provider}/login-request`;
+                    endpoints.LogoutRequest = `${authAPIHost}/auth/saml2/${provider}/logout-request`;
+                    endpoints.UserInfoRequest = `${authAPIHost}/auth/saml2/${provider}/user-info-request`;
+                    break;
+                default:
+                    throw new Error(`Unknown auth protocol: ${protocol}`);
+            }
+
+            return endpoints;
+        }
+
 
         initialize() {
             this.UIState.initialize();
@@ -182,7 +209,7 @@
         login() {
             this.log("AuthService", "logging in..");
             AppSettings.validateAppSettings();
-            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.LoginRequest)}?appContext=${AppSettings.generateAppContext(this.getName())}`);
+            this.UIState.transitToUrl(`${this.endpoints.LoginRequest}?appContext=${AppSettings.generateAppContext()}`);
         }
         async fetchAuthTokens(loginCode) {
             if (typeof this.endpoints.AuthTokenRequest !== "string") {
@@ -190,7 +217,7 @@
                 return { token: loginCode };
             }
 
-            const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.AuthTokenRequest)}`, {
+            const response = await fetch(`${this.endpoints.AuthTokenRequest}`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
@@ -198,7 +225,7 @@
                 },
                 body: JSON.stringify({
                     loginCode: loginCode,
-                    appContext: AppSettings.generateAppContext(this.getName()),
+                    appContext: AppSettings.generateAppContext(),
                 }),
             });
 
@@ -206,7 +233,7 @@
             return { token: data.token, idToken: data.idToken }
         }
         async fetchUserInfo(accessToken) {
-            const response = await fetch(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.UserInfoRequest)}`, {
+            const response = await fetch(`${this.endpoints.UserInfoRequest}`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
@@ -214,7 +241,7 @@
                 },
                 body: JSON.stringify({
                     token: accessToken,
-                    appContext: AppSettings.generateAppContext(this.getName()),
+                    appContext: AppSettings.generateAppContext(),
                 }),
             });
             if (response.status !== 200) {
@@ -230,7 +257,7 @@
             AppSettings.validateAppSettings();
 
             const urlParams = new URLSearchParams({
-                appContext: AppSettings.generateAppContext(this.getName()),
+                appContext: AppSettings.generateAppContext(),
             });
 
             const { idToken } = this.AuthState.getAuthTokens();
@@ -239,7 +266,7 @@
                 urlParams.append("idToken", idToken);
             }
 
-            this.UIState.transitToUrl(`${slashTrim(AppSettings.authAPIHost)}/${slashTrim(this.endpoints.LogoutRequest)}?${urlParams.toString()}`);
+            this.UIState.transitToUrl(`${this.endpoints.LogoutRequest}?${urlParams.toString()}`);
         }
     }
 
@@ -344,30 +371,15 @@
     /**************************************************************************/
     const sinuna = new BaseLoginApp({
         name: "Sinuna",
-        endpoints: {
-            LoginRequest: "/auth/openid/login-request",
-            LogoutRequest: "/auth/openid/logout-request",
-            UserInfoRequest: "/auth/openid/user-info-request",
-            AuthTokenRequest: "/auth/openid/auth-token-request"
-        },
+        authProtocol: "openid",
     });
     const suomifi = new BaseLoginApp({
         name: "SuomiFI",
-        endpoints: {
-            LoginRequest: "/auth/saml2/login-request",
-            LogoutRequest: "/auth/saml2/logout-request",
-            UserInfoRequest: "/auth/saml2/user-info-request",
-        },
+        authProtocol: "saml2",
     });
-
     const testbed = new BaseLoginApp({
         name: "Testbed",
-        endpoints: {
-            LoginRequest: "/auth/openid/login-request",
-            LogoutRequest: "/auth/openid/logout-request",
-            UserInfoRequest: "/auth/openid/user-info-request",
-            AuthTokenRequest: "/auth/openid/auth-token-request"
-        },
+        authProtocol: "openid",
     });
     /**************************************************************************
      * 

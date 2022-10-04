@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: "Authentication Gateway API"
-  version: 1.0.0
+  version: 1.1.0
 paths:
   "/":
     get:
@@ -36,7 +36,7 @@ paths:
               schema:
                 type: string
                 example: "OK"
-  "/auth/authorize":
+  "/authorize":
     post:
       operationId: AuthorizeRequest
       parameters:
@@ -73,23 +73,22 @@ paths:
                   message:
                     type: string
                     default: "Access Denied"
-  "/auth/openid/login-request":
+  "/auth/openid/{provider}/login-request":
     get:
       operationId: OpenIdLoginRequest
       parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
         - in: query
           name: appContext
           schema:
             type: string
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
-        - in: query
-          name: provider
-          schema:
-            type: string
-            default: "sinuna"
-          required: false
-          description: "Auth provider name"
       responses:
         "307":
           description: Redirect to the authentication provider service
@@ -98,11 +97,16 @@ paths:
               description: Authentication provider service URL
               schema:
                 type: string
-
-  "/auth/openid/authenticate-response":
+  "/auth/openid/{provider}/authenticate-response":
     get:
       operationId: OpenIdAuthenticateResponse
       parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
         - in: query
           name: code
           description: "Login code"
@@ -148,22 +152,21 @@ paths:
               description: App context URL
               schema:
                 type: string
-  "/auth/openid/logout-request":
+  "/auth/openid/{provider}/logout-request":
     get:
       parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
         - in: query
           name: appContext
           schema:
             type: string
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
-        - in: query
-          name: provider
-          schema:
-            type: string
-            default: "sinuna"
-          required: false
-          description: "Auth provider name"
         - in: query
           name: idToken
           schema:
@@ -179,10 +182,16 @@ paths:
               description: Authentication provider service URL
               schema:
                 type: string
-  "/auth/openid/logout-response":
+  "/auth/openid/{provider}/logout-response":
     get:
       operationId: OpenIdLogoutResponse
       parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
         - in: query
           name: state
           schema:
@@ -197,9 +206,16 @@ paths:
               description: App context URL
               schema:
                 type: string
-  "/auth/openid/auth-token-request":
+  "/auth/openid/{provider}/auth-token-request":
     post:
       operationId: OpenIdAuthTokenRequest
+      parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
       requestBody:
         description: Retrieve the authentication token from the auth provider service
         required: true
@@ -233,9 +249,16 @@ paths:
                 properties:
                   message:
                     type: string
-  "/auth/openid/user-info-request":
+  "/auth/openid/{provider}/user-info-request":
     post:
       operationId: OpenIdUserInfoRequest
+      parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
       requestBody:
         description: Retrieve user info from the auth provider service
         required: true
@@ -271,10 +294,16 @@ paths:
                 properties:
                   message:
                     type: string
-  "/auth/saml2/login-request":
+  "/auth/saml2/{provider}/login-request":
     get:
       operationId: Saml2LoginRequest
       parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
         - in: query
           name: appContext
           schema:
@@ -296,29 +325,35 @@ paths:
               description: Authentication provider service URL
               schema:
                 type: string
-  "/auth/saml2/authenticate-response":
+  "/auth/saml2/{provider}/authenticate-response":
     post:
       operationId: Saml2AuthenticateResponse
+      parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
       responses:
         "200":
           description: Handle response from the auth provider
-  "/auth/saml2/logout-request":
+  "/auth/saml2/{provider}/logout-request":
     get:
       operationId: Saml2LogoutRequest
       parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
         - in: query
           name: appContext
           schema:
             type: string
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
-        - in: query
-          name: provider
-          schema:
-            type: string
-            default: "suomifi"
-          required: false
-          description: "Auth provider name"
       responses:
         "307":
           description: Redirect to the authentication provider service
@@ -327,10 +362,16 @@ paths:
               description: Authentication provider service URL
               schema:
                 type: string
-  "/auth/saml2/logout":
+  "/auth/saml2/{provider}/logout-response":
     get:
       operationId: Saml2LogoutResponse
       parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
         - in: query
           name: SAMLResponse
           schema:
@@ -363,9 +404,16 @@ paths:
               description: App context URL
               schema:
                 type: string
-  "/auth/saml2/user-info-request":
+  "/auth/saml2/{provider}/user-info-request":
     post:
       operationId: Saml2UserInfoRequest
+      parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
       requestBody:
         description: Retrieve user info from the auth provider service
         required: true
