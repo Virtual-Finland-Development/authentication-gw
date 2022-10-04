@@ -32,7 +32,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
     const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
     const SCOPE = SinunaSettings.scope;
     const STATE = SinunaStateAttributor.generate(appContext.object); // Throws if appContext is invalid
-    const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/authenticate-response");
+    const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/authenticate-response");
     const SINUNA_LOGIN_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
 
     return {
@@ -76,7 +76,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
     const SCOPE = SinunaSettings.scope;
     const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
     const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET");
-    const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/authenticate-response");
+    const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/authenticate-response");
     try {
       const response = await axios.post(
         `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,
@@ -118,7 +118,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
     const appContext = parseAppContext(context, this.identityProviderIdent);
-    const LOGOUT_CALLBACK_REDIRECT_URI = Runtime.getAppUrl("/auth/openid/logout-response");
+    const LOGOUT_CALLBACK_REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/logout-response");
     const LOGOUT_REQUEST_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${LOGOUT_CALLBACK_REDIRECT_URI}`;
 
     return {
