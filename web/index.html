@@ -114,23 +114,23 @@
             const authAPIHost = AppSettings.authAPIHost;
 
             const endpoints = {
-                login: null,
-                logout: null,
-                userInfo: null,
-                token: null,
+                LoginRequest: null,
+                LogoutRequest: null,
+                UserInfoRequest: null,
+                AuthTokenRequest: null,
             }
 
             switch (protocol) {
                 case "openid":
-                    endpoints.login = `${authAPIHost}/auth/openid/${provider}/login-request`;
-                    endpoints.logout = `${authAPIHost}/auth/openid/${provider}/logout-request`;
-                    endpoints.userInfo = `${authAPIHost}/auth/openid/${provider}/user-info-request`;
-                    endpoints.token = `${authAPIHost}/auth/openid/${provider}/auth-token-request`;
+                    endpoints.LoginRequest = `${authAPIHost}/auth/openid/${provider}/login-request`;
+                    endpoints.LogoutRequest = `${authAPIHost}/auth/openid/${provider}/logout-request`;
+                    endpoints.UserInfoRequest = `${authAPIHost}/auth/openid/${provider}/user-info-request`;
+                    endpoints.AuthTokenRequest = `${authAPIHost}/auth/openid/${provider}/auth-token-request`;
                     break;
                 case "saml2":
-                    endpoints.login = `${authAPIHost}/auth/saml2/${provider}/login-request`;
-                    endpoints.logout = `${authAPIHost}/auth/saml2/${provider}/logout-request`;
-                    endpoints.userInfo = `${authAPIHost}/auth/saml2/${provider}/user-info-request`;
+                    endpoints.LoginRequest = `${authAPIHost}/auth/saml2/${provider}/login-request`;
+                    endpoints.LogoutRequest = `${authAPIHost}/auth/saml2/${provider}/logout-request`;
+                    endpoints.UserInfoRequest = `${authAPIHost}/auth/saml2/${provider}/user-info-request`;
                     break;
                 default:
                     throw new Error(`Unknown auth protocol: ${protocol}`);
