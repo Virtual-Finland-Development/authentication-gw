@@ -55,7 +55,19 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 
 ## References
 
-- https://developer.sinuna.fi/integration_documentation/
-- https://swagger.io/docs/specification/about/
-- https://github.com/anttiviljami/openapi-backend
-- https://github.com/sylwit/aws-serverless-swagger-ui
+### Authentication providers
+
+- [Sinuna - documentation](https://developer.sinuna.fi/integration_documentation/)
+- [Suomi.fi - documentation](https://palveluhallinta.suomi.fi/en/sivut/tunnistus/kayttoonotto/kayttoonoton-vaiheet)
+- [Testbed - documentation](https://ioxio.com/guides/use-login-portal-in-your-applications)
+
+### Authentication flows
+
+- [OpenID Connect](https://openid.net/connect/)
+- [SAML2](https://en.wikipedia.org/wiki/SAML_2.0)
+
+### Backend techs
+
+- [OpenAPI Backend](https://github.com/anttiviljami/openapi-backend)
+- [OpenAPI 3.0](https://swagger.io/specification/)
+- [Swagger UI](https://github.com/sylwit/aws-serverless-swagger-ui)
