@@ -51,7 +51,7 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authAPIHost: "", // the authentication gw host
+        authAPIHost: "http://localhost:3000", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
         generateAppContext() {
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
@@ -101,7 +101,7 @@
 
         constructor(configuration) {
             this.name = configuration.name;
-            this.initializeEndpoints(configuration.name, configuration.authProtocol);
+            this.endpoints = this.initializeEndpoints(configuration.name, configuration.authProtocol);
 
             this.UIState = new UIState(this);
             this.AuthState = new AuthState(this);
@@ -113,7 +113,7 @@
             const protocol = authProtocol.toLowerCase();
             const authAPIHost = AppSettings.authAPIHost;
 
-            this.endpoints = {
+            const endpoints = {
                 login: null,
                 logout: null,
                 userInfo: null,
@@ -122,19 +122,21 @@
 
             switch (protocol) {
                 case "openid":
-                    this.endpoints.login = `${authAPIHost}/auth/openid/${provider}/login-request`;
-                    this.endpoints.logout = `${authAPIHost}/auth/openid/${provider}/logout-request`;
-                    this.endpoints.userInfo = `${authAPIHost}/auth/openid/${provider}/user-info-request`;
-                    this.endpoints.token = `${authAPIHost}/auth/openid/${provider}/auth-token-request`;
+                    endpoints.login = `${authAPIHost}/auth/openid/${provider}/login-request`;
+                    endpoints.logout = `${authAPIHost}/auth/openid/${provider}/logout-request`;
+                    endpoints.userInfo = `${authAPIHost}/auth/openid/${provider}/user-info-request`;
+                    endpoints.token = `${authAPIHost}/auth/openid/${provider}/auth-token-request`;
                     break;
                 case "saml2":
-                    this.endpoints.login = `${authAPIHost}/auth/saml2/${provider}/login-request`;
-                    this.endpoints.logout = `${authAPIHost}/auth/saml2/${provider}/logout-request`;
-                    this.endpoints.userInfo = `${authAPIHost}/auth/saml2/${provider}/user-info-request`;
+                    endpoints.login = `${authAPIHost}/auth/saml2/${provider}/login-request`;
+                    endpoints.logout = `${authAPIHost}/auth/saml2/${provider}/logout-request`;
+                    endpoints.userInfo = `${authAPIHost}/auth/saml2/${provider}/user-info-request`;
                     break;
                 default:
                     throw new Error(`Unknown auth protocol: ${protocol}`);
             }
+
+            return endpoints;
         }
 
 
@@ -214,7 +216,7 @@
                 // No token endpoint defined, login code is the token
                 return { token: loginCode };
             }
-            
+
             const response = await fetch(`${this.endpoints.AuthTokenRequest}`, {
                 method: "POST",
                 credentials: 'include',
@@ -263,7 +265,7 @@
             if (idToken) {
                 urlParams.append("idToken", idToken);
             }
-            
+
             this.UIState.transitToUrl(`${this.endpoints.LogoutRequest}?${urlParams.toString()}`);
         }
     }

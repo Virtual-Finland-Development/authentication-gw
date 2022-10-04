@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Fix example index url
-        run: 'sed -i "s|authAPIHost: \"\",|authAPIHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./web/index.html'
+        run: 'sed -i "s|authAPIHost: \"http://localhost:3000\",|authAPIHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./web/index.html'
         env:
           AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{ secrets.AUTH_PROVIDER_REDIRECT_BACK_HOST }}
       - name: Deploy to S3
