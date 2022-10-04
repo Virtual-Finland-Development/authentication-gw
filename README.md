@@ -8,9 +8,9 @@ An authentication / authorization service for test & experimenting purposes of t
 
 ## Description
 
-Authentication GW is a service that implements the Authentication part between the browser client and the authentication provider service and the Authorization part between the authentication provider service and the resource server.
+Authentication GW is a service that implements the authentication part between the browser client and the authentication provider service and also the authorization part between the authentication provider service and the resource server.
 
-The authentication request flow redirects the user to the authentication provider service, which in turn redirects the user back to the client with the authorization access token and the related info. With the granted access, the client can access the resource server protected resources with the authorization request flow.
+The _authentication request flow_ redirects the user to the authentication provider service, which in turn redirects the user back to the client with the authorization access token and the related info. With the granted access, the client can access the resource server protected resources with the _authorization request flow_.
 
 The supported protocols for the authentication provider service are: OpenID Connect and SAML2.
 
