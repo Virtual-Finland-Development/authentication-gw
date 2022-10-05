@@ -53,24 +53,14 @@
         appName: "authflow-test",
         authAPIHost: "http://localhost:3000", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
-        generateAppContext() {
+        generateAppContext() { // App context generator
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
         },
-        validateAppSettings() {
-            if (!this.authAPIHost) {
-                const errorMessage = "AppSettings.authAPIHost is not defined";
-                window.alert(errorMessage);
-                throw new Error(errorMessage);
-            }
-        }
     }
 
+    // log helper
     const log = function (context, message, ...args) {
         console.log(context, "->", message, ...args);
-    }
-
-    const slashTrim = function (str) {
-        return str.replace(/^\/+|\/+$/g, '');
     }
 
     /**************************************************************************
@@ -78,23 +68,6 @@
      * Login service defs
      * 
     /**************************************************************************/
-    class BaseAppComponent {
-        parent = null;
-        constructor(parent) {
-            this.parent = parent;
-            this.getName = this.parent.getName.bind(parent);
-            this.log = this.parent.log.bind(parent);
-            this.endpoints = this.parent.endpoints;
-        }
-
-        initialize() {
-            this.UIState = this.parent.UIState;
-            this.AuthState = this.parent.AuthState;
-            this.AuthService = this.parent.AuthService;
-        }
-    }
-
-
     class BaseLoginApp {
         name = null;
         endpoints = null;
@@ -113,34 +86,27 @@
             const protocol = authProtocol.toLowerCase();
             const authAPIHost = AppSettings.authAPIHost;
 
-            const endpoints = {
-                LoginRequest: null,
-                LogoutRequest: null,
-                UserInfoRequest: null,
-                AuthTokenRequest: null,
-            }
-
             switch (protocol) {
                 case "openid":
-                    endpoints.LoginRequest = `${authAPIHost}/auth/openid/${provider}/login-request`;
-                    endpoints.LogoutRequest = `${authAPIHost}/auth/openid/${provider}/logout-request`;
-                    endpoints.UserInfoRequest = `${authAPIHost}/auth/openid/${provider}/user-info-request`;
-                    endpoints.AuthTokenRequest = `${authAPIHost}/auth/openid/${provider}/auth-token-request`;
-                    break;
+                    return {
+                        LoginRequest: `${authAPIHost}/auth/openid/${provider}/login-request`,
+                        LogoutRequest: `${authAPIHost}/auth/openid/${provider}/logout-request`,
+                        UserInfoRequest: `${authAPIHost}/auth/openid/${provider}/user-info-request`,
+                        AuthTokenRequest: `${authAPIHost}/auth/openid/${provider}/auth-token-request`,
+                    }
                 case "saml2":
-                    endpoints.LoginRequest = `${authAPIHost}/auth/saml2/${provider}/login-request`;
-                    endpoints.LogoutRequest = `${authAPIHost}/auth/saml2/${provider}/logout-request`;
-                    endpoints.UserInfoRequest = `${authAPIHost}/auth/saml2/${provider}/user-info-request`;
-                    break;
+                    return {
+                        LoginRequest: `${authAPIHost}/auth/saml2/${provider}/login-request`,
+                        LogoutRequest: `${authAPIHost}/auth/saml2/${provider}/logout-request`,
+                        UserInfoRequest: `${authAPIHost}/auth/saml2/${provider}/user-info-request`,
+                    }
                 default:
                     throw new Error(`Unknown auth protocol: ${protocol}`);
             }
-
-            return endpoints;
         }
 
 
-        initialize() {
+        initializeComponents() {
             this.UIState.initialize();
             this.AuthState.initialize();
             this.AuthService.initialize();
@@ -158,7 +124,7 @@
         }
 
         engage() {
-            this.initialize();
+            this.initializeComponents();
             this.UIState.handleCurrentState();
             this.engageLoginFlowEventsListener();
         }
@@ -205,10 +171,28 @@
         }
     }
 
+    class BaseAppComponent {
+        parent = null;
+        constructor(parent) {
+            this.parent = parent;
+            this.getName = this.parent.getName.bind(parent);
+            this.log = this.parent.log.bind(parent);
+            this.endpoints = this.parent.endpoints;
+        }
+
+        initialize() {
+            this.UIState = this.parent.UIState;
+            this.AuthState = this.parent.AuthState;
+            this.AuthService = this.parent.AuthService;
+        }
+    }
+
+    /**
+     * Example app auth service
+     */
     class AuthService extends BaseAppComponent {
         login() {
             this.log("AuthService", "logging in..");
-            AppSettings.validateAppSettings();
             this.UIState.transitToUrl(`${this.endpoints.LoginRequest}?appContext=${AppSettings.generateAppContext()}`);
         }
         async fetchAuthTokens(loginCode) {
@@ -254,7 +238,6 @@
         }
         logout() {
             this.log("AuthService", "logging out..");
-            AppSettings.validateAppSettings();
 
             const urlParams = new URLSearchParams({
                 appContext: AppSettings.generateAppContext(),
@@ -270,6 +253,9 @@
         }
     }
 
+    /**
+     * Example app auth state
+     */
     class AuthState extends BaseAppComponent {
         storeKey = null
         isInTransition = false
@@ -330,6 +316,9 @@
         }
     }
 
+    /**
+    * Example app UI state, interactions handler
+    */
     class UIState extends BaseAppComponent {
         handleCurrentState() {
             const loginButton = document.querySelector(`#${this.getName()} .login`);
