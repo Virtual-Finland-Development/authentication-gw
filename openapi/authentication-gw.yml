@@ -404,6 +404,8 @@ paths:
               description: App context URL
               schema:
                 type: string
+  "/auth/saml2/{provider}/logout":
+    $ref: "#/paths/~1auth~1saml2~1{provider}~1logout-response"
   "/auth/saml2/{provider}/user-info-request":
     post:
       operationId: Saml2UserInfoRequest
