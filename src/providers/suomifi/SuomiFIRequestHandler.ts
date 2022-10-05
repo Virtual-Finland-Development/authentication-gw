@@ -13,6 +13,11 @@ import SuomiFISettings from "./SuomiFI.config";
 import { generateSaml2RelayState, parseSaml2RelayState } from "./SuomiFIAuthorizer";
 import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
 
+/**
+ * @see: https://palveluhallinta.suomi.fi/en/sivut/tunnistus/kayttoonotto/kayttoonoton-vaiheet
+ * @see: https://en.wikipedia.org/wiki/SAML_2.0
+ * @see: https://github.com/node-saml/node-saml
+ */
 export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   identityProviderIdent = SuomiFISettings.ident;
   async initialize(): Promise<void> {}
@@ -107,7 +112,6 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
 
   /**
    * GET->REDIRECT: The route for handling the logout flow callback url
-   * (not used, but required by the Sinuna logout flow)
    *
    * @param context
    * @returns
@@ -165,7 +169,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   }
 
   /**
-   *  POST: get user info from with the access token
+   *  POST: get user info with the access token
    *
    * @param context
    * @returns

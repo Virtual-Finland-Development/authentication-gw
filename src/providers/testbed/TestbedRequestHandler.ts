@@ -167,7 +167,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
   }
 
   /**
-   *  POST: get user info from with the access token
+   *  POST: get user info with the access token
    *
    * @param context
    * @returns

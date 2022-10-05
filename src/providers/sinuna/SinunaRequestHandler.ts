@@ -13,6 +13,10 @@ import { parseAppContext } from "../../utils/validators";
 import SinunaSettings from "./Sinuna.config";
 import { parseSinunaAuthenticateResponse, SinunaStateAttributor } from "./utils/SinunaResponseParsers";
 
+/**
+ * @see: https://developer.sinuna.fi/integration_documentation/
+ * @see: https://openid.net/connect/
+ */
 export default new (class SinunaRequestHandler implements AuthRequestHandler {
   identityProviderIdent = SinunaSettings.ident;
 
@@ -132,7 +136,6 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
 
   /**
    * GET->REDIRECT: The route for handling the logout flow callback url
-   * (not used, but required by the Sinuna logout flow)
    *
    * @param context
    * @returns
@@ -151,7 +154,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
   }
 
   /**
-   *  POST: get user info from with the access token
+   *  POST: get user info with the access token
    *
    * @param context
    * @returns

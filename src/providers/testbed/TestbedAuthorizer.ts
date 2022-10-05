@@ -17,7 +17,8 @@ const cacheService = {
 };
 
 /**
- * @see: https://ioxio.com/guides/verify-id-token-in-a-data-source
+ *
+ * @param decodedToken
  * @returns
  */
 async function getPublicKey(decodedToken: jwt.Jwt | null): Promise<{ pem: string; key: jwktopem.JWK }> {
@@ -60,6 +61,7 @@ async function getJwksKey(keyId: string): Promise<jwktopem.JWK> {
  *
  * @param idToken
  * @param context - which app source is requesting access
+ * @see: https://ioxio.com/guides/verify-id-token-in-a-data-source
  */
 export default async function authorize(idToken: string, context: string): Promise<void> {
   try {
