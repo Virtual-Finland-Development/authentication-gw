@@ -86,22 +86,15 @@
             const protocol = authProtocol.toLowerCase();
             const authAPIHost = AppSettings.authAPIHost;
 
-            switch (protocol) {
-                case "openid":
-                    return {
-                        LoginRequest: `${authAPIHost}/auth/openid/${provider}/login-request`,
-                        LogoutRequest: `${authAPIHost}/auth/openid/${provider}/logout-request`,
-                        UserInfoRequest: `${authAPIHost}/auth/openid/${provider}/user-info-request`,
-                        AuthTokenRequest: `${authAPIHost}/auth/openid/${provider}/auth-token-request`,
-                    }
-                case "saml2":
-                    return {
-                        LoginRequest: `${authAPIHost}/auth/saml2/${provider}/login-request`,
-                        LogoutRequest: `${authAPIHost}/auth/saml2/${provider}/logout-request`,
-                        UserInfoRequest: `${authAPIHost}/auth/saml2/${provider}/user-info-request`,
-                    }
-                default:
-                    throw new Error(`Unknown auth protocol: ${protocol}`);
+            if (["openid", "saml2"].indexOf(protocol) < 0) {
+                throw new Error(`Unsupported auth protocol: ${protocol}`);
+            }
+
+            return {
+                LoginRequest: `${authAPIHost}/auth/${protocol}/${provider}/login-request`,
+                LogoutRequest: `${authAPIHost}/auth/${protocol}/${provider}/logout-request`,
+                UserInfoRequest: `${authAPIHost}/auth/${protocol}/${provider}/user-info-request`,
+                AuthTokenRequest: `${authAPIHost}/auth/${protocol}/${provider}/auth-token-request`,
             }
         }
 
@@ -196,10 +189,6 @@
             this.UIState.transitToUrl(`${this.endpoints.LoginRequest}?appContext=${AppSettings.generateAppContext()}`);
         }
         async fetchAuthTokens(loginCode) {
-            if (typeof this.endpoints.AuthTokenRequest !== "string") {
-                // No token endpoint defined, login code is the token
-                return { token: loginCode };
-            }
 
             const response = await fetch(`${this.endpoints.AuthTokenRequest}`, {
                 method: "POST",
