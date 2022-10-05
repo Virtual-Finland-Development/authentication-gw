@@ -130,6 +130,38 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   }
 
   /**
+   *  POST: The route for the access token exchange: loginCode -> accessToken
+   *
+   * @param context
+   * @returns
+   */
+  async AuthTokenRequest(context: Context): Promise<HttpResponse> {
+    parseAppContext(context, this.identityProviderIdent);
+    if (context.request.cookies?.suomiFiLoginState) {
+      try {
+        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
+        if (!loginState.accessToken) {
+          throw new ValidationError("No accessToken info on the login state");
+        }
+        return {
+          statusCode: 200,
+          headers: getJSONResponseHeaders(),
+          body: JSON.stringify({
+            token: loginState.accessToken,
+          }),
+        };
+      } catch (error) {
+        if (error instanceof ValidationError || error instanceof AccessDeniedException) {
+          throw error;
+        }
+        debug(error);
+        throw new ValidationError("Bad login profile data");
+      }
+    }
+    throw new AccessDeniedException("Not logged in");
+  }
+
+  /**
    *  POST: get user info from with the access token
    *
    * @param context

@@ -406,6 +406,49 @@ paths:
                 type: string
   "/auth/saml2/{provider}/logout":
     $ref: "#/paths/~1auth~1saml2~1{provider}~1logout-response"
+  "/auth/saml2/{provider}/auth-token-request":
+    post:
+      operationId: Saml2AuthTokenRequest
+      parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Retrieve the authentication token from the auth provider service
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                loginCode:
+                  type: string
+                appContext:
+                  type: string
+      responses:
+        "200":
+          description: Auth token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  expiresIn:
+                    type: number
+        "401":
+          description: "Access token retrieval failed"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
   "/auth/saml2/{provider}/user-info-request":
     post:
       operationId: Saml2UserInfoRequest

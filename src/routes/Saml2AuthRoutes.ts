@@ -3,16 +3,6 @@ import { generateRequestHandlers } from "../utils/route-utils";
 
 const defaultAuthProviderIdent = SuomiFISettings.ident;
 const operationPrefix = "Saml2";
-const operationNames = [
-  "LoginRequest",
-  "AuthenticateResponse",
-  "LogoutRequest",
-  "LogoutResponse",
-  "UserInfoRequest",
-];
+const operationNames = ["LoginRequest", "AuthenticateResponse", "LogoutRequest", "LogoutResponse", "AuthTokenRequest", "UserInfoRequest"];
 
-export default generateRequestHandlers(
-  operationNames,
-  operationPrefix,
-  defaultAuthProviderIdent
-);
+export default generateRequestHandlers(operationNames, operationPrefix, defaultAuthProviderIdent);
