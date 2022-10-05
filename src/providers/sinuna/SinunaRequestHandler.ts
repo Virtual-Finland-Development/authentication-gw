@@ -3,11 +3,11 @@ import { Context } from "openapi-backend";
 
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException } from "../../utils/exceptions";
+import { generateBase64Hash } from "../../utils/hashes";
 import { debug, logAxiosException } from "../../utils/logging";
 import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
-import { generateBase64Hash } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SinunaSettings from "./Sinuna.config";
@@ -27,11 +27,11 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
 
     const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
     const SCOPE = SinunaSettings.scope;
-    const STATE = SinunaStateAttributor.generate(appContext.object); // Throws if appContext is invalid
+    const STATE = SinunaStateAttributor.generate(parsedAppContext.object); // Throws if appContext is invalid
     const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/authenticate-response");
     const SINUNA_LOGIN_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/authorize?client_id=${CLIENT_ID}&response_type=code&scope=${SCOPE}&state=${STATE}&redirect_uri=${REDIRECT_URI}`;
 
@@ -39,7 +39,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: SINUNA_LOGIN_URL,
-        "Set-Cookie": `appContext=${appContext.hash};`,
+        "Set-Cookie": `appContext=${parsedAppContext.hash};`,
       },
     };
   }
@@ -117,7 +117,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
     const LOGOUT_CALLBACK_REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/logout-response");
     const LOGOUT_REQUEST_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${LOGOUT_CALLBACK_REDIRECT_URI}`;
 
@@ -125,7 +125,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: LOGOUT_REQUEST_URL,
-        "Set-Cookie": `appContext=${appContext.hash};`,
+        "Set-Cookie": `appContext=${parsedAppContext.hash};`,
       },
     };
   }
@@ -138,8 +138,8 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutResponse(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
-    const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+    const redirectUrl = prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent);
 
     return {
       statusCode: 303,

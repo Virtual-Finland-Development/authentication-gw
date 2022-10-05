@@ -84,8 +84,8 @@ export function resolveProvider(context: Context, defaultProvider: string | unde
     provider = String(context.request.headers["x-authentication-provider"]);
   } else {
     try {
-      const appContext = parseAppContext(context, defaultProvider);
-      provider = String(appContext.object.provider);
+      const parsedAppContext = parseAppContext(context, defaultProvider);
+      provider = String(parsedAppContext.object.provider);
     } catch (error) {}
   }
 

@@ -1,9 +1,12 @@
 import { Context } from "openapi-backend";
+import { v4 as uuidv4 } from "uuid";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
+import { generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
 import { debug, log } from "../../utils/logging";
 import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
-import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../../utils/transformers";
+import { parseBase64XMLBody } from "../../utils/transformers";
+
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SuomiFISettings from "./SuomiFI.config";
@@ -21,9 +24,9 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent, uuidv4());
     const samlClient = await getSuomiFISAML2Client();
-    const RelayState = await generateSaml2RelayState(appContext.hash);
+    const RelayState = await generateSaml2RelayState(parsedAppContext);
     const authenticationUrl = await samlClient.getAuthorizeUrlAsync(RelayState);
 
     return {
@@ -46,8 +49,8 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const result = await samlClient.validatePostResponseAsync(body); // throws
 
     const { appContextHash, accessToken } = parseSaml2RelayState(body.RelayState);
-    const appContext = parseAppContext(appContextHash, this.identityProviderIdent);
-    const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameID, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(appContextHash, this.identityProviderIdent);
+    const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, result.profile.nameID, this.identityProviderIdent);
 
     try {
       const suomiFiLoginState = {
@@ -78,7 +81,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
     if (context.request.cookies?.suomiFiLoginState) {
       try {
         const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
@@ -87,7 +90,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         }
 
         const samlClient = await getSuomiFISAML2Client();
-        const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, appContext.hash);
+        const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, parsedAppContext.hash);
 
         return {
           statusCode: 303,
@@ -118,12 +121,12 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     } catch (error) {
       log("Error", "LogoutResponse", error);
     }
-    const appContext = parseAppContext(String(body.RelayState), this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(String(body.RelayState), this.identityProviderIdent);
 
     return {
       statusCode: 303,
       headers: {
-        Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, this.identityProviderIdent),
+        Location: prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent),
         "Set-Cookie": `suomiFiLoginState=;`,
       },
     };

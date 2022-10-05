@@ -7,6 +7,8 @@ export type AppContext = {
   provider?: string;
 };
 
+export type ParsedAppContext = { object: AppContext; hash: string };
+
 export interface AuthenticateResponse {
   provider: string;
 }

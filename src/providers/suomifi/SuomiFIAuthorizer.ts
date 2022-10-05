@@ -1,18 +1,37 @@
-import { debug } from "console";
 import * as jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
 
 import { AccessDeniedException } from "../../utils/exceptions";
+import { createSecretHash, generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
+import { debug } from "../../utils/logging";
 import Settings from "../../utils/Settings";
-import { generateBase64Hash, leftTrim, resolveBase64Hash } from "../../utils/transformers";
+import { leftTrim } from "../../utils/transformers";
+import { ParsedAppContext } from "../../utils/types";
+import { parseAppContext } from "../../utils/validators";
+import SuomiFIConfig from "./SuomiFI.config";
 
-export async function generateSaml2RelayState(appContextHash: string): Promise<string> {
+/**
+ * Creates a relay state hash with a JWT token for the given user
+ *
+ * @param appContextHash
+ * @returns RelayState
+ */
+export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext): Promise<string> {
+  const secretGuid = createSecretHash(parsedAppContext.object.guid, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
   return generateBase64Hash({
-    appContextHash: appContextHash,
-    accessToken: jwt.sign({ hash: appContextHash, nonce: String(uuidv4()) }, await Settings.getSecret("SUOMIFI_JWT_SECRET"), { algorithm: "HS256", expiresIn: "1h" }),
+    appContextHash: parsedAppContext.hash,
+    accessToken: jwt.sign({ appContextHash: parsedAppContext.hash, secretGuid: secretGuid }, await Settings.getSecret("SUOMIFI_JWT_SECRET"), {
+      algorithm: "HS256",
+      expiresIn: "1h",
+    }),
   });
 }
 
+/**
+ * Parses the relay state hash and returns the app context hash and the access token
+ *
+ * @param RelayState
+ * @returns
+ */
 export function parseSaml2RelayState(RelayState: string): { appContextHash: string; accessToken: string } {
   return JSON.parse(resolveBase64Hash(RelayState));
 }
@@ -28,8 +47,15 @@ export default async function authorize(accessToken: string, context: string): P
       throw new Error("No nameID found in token");
     }
 
-    const decoded = jwt.verify(token, await Settings.getSecret("SUOMIFI_JWT_SECRET"));
+    const decoded = jwt.verify(token, await Settings.getSecret("SUOMIFI_JWT_SECRET"), { ignoreExpiration: false }) as jwt.JwtPayload;
     debug(decoded);
+
+    // Validate rest of the fields
+    const parsedAppContext = parseAppContext(decoded.appContextHash, SuomiFIConfig.ident); // Throws
+    const secretGuid = createSecretHash(parsedAppContext.object.guid, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+    if (secretGuid !== decoded.secretGuid) {
+      throw new Error("Invalid secretGuid");
+    }
   } catch (error) {
     throw new AccessDeniedException(String(error));
   }
