@@ -25,15 +25,15 @@ SuomiFi is an SAML2 -type authentication provider with the following endpoints:
 
 - LoginRequest: `/auth/saml2/suomifi/login-request`
   - gets a `loginCode`
+- AuthTokenRequest: `/auth/saml2/suomifi/auth-token-request`
+  - uses the `loginCode` to get an access token: `token`
 - UserInfoRequest: `/auth/saml2/suomifi/user-info-request`
-  - uses the `loginCode` to get user info and access token
+  - uses the `token` to get user info
   - example: `{"context": {"AuthnContextClassRef": "http://ftn.ficora.fi/2017/loa2"}, "profile": {"nameID": "a21sxxasxaxas323", "email":"John@Doe"}, "accessToken": jwt.233höpölöpöasd.32313cc}`
     - `context.AuthnContextClassRef`: is the authentication level information
     - `profile.nameID`: is the user ID
     - `profile.email`: is the user email (if available)
-    - `accessToken`: is the access token used for accessing external API resources
-- AuthTokenRequest: `/auth/openid/suomifi/auth-token-request`
-  - uses the `loginCode` to get an access token: `token` (the same as above accessToken)
+    - `accessToken`: is the access token used for accessing external API resources (same as the token above)
 - LogoutRequest: `/auth/saml2/suomifi/logout-request`
   - ends the suomifi login session
 
