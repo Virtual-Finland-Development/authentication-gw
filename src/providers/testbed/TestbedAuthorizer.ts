@@ -1,15 +1,26 @@
 import axios from "axios";
-import { debug } from "console";
 import * as jwt from "jsonwebtoken";
 import jwktopem from "jwk-to-pem";
+
 import { AccessDeniedException } from "../../utils/exceptions";
+import { debug } from "../../utils/logging";
 import { leftTrim } from "../../utils/transformers";
+
+const cacheService = {
+  store: new Map<string, any>(),
+  async get(key: string) {
+    return this.store.get(key);
+  },
+  async set(key: string, value: any) {
+    this.store.set(key, value);
+  },
+};
 
 /**
  * @see: https://ioxio.com/guides/verify-id-token-in-a-data-source
  * @returns
  */
-async function getPublicKey(decodedToken: jwt.Jwt | null): Promise<{ pem: string; key: { kid: string; kty: string; use: string; alg: string; n: string; e: string } }> {
+async function getPublicKey(decodedToken: jwt.Jwt | null): Promise<{ pem: string; key: jwktopem.JWK }> {
   const keyId = decodedToken?.header.kid;
   const payload = decodedToken?.payload;
 
@@ -24,11 +35,25 @@ async function getPublicKey(decodedToken: jwt.Jwt | null): Promise<{ pem: string
     throw new Error("Invalid issuer");
   }
 
-  const verifyConfig = await axios.get("https://login.testbed.fi/.well-known/openid-configuration");
-  const jwksUri = verifyConfig.data.jwks_uri;
-  const jwks = await axios.get(jwksUri);
-  const key = jwks.data.keys.find((key: any) => key.kid === keyId);
+  const key = await getJwksKey(keyId);
   return { pem: jwktopem(key), key: key };
+}
+
+async function getJwksKey(keyId: string): Promise<jwktopem.JWK> {
+  let key = await cacheService.get("jwks-key");
+  if (!key) {
+    debug("Fetching JWKS key..");
+    const verifyConfig = await axios.get("https://login.testbed.fi/.well-known/openid-configuration");
+    const jwksUri = verifyConfig.data.jwks_uri;
+    const jwks = await axios.get(jwksUri);
+    key = jwks.data.keys.find((key: any) => key.kid === keyId);
+    await cacheService.set("jwks-key", key);
+  }
+
+  if (!key) {
+    throw new Error("Public key not found in jwks.json");
+  }
+  return key;
 }
 
 /**
