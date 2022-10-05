@@ -7,6 +7,7 @@ import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../..
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SuomiFISettings from "./SuomiFI.config";
+import { generateSaml2RelayState, parseSaml2RelayState } from "./SuomiFIAuthorizer";
 import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
 
 export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
@@ -22,7 +23,8 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   async LoginRequest(context: Context): Promise<HttpResponse> {
     const appContext = parseAppContext(context, this.identityProviderIdent);
     const samlClient = await getSuomiFISAML2Client();
-    const authenticationUrl = await samlClient.getAuthorizeUrlAsync(appContext.hash);
+    const RelayState = await generateSaml2RelayState(appContext.hash);
+    const authenticationUrl = await samlClient.getAuthorizeUrlAsync(RelayState);
 
     return {
       statusCode: 303,
@@ -42,7 +44,9 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const body = parseBase64XMLBody(context.request.body);
     const samlClient = await getSuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
-    const appContext = parseAppContext(body.RelayState, this.identityProviderIdent);
+
+    const { appContextHash, accessToken } = parseSaml2RelayState(body.RelayState);
+    const appContext = parseAppContext(appContextHash, this.identityProviderIdent);
     const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameID, this.identityProviderIdent);
 
     try {
@@ -51,6 +55,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         context: {
           AuthnContextClassRef: result.profile.getAssertion()["Assertion"]["AuthnStatement"][0]["AuthnContext"][0]["AuthnContextClassRef"][0]["_"],
         },
+        accessToken: accessToken,
       };
 
       return {
@@ -138,7 +143,9 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         if (!loginState.profile) {
           throw new ValidationError("No profile info on the login state");
         }
-
+        if (!loginState.accessToken) {
+          throw new ValidationError("No accessToken info on the login state");
+        }
         if (loginState.profile.nameID !== context.request.requestBody.token) {
           debug(loginState, context.request);
           throw new AccessDeniedException("Invalid session token");
