@@ -172,7 +172,7 @@ paths:
           schema:
             type: string
           required: false
-          description: "id_token value"
+          description: "Logout id_token hint"
       operationId: OpenIdLogoutRequest
       responses:
         "307":
@@ -354,6 +354,12 @@ paths:
             type: string
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+        - in: query
+          name: idToken
+          schema:
+            type: string
+          required: false
+          description: "Logout id_token hint"
       responses:
         "307":
           description: Redirect to the authentication provider service

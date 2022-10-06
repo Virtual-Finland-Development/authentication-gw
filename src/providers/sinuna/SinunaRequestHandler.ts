@@ -68,7 +68,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
   }
 
   /**
-   *  POST: The route for the access token exchange: loginCode -> accessToken
+   *  POST: The route for the access token exchange: loginCode -> accessToken, idToken
    *
    * @param context
    * @returns
@@ -104,7 +104,8 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
         statusCode: 200,
         headers: getJSONResponseHeaders(),
         body: JSON.stringify({
-          token: response.data.access_token,
+          accessToken: response.data.access_token,
+          idToken: response.data.id_token,
           expiresIn: response.data.expires_in,
         }),
       };
@@ -162,7 +163,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
     parseAppContext(context, this.identityProviderIdent); // Valites app context
 
-    const accessToken = context.request.requestBody.token;
+    const accessToken = context.request.requestBody.accessToken;
 
     try {
       const response = await axios.get(`https://login.iam.qa.sinuna.fi/oxauth/restv1/userinfo`, {

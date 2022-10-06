@@ -42,7 +42,7 @@ export interface AuthRequestHandler {
   AuthenticateResponse(context: Context): Promise<HttpResponse>;
 
   /**
-   *  POST: The route for the access token exchange: loginCode -> accessToken
+   *  POST: The route for the access token exchange: loginCode -> accessToken, idToken
    *
    * @param context
    * @returns

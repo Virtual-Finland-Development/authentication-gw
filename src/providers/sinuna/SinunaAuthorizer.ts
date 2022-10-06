@@ -5,14 +5,14 @@ import { leftTrim } from "../../utils/transformers";
 
 /**
  *
- * @param accessToken
+ * @param idToken
  * @param context - which app source is requesting access
  */
-export default async function authorize(accessToken: string, context: string): Promise<void> {
+export default async function authorize(idToken: string, context: string): Promise<void> {
   try {
     const response = await axios.get(`https://login.iam.qa.sinuna.fi/oxauth/restv1/userinfo`, {
       headers: {
-        Authorization: `Bearer ${leftTrim(accessToken, "Bearer ")}`,
+        Authorization: `Bearer ${leftTrim(idToken, "Bearer ")}`,
       },
     });
 

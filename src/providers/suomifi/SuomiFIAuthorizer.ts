@@ -4,7 +4,7 @@
  */
 import * as jwt from "jsonwebtoken";
 
-import { AccessDeniedException } from "../../utils/exceptions";
+import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import { createSecretHash, generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
 import { debug } from "../../utils/logging";
 import Settings from "../../utils/Settings";
@@ -13,6 +13,13 @@ import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SuomiFIConfig from "./SuomiFI.config";
 
+async function generateSecretGuid(guid: string | undefined): Promise<string> {
+  if (!guid) {
+    throw new ValidationError("Missing guid");
+  }
+  return createSecretHash(guid, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+}
+
 /**
  * Creates a relay state hash with a JWT token for the given user
  *
@@ -20,10 +27,11 @@ import SuomiFIConfig from "./SuomiFI.config";
  * @returns RelayState
  */
 export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext): Promise<string> {
-  const secretGuid = createSecretHash(parsedAppContext.object.guid, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+  const secretGuid = await generateSecretGuid(parsedAppContext.object.guid);
   return generateBase64Hash({
     appContextHash: parsedAppContext.hash,
-    accessToken: jwt.sign({ appContextHash: parsedAppContext.hash, secretGuid: secretGuid }, await Settings.getSecret("SUOMIFI_JWT_SECRET"), {
+    accessToken: parsedAppContext.object.guid,
+    idToken: jwt.sign({ appContextHash: parsedAppContext.hash, secretGuid: secretGuid }, await Settings.getSecret("SUOMIFI_JWT_SECRET"), {
       algorithm: "HS256",
       expiresIn: "1h",
     }),
@@ -36,7 +44,7 @@ export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext
  * @param RelayState
  * @returns
  */
-export function parseSaml2RelayState(RelayState: string): { appContextHash: string; accessToken: string } {
+export function parseSaml2RelayState(RelayState: string): { appContextHash: string; accessToken: string; idToken: string } {
   return JSON.parse(resolveBase64Hash(RelayState));
 }
 
@@ -56,7 +64,7 @@ export default async function authorize(accessToken: string, context: string): P
 
     // Validate rest of the fields
     const parsedAppContext = parseAppContext(decoded.appContextHash, SuomiFIConfig.ident); // Throws
-    const secretGuid = createSecretHash(parsedAppContext.object.guid, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+    const secretGuid = await generateSecretGuid(parsedAppContext.object.guid);
     if (secretGuid !== decoded.secretGuid) {
       throw new Error("Invalid secretGuid");
     }

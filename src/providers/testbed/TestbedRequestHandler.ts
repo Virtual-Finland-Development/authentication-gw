@@ -36,7 +36,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
       acr_values: TestbedSettings.acr_values,
       scope: TestbedSettings.scope,
       redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/authenticate-response"),
-      nonce: String(uuidv4()),
+      nonce: uuidv4(),
       state: parsedAppContext.hash,
     }).toString();
 
@@ -59,10 +59,10 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     debug(context.request.query);
-    const token = String(context.request.query.code);
+    const loginCode = String(context.request.query.code);
     const state = String(context.request.query.state);
     const parsedAppContext = parseAppContext(state, this.identityProviderIdent);
-    const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, token, this.identityProviderIdent);
+    const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loginCode, this.identityProviderIdent);
 
     return {
       statusCode: 303,
@@ -74,7 +74,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
   }
 
   /**
-   *  POST: The route for the access token exchange: loginCode -> accessToken
+   *  POST: The route for the access token exchange: loginCode -> accessToken, idToken
    *
    * @param context
    * @returns
@@ -109,7 +109,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
         statusCode: 200,
         headers: getJSONResponseHeaders(),
         body: JSON.stringify({
-          token: response.data.access_token,
+          accessToken: response.data.access_token,
           idToken: response.data.id_token,
           expiresIn: response.data.expires_in,
         }),
@@ -175,7 +175,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
     parseAppContext(context, this.identityProviderIdent); // Valites app context
 
-    const accessToken = context.request.requestBody.token;
+    const accessToken = context.request.requestBody.accessToken;
 
     try {
       const response = await axios.post(`https://login.testbed.fi/api/oauth/userinfo`, null, {
