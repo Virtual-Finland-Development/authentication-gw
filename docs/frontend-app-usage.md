@@ -91,7 +91,7 @@ localStorage.setItem(`idToken_sinuna`, idToken);
 
 ## Using the auth token
 
-The auth `idToken` is used for example in the `Authorization` header of the requests to the productizer backends.
+Requests to the protected external backend services are accompanied with the `idToken` as a bearer token in the `Authorization` header, accomppanied with a provider name in the `X-authorization-provider` header.
 
 eg:
 
@@ -101,6 +101,19 @@ fetch(`https://data-product-endpoint.example`, {
   headers: {
     "Content-Type": "application/json",
     Authorization: `Bearer ${idToken}`,
+    "X-authorization-provider": "testbed",
+  },
+});
+```
+
+Excemption to the `idToken` - usage is the sinuna provider which uses the `accessToken` for the same purpose.
+
+```
+fetch(`https://data-product-endpoint.example`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
     "X-authorization-provider": "sinuna",
   },
 });

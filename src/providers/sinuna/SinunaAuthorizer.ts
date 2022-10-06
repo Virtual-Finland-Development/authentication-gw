@@ -1,29 +1,24 @@
-import * as jwt from "jsonwebtoken";
-
+import axios from "axios";
 import { AccessDeniedException } from "../../utils/exceptions";
-import { debug } from "../../utils/logging";
-import { getPublicKey } from "../../utils/openId-JWKS";
+import { debug, logAxiosException } from "../../utils/logging";
 import { leftTrim } from "../../utils/transformers";
 
 /**
  *
- * @param idToken
+ * @param accessToken
  * @param context - which app source is requesting access
  */
-export default async function authorize(idToken: string, context: string): Promise<void> {
+export default async function authorize(accessToken: string, context: string): Promise<void> {
   try {
-    // Decode token
-    const token = leftTrim(idToken, "Bearer ");
-    const decodedToken = jwt.decode(token, { complete: true });
-
-    // Validate token
-    const publicKey = await getPublicKey(decodedToken, {
-      issuer: "https://login.iam.qa.sinuna.fi",
-      openIdConfigUrl: "https://login.iam.qa.sinuna.fi/oxauth/.well-known/openid-configuration",
+    const response = await axios.get(`https://login.iam.qa.sinuna.fi/oxauth/restv1/userinfo`, {
+      headers: {
+        Authorization: `Bearer ${leftTrim(accessToken, "Bearer ")}`,
+      },
     });
-    const verified = jwt.verify(token, publicKey.pem, { ignoreExpiration: false });
-    debug(verified);
+
+    debug(response.data);
   } catch (error) {
+    logAxiosException(error);
     throw new AccessDeniedException(String(error));
   }
 }

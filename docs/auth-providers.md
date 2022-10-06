@@ -17,7 +17,7 @@ Sinuna is an Openid Connect -type authentication provider with the following end
     - `email`: is the user email
     - `sub` _(disrecard)_: is the sinuna service-account specific user ID
 - Data requests to external APIs that need to be authorized:
-  - `Authorization: Bearer <idToken>`
+  - `Authorization: Bearer <accessToken>`
   - `X-authorization-provider: sinuna`
 - LogoutRequest: `/auth/openid/sinuna/logout-request`
   - ends the sinuna login session
