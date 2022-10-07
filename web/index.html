@@ -288,12 +288,22 @@
             try {
                 const tokens = this.getAuthTokens();
                 const userInfo = await this.AuthService.fetchUserInfo(tokens);
-                this.user.email = userInfo.email;
+                this.user = this.getHandledUserInfo(userInfo);
             } catch (error) {
                 // Auth invalidated
                 this.log("AuthState", "login invalidated");
                 this.logout();
                 this.UIState.resetViewState(); // reset view state
+            }
+        }
+        getHandledUserInfo(userInfo) {
+            if (this.authProtocol === "saml2") {
+                return {
+                    email: userInfo?.profile?.email,
+                }
+            }
+            return {
+                email: userInfo.email,
             }
         }
     }
