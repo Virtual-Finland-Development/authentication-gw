@@ -499,6 +499,30 @@ paths:
       responses:
         "200":
           description: User info object
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["profile", "context", "accessToken", "idToken", "expiresIn"]
+                properties:
+                  profile:
+                    allOf:
+                      - type: object
+                        properties:
+                          nameID:
+                            type: string
+                  context:
+                    type: object
+                    required: ["AuthnContextClassRef"]
+                    properties:
+                      AuthnContextClassRef:
+                        type: string
+                  accessToken:
+                    type: string
+                  idToken:
+                    type: string
+                  expiresIn:
+                    type: number
         "401":
           description: "Login invalid or expired"
           content:
