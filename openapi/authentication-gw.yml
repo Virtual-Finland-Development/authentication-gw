@@ -457,7 +457,9 @@ paths:
                 type: object
                 required: ["accessToken", "idToken", "expiresIn"]
                 properties:
-                  token:
+                  accessToken:
+                    type: string
+                  idToken:
                     type: string
                   expiresIn:
                     type: number
