@@ -8,7 +8,7 @@ import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import { createSecretHash, generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
 import { debug } from "../../utils/logging";
 import Settings from "../../utils/Settings";
-import { leftTrim } from "../../utils/transformers";
+import { leftTrim, transformExpiresInToExpiresAt } from "../../utils/transformers";
 import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SuomiFIConfig from "./SuomiFI.config";
@@ -36,7 +36,7 @@ export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext
       algorithm: "HS256",
       expiresIn: expiresIn,
     }),
-    expiresIn: expiresIn,
+    expiresAt: transformExpiresInToExpiresAt(expiresIn),
   });
 }
 
@@ -46,7 +46,7 @@ export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext
  * @param RelayState
  * @returns
  */
-export function parseSaml2RelayState(RelayState: string): { appContextHash: string; accessToken: string; idToken: string; expiresIn: string } {
+export function parseSaml2RelayState(RelayState: string): { appContextHash: string; accessToken: string; idToken: string; expiresAt: number } {
   return JSON.parse(resolveBase64Hash(RelayState));
 }
 

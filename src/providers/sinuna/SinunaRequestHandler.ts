@@ -8,6 +8,7 @@ import { debug, logAxiosException } from "../../utils/logging";
 import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
+import { transformExpiresInToExpiresAt } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SinunaSettings from "./Sinuna.config";
@@ -106,7 +107,7 @@ export default new (class SinunaRequestHandler implements AuthRequestHandler {
         body: JSON.stringify({
           accessToken: response.data.access_token,
           idToken: response.data.id_token,
-          expiresIn: response.data.expires_in,
+          expiresAt: transformExpiresInToExpiresAt(response.data.expires_in),
         }),
       };
     } catch (error) {

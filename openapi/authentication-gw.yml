@@ -236,13 +236,13 @@ paths:
             application/json:
               schema:
                 type: object
-                required: ["accessToken", "idToken", "expiresIn"]
+                required: ["accessToken", "idToken", "expiresAt"]
                 properties:
                   accessToken:
                     type: string
                   idToken:
                     type: string
-                  expiresIn:
+                  expiresAt:
                     type: number
         "401":
           description: "Access token retrieval failed"
@@ -455,13 +455,13 @@ paths:
             application/json:
               schema:
                 type: object
-                required: ["accessToken", "idToken", "expiresIn"]
+                required: ["accessToken", "idToken", "expiresAt"]
                 properties:
                   accessToken:
                     type: string
                   idToken:
                     type: string
-                  expiresIn:
+                  expiresAt:
                     type: number
         "401":
           description: "Access token retrieval failed"
@@ -503,7 +503,7 @@ paths:
             application/json:
               schema:
                 type: object
-                required: ["profile", "context", "accessToken", "idToken", "expiresIn"]
+                required: ["profile", "context", "accessToken", "idToken", "expiresAt"]
                 properties:
                   profile:
                     type: object
@@ -523,7 +523,7 @@ paths:
                     type: string
                   idToken:
                     type: string
-                  expiresIn:
+                  expiresAt:
                     type: number
         "401":
           description: "Login invalid or expired"

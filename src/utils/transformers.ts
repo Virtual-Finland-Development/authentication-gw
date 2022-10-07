@@ -166,3 +166,12 @@ export function slashTrim(str: string): string {
 export function leftTrim(str: string, trim: string): string {
   return str.replace(new RegExp(`^${trim}`), "");
 }
+
+/**
+ *
+ * @param expiresIn
+ * @returns
+ */
+export function transformExpiresInToExpiresAt(expiresIn: number): number {
+  return Date.now() + expiresIn * 1000;
+}
