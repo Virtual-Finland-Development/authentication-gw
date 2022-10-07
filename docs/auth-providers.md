@@ -10,10 +10,14 @@ Sinuna is an Openid Connect -type authentication provider with the following end
   - gets a `loginCode`.
 - AuthTokenRequest: `/auth/openid/sinuna/auth-token-request`
   - uses the `loginCode` to get an access tokens `idToken` and `accessToken`.
+  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresIn": 123123133}`
+    - `idToken` is a JWT token that contains the user's identity information
+    - `accessToken` is a permit to get the authentication provider specific data and details using the UserInfoRequest-endpoint
+    - `expiresIn` is an unix timestamp number that parses into a datetime when the tokens expires
 - UserInfoRequest: `/auth/openid/sinuna/user-info-request`
   - uses the `accessToken` to get user info
-  - example: `{"inum": "bazbar1231231", "sub":"1234567890","email":"John@Doe"}`
-    - `inum`: is the user ID
+  - example response: `{"inum": "bazbar1231231", "sub":"1234567890","email":"John@Doe"}`
+    - `inum`: is the user ID in the Sinuna system
     - `email`: is the user email
     - `sub` _(disrecard)_: is the sinuna service-account specific user ID
 - Data requests to external APIs that need to be authorized:
@@ -30,13 +34,16 @@ SuomiFi is an SAML2 -type authentication provider with the following endpoints:
   - gets a `loginCode`
 - AuthTokenRequest: `/auth/saml2/suomifi/auth-token-request`
   - uses the `loginCode` to get an access tokens `idToken` and `accessToken`.
+  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresIn": 123123133}`
+    - `idToken` is a JWT token that contains the user's identity information
+    - `accessToken` is a permit to get the authentication provider specific data and details using the UserInfoRequest-endpoint
+    - `expiresIn` is an unix timestamp number that parses into a datetime when the tokens expires
 - UserInfoRequest: `/auth/saml2/suomifi/user-info-request`
   - uses the `accessToken` to get user info
-  - example: `{"context": {"AuthnContextClassRef": "http://ftn.ficora.fi/2017/loa2"}, "profile": {"nameID": "a21sxxasxaxas323", "email":"John@Doe"}, "accessToken": jwt.233höpölöpöasd.32313cc}`
+  - example response: `{"context": {"AuthnContextClassRef": "http://ftn.ficora.fi/2017/loa2"}, "profile": {"nameID": "a21sxxasxaxas323", "email":"John@Doe"}, "accessToken": jwt.233höpölöpöasd.32313cc}`
     - `context.AuthnContextClassRef`: is the authentication level information
-    - `profile.nameID`: is the user ID
+    - `profile.nameID`: is the user ID in the SuomiFi system
     - `profile.email`: is the user email (if available)
-    - `accessToken`: is the access token used for accessing external API resources (same as the token above)
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
   - `X-authorization-provider: suomifi`
@@ -51,10 +58,14 @@ Testbed is an Openid Connect -type authentication provider with the following en
   - gets a `loginCode`.
 - AuthTokenRequest: `/auth/openid/testbed/auth-token-request`
   - uses the `loginCode` to get an access tokens: `idToken` and `accessToken`
+  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresIn": 123123133}`
+    - `idToken` is a JWT token that contains the user's identity information
+    - `accessToken` is a permit to get the authentication provider specific data and details using the UserInfoRequest-endpoint
+    - `expiresIn` is an unix timestamp number that parses into a datetime when the tokens expires
 - UserInfoRequest: `/auth/openid/testbed/user-info-request`
   - uses the `accessToken` to get user info
-  - example: `{"sub":"1234567890","name":"1234567890"}`
-    - `sub`: is the testbed user ID
+  - example response: `{"sub":"1234567890","name":"1234567890"}`
+    - `sub`: is the user ID in the Testbed system
     - `name` _(disrecard)_: is the user name, but not currently available
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
