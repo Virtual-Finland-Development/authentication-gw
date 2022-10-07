@@ -506,11 +506,13 @@ paths:
                 required: ["profile", "context", "accessToken", "idToken", "expiresIn"]
                 properties:
                   profile:
-                    allOf:
-                      - type: object
-                        properties:
-                          nameID:
-                            type: string
+                    type: object
+                    required: ["nameID", "email"]
+                    properties:
+                      nameID:
+                        type: string
+                      email:
+                        type: string
                   context:
                     type: object
                     required: ["AuthnContextClassRef"]
