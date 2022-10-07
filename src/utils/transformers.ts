@@ -170,8 +170,8 @@ export function leftTrim(str: string, trim: string): string {
 /**
  *
  * @param expiresIn
- * @returns
+ * @returns Date.toIsoString
  */
-export function transformExpiresInToExpiresAt(expiresIn: number): number {
-  return Date.now() + expiresIn * 1000;
+export function transformExpiresInToExpiresAt_ISOString(expiresIn: number): string {
+  return new Date(Date.now() + expiresIn * 1000).toISOString();
 }

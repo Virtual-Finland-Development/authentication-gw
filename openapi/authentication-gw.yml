@@ -173,6 +173,7 @@ paths:
             type: string
           required: false
           description: "Logout id_token hint"
+          example: "1233ab213.1233abec213.1233abecd213"
       operationId: OpenIdLogoutRequest
       responses:
         "303":
@@ -242,8 +243,11 @@ paths:
                     type: string
                   idToken:
                     type: string
+                    example: "1233ab213.1233abec213.1233abecd213"
                   expiresAt:
-                    type: number
+                    type: string
+                    format: date-time
+                    example: "2022-01-30T08:30:00Z"
         "401":
           description: "Access token retrieval failed"
           content:
@@ -373,6 +377,7 @@ paths:
             type: string
           required: false
           description: "Logout id_token hint"
+          example: "1233ab213.1233abec213.1233abecd213"
       responses:
         "303":
           description: Redirect to the authentication provider service
@@ -461,8 +466,11 @@ paths:
                     type: string
                   idToken:
                     type: string
+                    example: "1233ab213.1233abec213.1233abecd213"
                   expiresAt:
-                    type: number
+                    type: string
+                    format: date-time
+                    example: "2022-01-30T08:30:00Z"
         "401":
           description: "Access token retrieval failed"
           content:
@@ -523,8 +531,11 @@ paths:
                     type: string
                   idToken:
                     type: string
+                    example: "1233ab213.1233abec213.1233abecd213"
                   expiresAt:
-                    type: number
+                    type: string
+                    format: date-time
+                    example: "2022-01-30T08:30:00Z"
         "401":
           description: "Login invalid or expired"
           content:
