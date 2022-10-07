@@ -28,6 +28,8 @@
     "aws-sdk": "^2.1214.0",
     "aws-serverless-swagger-ui": "^1.0.1",
     "axios": "^0.27.2",
+    "jsonwebtoken": "^8.5.1",
+    "jwk-to-pem": "^2.0.5",
     "node-saml": "^4.0.0-beta.2",
     "openapi-backend": "^5.5.0",
     "uuid": "^9.0.0"
@@ -36,6 +38,8 @@
     "@pulumi/aws": "^5.14.0",
     "@pulumi/pulumi": "^3.40.0",
     "@types/aws-lambda": "^8.10.102",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/jwk-to-pem": "^2.0.1",
     "@types/node": "^18.7.15",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.36.2",

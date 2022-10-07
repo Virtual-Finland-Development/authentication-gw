@@ -51,26 +51,16 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authAPIHost: "http://localhost:3000", // the authentication gw host
+        authAPIHost: "https://q88uo5prmh.execute-api.eu-north-1.amazonaws.com", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
-        generateAppContext() {
+        generateAppContext() { // App context generator
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
         },
-        validateAppSettings() {
-            if (!this.authAPIHost) {
-                const errorMessage = "AppSettings.authAPIHost is not defined";
-                window.alert(errorMessage);
-                throw new Error(errorMessage);
-            }
-        }
     }
 
+    // log helper
     const log = function (context, message, ...args) {
         console.log(context, "->", message, ...args);
-    }
-
-    const slashTrim = function (str) {
-        return str.replace(/^\/+|\/+$/g, '');
     }
 
     /**************************************************************************
@@ -78,23 +68,6 @@
      * Login service defs
      * 
     /**************************************************************************/
-    class BaseAppComponent {
-        parent = null;
-        constructor(parent) {
-            this.parent = parent;
-            this.getName = this.parent.getName.bind(parent);
-            this.log = this.parent.log.bind(parent);
-            this.endpoints = this.parent.endpoints;
-        }
-
-        initialize() {
-            this.UIState = this.parent.UIState;
-            this.AuthState = this.parent.AuthState;
-            this.AuthService = this.parent.AuthService;
-        }
-    }
-
-
     class BaseLoginApp {
         name = null;
         endpoints = null;
@@ -113,34 +86,20 @@
             const protocol = authProtocol.toLowerCase();
             const authAPIHost = AppSettings.authAPIHost;
 
-            const endpoints = {
-                LoginRequest: null,
-                LogoutRequest: null,
-                UserInfoRequest: null,
-                AuthTokenRequest: null,
+            if (["openid", "saml2"].indexOf(protocol) < 0) {
+                throw new Error(`Unsupported auth protocol: ${protocol}`);
             }
 
-            switch (protocol) {
-                case "openid":
-                    endpoints.LoginRequest = `${authAPIHost}/auth/openid/${provider}/login-request`;
-                    endpoints.LogoutRequest = `${authAPIHost}/auth/openid/${provider}/logout-request`;
-                    endpoints.UserInfoRequest = `${authAPIHost}/auth/openid/${provider}/user-info-request`;
-                    endpoints.AuthTokenRequest = `${authAPIHost}/auth/openid/${provider}/auth-token-request`;
-                    break;
-                case "saml2":
-                    endpoints.LoginRequest = `${authAPIHost}/auth/saml2/${provider}/login-request`;
-                    endpoints.LogoutRequest = `${authAPIHost}/auth/saml2/${provider}/logout-request`;
-                    endpoints.UserInfoRequest = `${authAPIHost}/auth/saml2/${provider}/user-info-request`;
-                    break;
-                default:
-                    throw new Error(`Unknown auth protocol: ${protocol}`);
+            return {
+                LoginRequest: `${authAPIHost}/auth/${protocol}/${provider}/login-request`,
+                LogoutRequest: `${authAPIHost}/auth/${protocol}/${provider}/logout-request`,
+                UserInfoRequest: `${authAPIHost}/auth/${protocol}/${provider}/user-info-request`,
+                AuthTokenRequest: `${authAPIHost}/auth/${protocol}/${provider}/auth-token-request`,
             }
-
-            return endpoints;
         }
 
 
-        initialize() {
+        initializeComponents() {
             this.UIState.initialize();
             this.AuthState.initialize();
             this.AuthService.initialize();
@@ -158,7 +117,7 @@
         }
 
         engage() {
-            this.initialize();
+            this.initializeComponents();
             this.UIState.handleCurrentState();
             this.engageLoginFlowEventsListener();
         }
@@ -205,17 +164,31 @@
         }
     }
 
+    class BaseAppComponent {
+        parent = null;
+        constructor(parent) {
+            this.parent = parent;
+            this.getName = this.parent.getName.bind(parent);
+            this.log = this.parent.log.bind(parent);
+            this.endpoints = this.parent.endpoints;
+        }
+
+        initialize() {
+            this.UIState = this.parent.UIState;
+            this.AuthState = this.parent.AuthState;
+            this.AuthService = this.parent.AuthService;
+        }
+    }
+
+    /**
+     * Example app auth service
+     */
     class AuthService extends BaseAppComponent {
         login() {
             this.log("AuthService", "logging in..");
-            AppSettings.validateAppSettings();
             this.UIState.transitToUrl(`${this.endpoints.LoginRequest}?appContext=${AppSettings.generateAppContext()}`);
         }
         async fetchAuthTokens(loginCode) {
-            if (typeof this.endpoints.AuthTokenRequest !== "string") {
-                // No token endpoint defined, login code is the token
-                return { token: loginCode };
-            }
 
             const response = await fetch(`${this.endpoints.AuthTokenRequest}`, {
                 method: "POST",
@@ -230,9 +203,9 @@
             });
 
             const data = await response.json();
-            return { token: data.token, idToken: data.idToken }
+            return { accessToken: data.accessToken, idToken: data.idToken }
         }
-        async fetchUserInfo(accessToken) {
+        async fetchUserInfo(tokens) {
             const response = await fetch(`${this.endpoints.UserInfoRequest}`, {
                 method: "POST",
                 credentials: 'include',
@@ -240,36 +213,34 @@
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    token: accessToken,
+                    accessToken: tokens.accessToken,
                     appContext: AppSettings.generateAppContext(),
                 }),
             });
+
             if (response.status !== 200) {
-                if (response.status === 401) {
-                    throw new Error("Unauthorized");
-                }
-                throw new Error("Unknown error");
+                const errorMessage = response.status === 401 ? "Unauthorized" : "Failed to fetch user info";
+                throw new Error(errorMessage);
             }
+
             return await response.json()
         }
         logout() {
             this.log("AuthService", "logging out..");
-            AppSettings.validateAppSettings();
+            const { idToken } = this.AuthState.getAuthTokens();
 
             const urlParams = new URLSearchParams({
                 appContext: AppSettings.generateAppContext(),
+                idToken: idToken
             });
-
-            const { idToken } = this.AuthState.getAuthTokens();
-
-            if (idToken) {
-                urlParams.append("idToken", idToken);
-            }
 
             this.UIState.transitToUrl(`${this.endpoints.LogoutRequest}?${urlParams.toString()}`);
         }
     }
 
+    /**
+     * Example app auth state
+     */
     class AuthState extends BaseAppComponent {
         storeKey = null
         isInTransition = false
@@ -285,11 +256,8 @@
         login(tokens) {
             this.isInTransition = true;
             if (typeof tokens === "object" && tokens !== null) {
-                if (typeof tokens.token === "string") {
+                if (typeof tokens.accessToken === "string" && typeof tokens.idToken === "string") {
                     this.log("AuthState", "logged in");
-                    if (typeof tokens.idToken === "string") {
-                        this.log("AuthState", "--> Id Token received");
-                    }
                     localStorage.setItem(this.storeKey, JSON.stringify(tokens));
                 } else {
                     throw new Error("Invalid token response")
@@ -319,7 +287,7 @@
         async handleLoggedIn() {
             try {
                 const tokens = this.getAuthTokens();
-                const userInfo = await this.AuthService.fetchUserInfo(tokens.token);
+                const userInfo = await this.AuthService.fetchUserInfo(tokens);
                 this.user.email = userInfo.email;
             } catch (error) {
                 // Auth invalidated
@@ -330,6 +298,9 @@
         }
     }
 
+    /**
+    * Example app UI state, interactions handler
+    */
     class UIState extends BaseAppComponent {
         handleCurrentState() {
             const loginButton = document.querySelector(`#${this.getName()} .login`);

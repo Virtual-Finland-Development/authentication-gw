@@ -3,11 +3,11 @@ import { Context } from "openapi-backend";
 import { v4 as uuidv4 } from "uuid";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException } from "../../utils/exceptions";
+import { generateBase64Hash } from "../../utils/hashes";
 import { debug, logAxiosException } from "../../utils/logging";
 import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
-import { generateBase64Hash } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import TestbedSettings from "./Testbed.config";
@@ -28,7 +28,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
     const clientId = await Settings.getSecret("TESTBED_CLIENT_ID");
     const queryString = new URLSearchParams({
       response_type: "code",
@@ -36,8 +36,8 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
       acr_values: TestbedSettings.acr_values,
       scope: TestbedSettings.scope,
       redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/authenticate-response"),
-      nonce: String(uuidv4()),
-      state: appContext.hash,
+      nonce: uuidv4(),
+      state: parsedAppContext.hash,
     }).toString();
 
     const TESTBED_LOGIN_URL = `https://login.testbed.fi/start-login?${queryString}`;
@@ -46,7 +46,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: TESTBED_LOGIN_URL,
-        "Set-Cookie": `appContext=${appContext.hash};`,
+        "Set-Cookie": `appContext=${parsedAppContext.hash};`,
       },
     };
   }
@@ -59,10 +59,10 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     debug(context.request.query);
-    const token = String(context.request.query.code);
+    const loginCode = String(context.request.query.code);
     const state = String(context.request.query.state);
-    const appContext = parseAppContext(state, this.identityProviderIdent);
-    const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, token, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(state, this.identityProviderIdent);
+    const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loginCode, this.identityProviderIdent);
 
     return {
       statusCode: 303,
@@ -74,7 +74,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
   }
 
   /**
-   *  POST: The route for the access token exchange: loginCode -> accessToken
+   *  POST: The route for the access token exchange: loginCode -> accessToken, idToken
    *
    * @param context
    * @returns
@@ -109,7 +109,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
         statusCode: 200,
         headers: getJSONResponseHeaders(),
         body: JSON.stringify({
-          token: response.data.access_token,
+          accessToken: response.data.access_token,
           idToken: response.data.id_token,
           expiresIn: response.data.expires_in,
         }),
@@ -127,11 +127,11 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
 
     const queryString = new URLSearchParams({
       post_logout_redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/logout-response"),
-      state: appContext.hash,
+      state: parsedAppContext.hash,
       id_token_hint: context.request.query.idToken,
     }).toString();
 
@@ -141,7 +141,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: LOGOUT_REQUEST_URL,
-        "Set-Cookie": `appContext=${appContext.hash};`,
+        "Set-Cookie": `appContext=${parsedAppContext.hash};`,
       },
     };
   }
@@ -154,8 +154,8 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutResponse(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
-    const redirectUrl = prepareLogoutRedirectUrl(appContext.object.redirectUrl, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+    const redirectUrl = prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent);
 
     return {
       statusCode: 303,
@@ -167,7 +167,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
   }
 
   /**
-   *  POST: get user info from with the access token
+   *  POST: get user info with the access token
    *
    * @param context
    * @returns
@@ -175,7 +175,7 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
     parseAppContext(context, this.identityProviderIdent); // Valites app context
 
-    const accessToken = context.request.requestBody.token;
+    const accessToken = context.request.requestBody.accessToken;
 
     try {
       const response = await axios.post(`https://login.testbed.fi/api/oauth/userinfo`, null, {

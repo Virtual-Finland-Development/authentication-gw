@@ -1,14 +1,23 @@
 import { Context } from "openapi-backend";
+import { v4 as uuidv4 } from "uuid";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
+import { generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
 import { debug, log } from "../../utils/logging";
 import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
-import { generateBase64Hash, parseBase64XMLBody, resolveBase64Hash } from "../../utils/transformers";
+import { parseBase64XMLBody } from "../../utils/transformers";
+
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SuomiFISettings from "./SuomiFI.config";
+import { generateSaml2RelayState, parseSaml2RelayState } from "./SuomiFIAuthorizer";
 import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
 
+/**
+ * @see: https://palveluhallinta.suomi.fi/en/sivut/tunnistus/kayttoonotto/kayttoonoton-vaiheet
+ * @see: https://en.wikipedia.org/wiki/SAML_2.0
+ * @see: https://github.com/node-saml/node-saml
+ */
 export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   identityProviderIdent = SuomiFISettings.ident;
   async initialize(): Promise<void> {}
@@ -20,9 +29,10 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent, uuidv4());
     const samlClient = await getSuomiFISAML2Client();
-    const authenticationUrl = await samlClient.getAuthorizeUrlAsync(appContext.hash);
+    const RelayState = await generateSaml2RelayState(parsedAppContext);
+    const authenticationUrl = await samlClient.getAuthorizeUrlAsync(RelayState);
 
     return {
       statusCode: 303,
@@ -42,8 +52,12 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const body = parseBase64XMLBody(context.request.body);
     const samlClient = await getSuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
-    const appContext = parseAppContext(body.RelayState, this.identityProviderIdent);
-    const redirectUrl = prepareLoginRedirectUrl(appContext.object.redirectUrl, result.profile.nameID, this.identityProviderIdent);
+
+    const { appContextHash, accessToken, idToken, expiresIn } = parseSaml2RelayState(body.RelayState);
+    const parsedAppContext = parseAppContext(appContextHash, this.identityProviderIdent);
+
+    const loginCode = result.profile.nameID;
+    const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loginCode, this.identityProviderIdent);
 
     try {
       const suomiFiLoginState = {
@@ -51,6 +65,9 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         context: {
           AuthnContextClassRef: result.profile.getAssertion()["Assertion"]["AuthnStatement"][0]["AuthnContext"][0]["AuthnContextClassRef"][0]["_"],
         },
+        accessToken: accessToken,
+        idToken: idToken,
+        expiresIn: expiresIn,
       };
 
       return {
@@ -67,30 +84,34 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   }
 
   /**
-   * GET->REDIRECT: The route for handling the logout flow
+   *  POST: The route for the access token exchange: loginCode -> accessToken, idToken
    *
    * @param context
    * @returns
    */
-  async LogoutRequest(context: Context): Promise<HttpResponse> {
-    const appContext = parseAppContext(context, this.identityProviderIdent);
+  async AuthTokenRequest(context: Context): Promise<HttpResponse> {
+    parseAppContext(context, this.identityProviderIdent);
     if (context.request.cookies?.suomiFiLoginState) {
       try {
         const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
-        if (!loginState.profile) {
-          throw new ValidationError("No profile info on the login state");
+        if (!loginState.accessToken) {
+          throw new ValidationError("No accessToken info on the login state");
         }
 
-        const samlClient = await getSuomiFISAML2Client();
-        const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, appContext.hash);
-
         return {
-          statusCode: 303,
-          headers: {
-            Location: logoutRequestUrl,
-          },
+          statusCode: 200,
+          headers: getJSONResponseHeaders(),
+          body: JSON.stringify({
+            accessToken: loginState.accessToken,
+            idToken: loginState.idToken,
+            expiresIn: loginState.expiresIn,
+          }),
         };
       } catch (error) {
+        if (error instanceof ValidationError || error instanceof AccessDeniedException) {
+          throw error;
+        }
+        debug(error);
         throw new ValidationError("Bad login profile data");
       }
     }
@@ -98,34 +119,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   }
 
   /**
-   * GET->REDIRECT: The route for handling the logout flow callback url
-   * (not used, but required by the Sinuna logout flow)
-   *
-   * @param context
-   * @returns
-   */
-  async LogoutResponse(context: Context): Promise<HttpResponse> {
-    const body = context.request.query;
-    const originalQuery = new URLSearchParams(body).toString();
-    const samlClient = await getSuomiFISAML2Client();
-    try {
-      await samlClient.validateRedirectAsync(body, originalQuery); // throws
-    } catch (error) {
-      log("Error", "LogoutResponse", error);
-    }
-    const appContext = parseAppContext(String(body.RelayState), this.identityProviderIdent);
-
-    return {
-      statusCode: 303,
-      headers: {
-        Location: prepareLogoutRedirectUrl(appContext.object.redirectUrl, this.identityProviderIdent),
-        "Set-Cookie": `suomiFiLoginState=;`,
-      },
-    };
-  }
-
-  /**
-   *  POST: get user info from with the access token
+   *  POST: get user info with the access token
    *
    * @param context
    * @returns
@@ -138,8 +132,10 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         if (!loginState.profile) {
           throw new ValidationError("No profile info on the login state");
         }
-
-        if (loginState.profile.nameID !== context.request.requestBody.token) {
+        if (!loginState.accessToken) {
+          throw new ValidationError("No accessToken info on the login state");
+        }
+        if (loginState.accessToken !== context.request.requestBody.accessToken) {
           debug(loginState, context.request);
           throw new AccessDeniedException("Invalid session token");
         }
@@ -158,5 +154,62 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
       }
     }
     throw new AccessDeniedException("Not logged in");
+  }
+
+  /**
+   * GET->REDIRECT: The route for handling the logout flow
+   *
+   * @param context
+   * @returns
+   */
+  async LogoutRequest(context: Context): Promise<HttpResponse> {
+    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+    if (context.request.cookies?.suomiFiLoginState) {
+      try {
+        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
+        if (!loginState.profile) {
+          throw new ValidationError("No profile info on the login state");
+        }
+
+        const samlClient = await getSuomiFISAML2Client();
+        const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, parsedAppContext.hash);
+
+        return {
+          statusCode: 303,
+          headers: {
+            Location: logoutRequestUrl,
+          },
+        };
+      } catch (error) {
+        throw new ValidationError("Bad login profile data");
+      }
+    }
+    throw new AccessDeniedException("Not logged in");
+  }
+
+  /**
+   * GET->REDIRECT: The route for handling the logout flow callback url
+   *
+   * @param context
+   * @returns
+   */
+  async LogoutResponse(context: Context): Promise<HttpResponse> {
+    const body = context.request.query;
+    const originalQuery = new URLSearchParams(body).toString();
+    const samlClient = await getSuomiFISAML2Client();
+    try {
+      await samlClient.validateRedirectAsync(body, originalQuery); // throws
+    } catch (error) {
+      log("Error", "LogoutResponse", error);
+    }
+    const parsedAppContext = parseAppContext(String(body.RelayState), this.identityProviderIdent);
+
+    return {
+      statusCode: 303,
+      headers: {
+        Location: prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent),
+        "Set-Cookie": `suomiFiLoginState=;`,
+      },
+    };
   }
 })();

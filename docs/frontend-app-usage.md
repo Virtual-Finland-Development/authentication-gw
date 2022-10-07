@@ -56,11 +56,11 @@ After the auth process is done, the user is redirected to the `redirectUrl` pred
 
 eg: `https://${frontendAppHost}/login-handler.html?loginCode={loginCode}&provider=sinuna`
 
-The login code is either a temporary code that can be exchanged for an access token or for some auth providers it is the access token itself.
+The login code is either a temporary code that can be exchanged for authentication tokens.
 
-## AuthTokenRequest (if needed by the auth provider)
+## AuthTokenRequest
 
-The received `loginCode` is a temporary code which is used in retrieving the actual auth token from the `/auth/openid/sinuna/auth-token-request`-endpoint.
+The received `loginCode` is a temporary code which is used in retrieving the actual auth tokens from the `/auth/openid/sinuna/auth-token-request`-endpoint.
 
 ```js
 const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/auth-token-request`, {
@@ -73,20 +73,25 @@ const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/aut
     appContext: appContext, // url-encoded base64 string
   }),
 });
-const { token } = await response.json();
+const { accessToken, idToken } = await response.json();
 ```
+
+The retrieved tokens:
+
+- idToken: a JWT token that can be used to authenticate the user in the backend
+- accessToken: a hash that can be used to retrieve user information with the UserInfoRequest-call
 
 Store the token in the browser's local storage.
 
 eg.
 
 ```js
-localStorage.setItem(`authToken_sinuna`, token);
+localStorage.setItem(`idToken_sinuna`, idToken);
 ```
 
 ## Using the auth token
 
-The auth `token` is used for example in the `Authorization` header of the requests to the productizer backends.
+Requests to the protected external backend services are accompanied with the `idToken` as a bearer token in the `Authorization` header, accomppanied with a provider name in the `X-authorization-provider` header.
 
 eg:
 
@@ -95,7 +100,20 @@ fetch(`https://data-product-endpoint.example`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${idToken}`,
+    "X-authorization-provider": "testbed",
+  },
+});
+```
+
+Excemption to the `idToken` - usage is the sinuna provider which uses the `accessToken` for the same purpose.
+
+```
+fetch(`https://data-product-endpoint.example`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
     "X-authorization-provider": "sinuna",
   },
 });
@@ -103,7 +121,7 @@ fetch(`https://data-product-endpoint.example`, {
 
 ### UserInfoRequest
 
-In the frontend app the `token` could be used like this:
+In the frontend app the `accessToken` could be used like this:
 
 ```js
 const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/user-info-request`, {
@@ -113,7 +131,7 @@ const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/use
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    token: token,
+    accessToken: accessToken,
     appContext: appContext, // url-encoded base64 string
   }),
 });
@@ -125,10 +143,10 @@ If the request fails with a `401` status code, the token is expired and the user
 
 ## LogoutRequest
 
-Redirect user to the `/auth/openid/sinuna/logout-request`-endpoint with the `appContext` token as a query parameter:
+Redirect user to the `/auth/openid/sinuna/logout-request`-endpoint with the `appContext` and `idToken` token as a query parameter:
 
 ```js
-window.location.href = `https://${authEndpointHost}/auth/openid/sinuna/logout-request?appContext=${appContext}`;
+window.location.href = `https://${authEndpointHost}/auth/openid/sinuna/logout-request?appContext=${appContext}&idToken=${idToken}`;
 ```
 
 ## LogoutResponse

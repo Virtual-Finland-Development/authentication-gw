@@ -7,7 +7,7 @@ paths:
     get:
       operationId: root
       responses:
-        "307":
+        "303":
           description: Redirect to the API documentation
           headers:
             location:
@@ -18,7 +18,7 @@ paths:
     get:
       operationId: swagger
       responses:
-        "307":
+        "303":
           description: Redirect to the API documentation
           headers:
             location:
@@ -90,7 +90,7 @@ paths:
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
       responses:
-        "307":
+        "303":
           description: Redirect to the authentication provider service
           headers:
             location:
@@ -145,7 +145,7 @@ paths:
             type: string
           required: false
       responses:
-        "307":
+        "303":
           description: Authentication providers callback url, redirect back to the app context, provide loginCode and provider -variables as query params
           headers:
             location:
@@ -172,10 +172,10 @@ paths:
           schema:
             type: string
           required: false
-          description: "id_token value"
+          description: "Logout id_token hint"
       operationId: OpenIdLogoutRequest
       responses:
-        "307":
+        "303":
           description: Redirect to the authentication provider services logout endpoint
           headers:
             location:
@@ -199,7 +199,7 @@ paths:
           required: false
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
       responses:
-        "307":
+        "303":
           description: Authentication providers callback url, redirect back to the app context
           headers:
             location:
@@ -223,6 +223,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["loginCode", "appContext"]
               properties:
                 loginCode:
                   type: string
@@ -235,8 +236,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required: ["accessToken", "idToken", "expiresIn"]
                 properties:
-                  token:
+                  accessToken:
+                    type: string
+                  idToken:
                     type: string
                   expiresIn:
                     type: number
@@ -246,6 +250,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: ["message"]
                 properties:
                   message:
                     type: string
@@ -266,8 +271,9 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["accessToken", "appContext"]
               properties:
-                token:
+                accessToken:
                   type: string
                 appContext:
                   type: string
@@ -278,6 +284,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: ["sub"]
                 properties:
                   sub:
                     type: string
@@ -291,6 +298,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: ["message"]
                 properties:
                   message:
                     type: string
@@ -318,7 +326,7 @@ paths:
           required: false
           description: "Auth provider name"
       responses:
-        "307":
+        "303":
           description: Redirect to the authentication provider service
           headers:
             location:
@@ -336,8 +344,13 @@ paths:
             type: string
           required: true
       responses:
-        "200":
-          description: Handle response from the auth provider
+        "303":
+          description: Authentication providers callback url, redirect back to the app context
+          headers:
+            location:
+              description: App context URL
+              schema:
+                type: string
   "/auth/saml2/{provider}/logout-request":
     get:
       operationId: Saml2LogoutRequest
@@ -354,8 +367,14 @@ paths:
             type: string
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+        - in: query
+          name: idToken
+          schema:
+            type: string
+          required: false
+          description: "Logout id_token hint"
       responses:
-        "307":
+        "303":
           description: Redirect to the authentication provider service
           headers:
             location:
@@ -397,7 +416,7 @@ paths:
           required: true
           description: "Signature"
       responses:
-        "307":
+        "303":
           description: Authentication providers callback url, redirect back to the app context
           headers:
             location:
@@ -406,6 +425,52 @@ paths:
                 type: string
   "/auth/saml2/{provider}/logout":
     $ref: "#/paths/~1auth~1saml2~1{provider}~1logout-response"
+  "/auth/saml2/{provider}/auth-token-request":
+    post:
+      operationId: Saml2AuthTokenRequest
+      parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Retrieve the authentication token from the auth provider service
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["loginCode", "appContext"]
+              properties:
+                loginCode:
+                  type: string
+                appContext:
+                  type: string
+      responses:
+        "200":
+          description: Auth token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["accessToken", "idToken", "expiresIn"]
+                properties:
+                  token:
+                    type: string
+                  expiresIn:
+                    type: number
+        "401":
+          description: "Access token retrieval failed"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["message"]
+                properties:
+                  message:
+                    type: string
   "/auth/saml2/{provider}/user-info-request":
     post:
       operationId: Saml2UserInfoRequest
@@ -423,8 +488,9 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["accessToken", "appContext"]
               properties:
-                token:
+                accessToken:
                   type: string
                 appContext:
                   type: string
@@ -437,6 +503,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: ["message"]
                 properties:
                   message:
                     type: string

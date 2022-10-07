@@ -7,6 +7,8 @@ export type AppContext = {
   provider?: string;
 };
 
+export type ParsedAppContext = { object: AppContext; hash: string };
+
 export interface AuthenticateResponse {
   provider: string;
 }
@@ -40,7 +42,7 @@ export interface AuthRequestHandler {
   AuthenticateResponse(context: Context): Promise<HttpResponse>;
 
   /**
-   *  POST: The route for the access token exchange: loginCode -> accessToken
+   *  POST: The route for the access token exchange: loginCode -> accessToken, idToken
    *
    * @param context
    * @returns
@@ -57,7 +59,6 @@ export interface AuthRequestHandler {
 
   /**
    * GET->REDIRECT: The route for handling the logout flow callback url
-   * (not used, but required by the Sinuna logout flow)
    *
    * @param context
    * @returns
@@ -65,7 +66,7 @@ export interface AuthRequestHandler {
   LogoutResponse(context: Context): Promise<HttpResponse>;
 
   /**
-   *  POST: get user info from with the access token
+   *  POST: get user info with the access token
    *
    * @param context
    * @returns
@@ -82,6 +83,10 @@ export interface AuthRequestHandler {
 }
 
 /**
+ * POST: Then /authorize request implementation for the provider
  *
+ * @param token
+ * @param context
+ * @throws AccessDeniedException - if access is denied
  */
 export type AuthorizeFunc = (token: string, context: string) => Promise<void>;
