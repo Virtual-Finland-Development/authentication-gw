@@ -53,7 +53,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const samlClient = await getSuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
 
-    const { appContextHash, accessToken, idToken } = parseSaml2RelayState(body.RelayState);
+    const { appContextHash, accessToken, idToken, expiresIn } = parseSaml2RelayState(body.RelayState);
     const parsedAppContext = parseAppContext(appContextHash, this.identityProviderIdent);
 
     const loginCode = result.profile.nameID;
@@ -67,6 +67,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         },
         accessToken: accessToken,
         idToken: idToken,
+        expiresIn: expiresIn,
       };
 
       return {
@@ -96,12 +97,14 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         if (!loginState.accessToken) {
           throw new ValidationError("No accessToken info on the login state");
         }
+
         return {
           statusCode: 200,
           headers: getJSONResponseHeaders(),
           body: JSON.stringify({
             accessToken: loginState.accessToken,
             idToken: loginState.idToken,
+            expiresIn: loginState.expiresIn,
           }),
         };
       } catch (error) {

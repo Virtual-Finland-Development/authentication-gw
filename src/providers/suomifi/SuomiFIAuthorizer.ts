@@ -28,13 +28,15 @@ async function generateSecretGuid(guid: string | undefined): Promise<string> {
  */
 export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext): Promise<string> {
   const secretGuid = await generateSecretGuid(parsedAppContext.object.guid);
+  const expiresIn = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour
   return generateBase64Hash({
     appContextHash: parsedAppContext.hash,
     accessToken: parsedAppContext.object.guid,
     idToken: jwt.sign({ appContextHash: parsedAppContext.hash, secretGuid: secretGuid }, await Settings.getSecret("SUOMIFI_JWT_SECRET"), {
       algorithm: "HS256",
-      expiresIn: "1h",
+      expiresIn: expiresIn,
     }),
+    expiresIn: expiresIn,
   });
 }
 
@@ -44,7 +46,7 @@ export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext
  * @param RelayState
  * @returns
  */
-export function parseSaml2RelayState(RelayState: string): { appContextHash: string; accessToken: string; idToken: string } {
+export function parseSaml2RelayState(RelayState: string): { appContextHash: string; accessToken: string; idToken: string; expiresIn: string } {
   return JSON.parse(resolveBase64Hash(RelayState));
 }
 
