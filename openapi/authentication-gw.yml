@@ -247,7 +247,7 @@ paths:
                   expiresAt:
                     type: string
                     format: date-time
-                    example: "2022-01-30T08:30:00Z"
+                    example: "2022-01-30T08:30:00.123Z"
         "401":
           description: "Access token retrieval failed"
           content:
@@ -470,7 +470,7 @@ paths:
                   expiresAt:
                     type: string
                     format: date-time
-                    example: "2022-01-30T08:30:00Z"
+                    example: "2022-01-30T08:30:00.123Z"
         "401":
           description: "Access token retrieval failed"
           content:
@@ -535,7 +535,7 @@ paths:
                   expiresAt:
                     type: string
                     format: date-time
-                    example: "2022-01-30T08:30:00Z"
+                    example: "2022-01-30T08:30:00.123Z"
         "401":
           description: "Login invalid or expired"
           content:
