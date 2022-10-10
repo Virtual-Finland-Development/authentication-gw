@@ -11,33 +11,36 @@
         <div>
             <b>Sinuna login state:</b> <span class="loginState">...</span>
         </div>
-        <hr>
         <div>
             <button class="login" disabled="disabled" onclick="sinuna.AuthService.login()">Login</button>
             <button class="logout" disabled="disabled" onclick="sinuna.AuthService.logout()">Logout</button>
+            <button class="authorize" disabled="disabled" onclick="sinuna.AuthService.authorize()">Authorize</button>
         </div>
+        <hr>
     </div>
 
     <div id="SuomiFI">
         <div>
             <b>Suomi.fi login state:</b> <span class="loginState">...</span>
         </div>
-        <hr>
         <div>
             <button class="login" disabled="disabled" onclick="suomifi.AuthService.login()">Login</button>
             <button class="logout" disabled="disabled" onclick="suomifi.AuthService.logout()">Logout</button>
+            <button class="authorize" disabled="disabled" onclick="suomifi.AuthService.authorize()">Authorize</button>
         </div>
+        <hr>
     </div>
 
     <div id="Testbed">
         <div>
             <b>Testbed login state:</b> <span class="loginState">...</span>
         </div>
-        <hr>
         <div>
             <button class="login" disabled="disabled" onclick="testbed.AuthService.login()">Login</button>
             <button class="logout" disabled="disabled" onclick="testbed.AuthService.logout()">Logout</button>
+            <button class="authorize" disabled="disabled" onclick="testbed.AuthService.authorize()">Authorize</button>
         </div>
+        <hr>
     </div>
 
 </body>
@@ -96,6 +99,7 @@
                 LogoutRequest: `${authAPIHost}/auth/${protocol}/${provider}/logout-request`,
                 UserInfoRequest: `${authAPIHost}/auth/${protocol}/${provider}/user-info-request`,
                 AuthTokenRequest: `${authAPIHost}/auth/${protocol}/${provider}/auth-token-request`,
+                AuthorizeRequest: `${authAPIHost}/authorize`,
             }
         }
 
@@ -226,6 +230,26 @@
 
             return await response.json()
         }
+        async authorize() {
+            this.log("AuthService", "authorizing..");
+            const { idToken } = this.AuthState.getAuthTokens();
+
+            const response = await fetch(`${this.endpoints.AuthorizeRequest}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${idToken}`,
+                    "X-authorization-provider": this.getName(),
+                    "X-Authorization-Context": "demo app",
+                },
+            });
+
+            if (response.status === 200) {
+                window.alert("Authorized");
+            } else {
+                window.alert("Failed to authorize");
+            }
+        }
         logout() {
             this.log("AuthService", "logging out..");
             const { idToken } = this.AuthState.getAuthTokens();
@@ -317,17 +341,21 @@
             const loginButton = document.querySelector(`#${this.getName()} .login`);
             const logoutButton = document.querySelector(`#${this.getName()} .logout`);
             const loginState = document.querySelector(`#${this.getName()} .loginState`);
+            const authorizeState = document.querySelector(`#${this.getName()} .authorize`);
             if (this.AuthState.isLoading()) {
                 loginButton.disabled = true;
                 logoutButton.disabled = true;
+                authorizeState.disabled = true;
                 loginState.innerText = "loading..";
             } else if (this.AuthState.isLoggedIn()) {
                 loginButton.disabled = true;
                 logoutButton.disabled = false;
+                authorizeState.disabled = false;
                 loginState.innerText = this.AuthState.user.email ? `logged in as ${this.AuthState.user.email}` : "logged in";
             } else {
                 loginButton.disabled = false;
                 logoutButton.disabled = true;
+                authorizeState.disabled = true;
                 loginState.innerText = "logged out";
             }
         }
