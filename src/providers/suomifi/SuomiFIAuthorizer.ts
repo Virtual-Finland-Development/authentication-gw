@@ -27,7 +27,7 @@ async function generateSecretGuid(guid: string | undefined): Promise<string> {
  * @param secretGuid
  * @returns
  */
-async function signAppContext(parsedAppContext: ParsedAppContext, secretGuid: string): Promise<{ idToken: string; expiresAt: string }> {
+async function signAsLoggedIn(parsedAppContext: ParsedAppContext, secretGuid: string): Promise<{ idToken: string; expiresAt: string }> {
   const expiresIn = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour
   return {
     idToken: jwt.sign({ appContextHash: parsedAppContext.hash, secretGuid: secretGuid }, await Settings.getSecret("SUOMIFI_JWT_SECRET"), {
@@ -39,7 +39,7 @@ async function signAppContext(parsedAppContext: ParsedAppContext, secretGuid: st
 }
 
 /**
- * Creates a relay state hash with a JWT token for the given user
+ * Creates a relay state hash for the login initiation flow
  *
  * @param appContextHash
  * @returns RelayState
@@ -53,12 +53,12 @@ export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext
 }
 
 /**
- * Parses the relay state hash and returns the app context hash and the access token
+ * Parses and validates the relay state hash, create logged in tokens
  *
  * @param RelayState
  * @returns
  */
-export async function parseSaml2RelayState(RelayState: string): Promise<{ parsedAppContext: ParsedAppContext; accessToken: string; idToken: string; expiresAt: string }> {
+export async function createSignedInTokens(RelayState: string): Promise<{ parsedAppContext: ParsedAppContext; accessToken: string; idToken: string; expiresAt: string }> {
   const { appContextHash, secretGuid } = JSON.parse(resolveBase64Hash(RelayState));
   const parsedAppContext = parseAppContext(appContextHash);
   const parsedSecretGuid = await generateSecretGuid(parsedAppContext.object.guid);
@@ -67,7 +67,7 @@ export async function parseSaml2RelayState(RelayState: string): Promise<{ parsed
   }
 
   // Sign the authentication for later authorization checks
-  const { idToken, expiresAt } = await signAppContext(parsedAppContext, secretGuid);
+  const { idToken, expiresAt } = await signAsLoggedIn(parsedAppContext, secretGuid);
   const accessToken = String(parsedAppContext.object.guid); // access to the userInfo endpoint is granted with the guid
 
   return {

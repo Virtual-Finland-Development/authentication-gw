@@ -10,7 +10,7 @@ import { parseBase64XMLBody } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SuomiFISettings from "./SuomiFI.config";
-import { generateSaml2RelayState, parseSaml2RelayState } from "./SuomiFIAuthorizer";
+import { createSignedInTokens, generateSaml2RelayState } from "./SuomiFIAuthorizer";
 import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
 import { SuomiFiLoginState } from "./utils/SuomifiTypes";
 
@@ -54,8 +54,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const samlClient = await getSuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
 
-    const { parsedAppContext, accessToken, idToken, expiresAt } = await parseSaml2RelayState(body.RelayState);
-
+    const { parsedAppContext, accessToken, idToken, expiresAt } = await createSignedInTokens(body.RelayState); // throws
     const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, accessToken, this.identityProviderIdent);
 
     try {
