@@ -11,13 +11,12 @@ import Settings from "../../utils/Settings";
 import { leftTrim, transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
 import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
-import SuomiFIConfig from "./SuomiFI.config";
 
-async function generateSecretGuid(guid: string | undefined): Promise<string> {
-  if (!guid) {
-    throw new ValidationError("Missing guid");
+async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string> {
+  if (!parsedAppContext.object.guid) {
+    throw new ValidationError("Missing guid from app context");
   }
-  return createSecretHash(guid, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+  return createSecretHash(parsedAppContext.object.guid, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
 }
 
 /**
@@ -46,10 +45,10 @@ async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nameID: string
  * @returns RelayState
  */
 export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext): Promise<string> {
-  const secretGuid = await generateSecretGuid(parsedAppContext.object.guid);
+  const nonce = await generateNonce(parsedAppContext);
   return generateBase64Hash({
     appContextHash: parsedAppContext.hash,
-    secretGuid: secretGuid,
+    nonce: nonce,
   });
 }
 
@@ -64,15 +63,15 @@ export async function createSignedInTokens(
   RelayState: string,
   nameID: string
 ): Promise<{ parsedAppContext: ParsedAppContext; accessToken: string; idToken: string; expiresAt: string }> {
-  const { appContextHash, secretGuid } = JSON.parse(resolveBase64Hash(RelayState));
+  const { appContextHash, nonce } = JSON.parse(resolveBase64Hash(RelayState));
   const parsedAppContext = parseAppContext(appContextHash);
-  const parsedSecretGuid = await generateSecretGuid(parsedAppContext.object.guid);
-  if (parsedSecretGuid !== secretGuid) {
-    throw new AccessDeniedException("Invalid secret guid");
+  const parsedNonce = await generateNonce(parsedAppContext);
+  if (parsedNonce !== nonce) {
+    throw new AccessDeniedException("Invalid sign-in context secret");
   }
 
   // Sign the authentication for later authorization checks
-  const { idToken, expiresAt } = await signAsLoggedIn(parsedAppContext, nameID, secretGuid);
+  const { idToken, expiresAt } = await signAsLoggedIn(parsedAppContext, nameID, nonce);
   const accessToken = String(parsedAppContext.object.guid); // access to the userInfo endpoint is granted with the guid
 
   return {
@@ -91,17 +90,17 @@ export default async function authorize(idToken: string, context: string): Promi
   try {
     const token = leftTrim(idToken, "Bearer ");
     if (!token) {
-      throw new Error("No token");
+      throw new AccessDeniedException("No token");
     }
 
     const decoded = jwt.verify(token, await Settings.getSecret("SUOMIFI_JWT_SECRET"), { ignoreExpiration: false }) as jwt.JwtPayload;
     debug(decoded);
 
     // Validate rest of the fields
-    const parsedAppContext = parseAppContext(decoded.appContextHash, SuomiFIConfig.ident); // Throws
-    const secretGuid = await generateSecretGuid(parsedAppContext.object.guid);
-    if (secretGuid !== decoded.secretGuid) {
-      throw new Error("Invalid secret guid");
+    const parsedAppContext = parseAppContext(decoded.appContextHash); // Throws
+    const nonce = await generateNonce(parsedAppContext);
+    if (nonce !== decoded.nonce) {
+      throw new AccessDeniedException("Invalid authorizing context secret");
     }
   } catch (error) {
     throw new AccessDeniedException(String(error));
