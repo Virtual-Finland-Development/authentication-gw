@@ -101,12 +101,10 @@ fetch(`https://data-product-endpoint.example`, {
   headers: {
     "Content-Type": "application/json",
     Authorization: `Bearer ${idToken}`,
-    "X-authorization-provider": "testbed",
+    "X-authorization-provider": "sinuna",
   },
 });
 ```
-
-Excemption to the `idToken` - usage is the sinuna provider which uses the `accessToken` for the same purpose.
 
 ```
 fetch(`https://data-product-endpoint.example`, {
