@@ -232,17 +232,13 @@
         }
         async authorize() {
             this.log("AuthService", "authorizing..");
-            const { idToken, accessToken } = this.AuthState.getAuthTokens();
-            let authorizationToken = idToken;
-            if (this.getName() === "Sinuna") { // The sinuna exception
-                authorizationToken = accessToken;
-            }
+            const { idToken } = this.AuthState.getAuthTokens();
 
             const response = await fetch(`${this.endpoints.AuthorizeRequest}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${authorizationToken}`,
+                    Authorization: `Bearer ${idToken}`,
                     "X-authorization-provider": this.getName(),
                     "X-Authorization-Context": "demo app",
                 },
