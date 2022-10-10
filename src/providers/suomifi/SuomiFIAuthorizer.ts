@@ -46,7 +46,7 @@ export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext
  * @param RelayState
  * @returns
  */
-export function parseSaml2RelayState(RelayState: string): { appContextHash: string; accessToken: string; idToken: string; expiresAt: number } {
+export function parseSaml2RelayState(RelayState: string): { appContextHash: string; accessToken: string; idToken: string; expiresAt: string } {
   return JSON.parse(resolveBase64Hash(RelayState));
 }
 

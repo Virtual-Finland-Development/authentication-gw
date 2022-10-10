@@ -10,10 +10,10 @@ Sinuna is an Openid Connect -type authentication provider with the following end
   - gets a `loginCode`.
 - AuthTokenRequest: `/auth/openid/sinuna/auth-token-request`
   - uses the `loginCode` to get an access tokens `idToken` and `accessToken`.
-  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresAt": 123123133}`
+  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresAt": "2022-10-10T05:52:50.886Z"}`
     - `idToken` is a JWT token that contains the user's identity information
     - `accessToken` is a permit to get the authentication provider specific data and details using the UserInfoRequest-endpoint
-    - `expiresAt` is an unix timestamp number that parses into a datetime when the tokens expires
+    - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
 - UserInfoRequest: `/auth/openid/sinuna/user-info-request`
   - uses the `accessToken` to get user info
   - example response: `{"inum": "bazbar1231231", "sub":"1234567890","email":"John@Doe"}`
@@ -34,10 +34,10 @@ SuomiFi is an SAML2 -type authentication provider with the following endpoints:
   - gets a `loginCode`
 - AuthTokenRequest: `/auth/saml2/suomifi/auth-token-request`
   - uses the `loginCode` to get an access tokens `idToken` and `accessToken`.
-  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresAt": 123123133}`
+  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresAt": "2022-10-10T05:52:50.886Z"}`
     - `idToken` is a JWT token that contains the user's identity information
     - `accessToken` is a permit to get the authentication provider specific data and details using the UserInfoRequest-endpoint
-    - `expiresAt` is an unix timestamp number that parses into a datetime when the tokens expires
+    - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
 - UserInfoRequest: `/auth/saml2/suomifi/user-info-request`
   - uses the `accessToken` to get user info
   - example response: `{"context": {"AuthnContextClassRef": "http://ftn.ficora.fi/2017/loa2"}, "profile": {"nameID": "a21sxxasxaxas323", "email":"John@Doe"}, "accessToken": jwt.233höpölöpöasd.32313cc}`
@@ -58,10 +58,10 @@ Testbed is an Openid Connect -type authentication provider with the following en
   - gets a `loginCode`.
 - AuthTokenRequest: `/auth/openid/testbed/auth-token-request`
   - uses the `loginCode` to get an access tokens: `idToken` and `accessToken`
-  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresAt": 123123133}`
+  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresAt": "2022-10-10T05:52:50.886Z"}`
     - `idToken` is a JWT token that contains the user's identity information
     - `accessToken` is a permit to get the authentication provider specific data and details using the UserInfoRequest-endpoint
-    - `expiresAt` is an unix timestamp number that parses into a datetime when the tokens expires
+    - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
 - UserInfoRequest: `/auth/openid/testbed/user-info-request`
   - uses the `accessToken` to get user info
   - example response: `{"sub":"1234567890","name":"1234567890"}`
