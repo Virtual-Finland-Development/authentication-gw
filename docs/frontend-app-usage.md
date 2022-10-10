@@ -95,7 +95,7 @@ Requests to the protected external backend services are accompanied with the `id
 
 eg:
 
-```
+```js
 fetch(`https://data-product-endpoint.example`, {
   method: "POST",
   headers: {
