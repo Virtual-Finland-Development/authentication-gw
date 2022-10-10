@@ -106,16 +106,7 @@ fetch(`https://data-product-endpoint.example`, {
 });
 ```
 
-```
-fetch(`https://data-product-endpoint.example`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${accessToken}`,
-    "X-authorization-provider": "sinuna",
-  },
-});
-```
+If the endpoint need authorization and the request fails with a `401` status code, the token is expired and the user should be redirected to the login page.
 
 ### UserInfoRequest
 
