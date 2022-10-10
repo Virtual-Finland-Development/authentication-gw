@@ -10,8 +10,9 @@ import { parseBase64XMLBody } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SuomiFISettings from "./SuomiFI.config";
-import { generateSaml2RelayState, parseSaml2RelayState } from "./SuomiFIAuthorizer";
+import { createSignedInTokens, generateSaml2RelayState } from "./SuomiFIAuthorizer";
 import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
+import { SuomiFiLoginState } from "./utils/SuomifiTypes";
 
 /**
  * @see: https://palveluhallinta.suomi.fi/en/sivut/tunnistus/kayttoonotto/kayttoonoton-vaiheet
@@ -53,11 +54,8 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const samlClient = await getSuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
 
-    const { appContextHash, accessToken, idToken, expiresAt } = parseSaml2RelayState(body.RelayState);
-    const parsedAppContext = parseAppContext(appContextHash, this.identityProviderIdent);
-
-    const loginCode = result.profile.nameID;
-    const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loginCode, this.identityProviderIdent);
+    const { parsedAppContext, accessToken, idToken, expiresAt } = await createSignedInTokens(body.RelayState, result.profile.nameID); // throws
+    const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, accessToken, this.identityProviderIdent);
 
     try {
       const suomiFiLoginState = {
@@ -90,32 +88,18 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async AuthTokenRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, this.identityProviderIdent);
-    if (context.request.cookies?.suomiFiLoginState) {
-      try {
-        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
-        if (!loginState.accessToken) {
-          throw new ValidationError("No accessToken info on the login state");
-        }
+    parseAppContext(context, this.identityProviderIdent); // throws
+    const loginState = this.#resolveLoginState(context); // throws
 
-        return {
-          statusCode: 200,
-          headers: getJSONResponseHeaders(),
-          body: JSON.stringify({
-            accessToken: loginState.accessToken,
-            idToken: loginState.idToken,
-            expiresAt: loginState.expiresAt,
-          }),
-        };
-      } catch (error) {
-        if (error instanceof ValidationError || error instanceof AccessDeniedException) {
-          throw error;
-        }
-        debug(error);
-        throw new ValidationError("Bad login profile data");
-      }
-    }
-    throw new AccessDeniedException("Not logged in");
+    return {
+      statusCode: 200,
+      headers: getJSONResponseHeaders(),
+      body: JSON.stringify({
+        accessToken: loginState.accessToken,
+        idToken: loginState.idToken,
+        expiresAt: loginState.expiresAt,
+      }),
+    };
   }
 
   /**
@@ -125,35 +109,14 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, this.identityProviderIdent);
-    if (context.request.cookies?.suomiFiLoginState) {
-      try {
-        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
-        if (!loginState.profile) {
-          throw new ValidationError("No profile info on the login state");
-        }
-        if (!loginState.accessToken) {
-          throw new ValidationError("No accessToken info on the login state");
-        }
-        if (loginState.accessToken !== context.request.requestBody.accessToken) {
-          debug(loginState, context.request);
-          throw new AccessDeniedException("Invalid session token");
-        }
+    parseAppContext(context, this.identityProviderIdent); // throws
+    const loginState = this.#resolveLoginState(context); // throws
 
-        return {
-          statusCode: 200,
-          headers: getJSONResponseHeaders(),
-          body: JSON.stringify(loginState),
-        };
-      } catch (error) {
-        if (error instanceof ValidationError || error instanceof AccessDeniedException) {
-          throw error;
-        }
-        debug(error);
-        throw new ValidationError("Bad login profile data");
-      }
-    }
-    throw new AccessDeniedException("Not logged in");
+    return {
+      statusCode: 200,
+      headers: getJSONResponseHeaders(),
+      body: JSON.stringify(loginState),
+    };
   }
 
   /**
@@ -211,5 +174,26 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         "Set-Cookie": `suomiFiLoginState=;`,
       },
     };
+  }
+
+  #resolveLoginState(context: Context): SuomiFiLoginState {
+    if (typeof context.request.cookies?.suomiFiLoginState === "undefined") {
+      throw new AccessDeniedException("Not logged in");
+    }
+
+    const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
+    if (!loginState.profile) {
+      throw new ValidationError("No profile info on the login state");
+    }
+    if (!loginState.accessToken) {
+      throw new ValidationError("No accessToken info on the login state");
+    }
+
+    const requestAccessToken = context.request.requestBody?.accessToken || context.request.requestBody?.loginCode;
+    if (loginState.accessToken !== requestAccessToken) {
+      debug(loginState, context.request);
+      throw new AccessDeniedException("Invalid session token");
+    }
+    return loginState;
   }
 })();
