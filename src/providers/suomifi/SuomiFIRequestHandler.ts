@@ -54,7 +54,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     const samlClient = await getSuomiFISAML2Client();
     const result = await samlClient.validatePostResponseAsync(body); // throws
 
-    const { parsedAppContext, accessToken, idToken, expiresAt } = await createSignedInTokens(body.RelayState); // throws
+    const { parsedAppContext, accessToken, idToken, expiresAt } = await createSignedInTokens(body.RelayState, result.profile.nameID); // throws
     const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, accessToken, this.identityProviderIdent);
 
     try {
@@ -188,7 +188,9 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     if (!loginState.accessToken) {
       throw new ValidationError("No accessToken info on the login state");
     }
-    if (loginState.accessToken !== context.request.requestBody.accessToken) {
+
+    const requestAccessToken = context.request.requestBody?.accessToken || context.request.requestBody?.loginCode;
+    if (loginState.accessToken !== requestAccessToken) {
       debug(loginState, context.request);
       throw new AccessDeniedException("Invalid session token");
     }
