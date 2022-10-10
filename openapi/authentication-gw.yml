@@ -248,6 +248,7 @@ paths:
                     type: string
                     format: date-time
                     example: "2022-01-30T08:30:00.123Z"
+                    description: an ISO-8601 timestamp string that specifies the token expirity datetime
         "401":
           description: "Access token retrieval failed"
           content:
@@ -471,6 +472,7 @@ paths:
                     type: string
                     format: date-time
                     example: "2022-01-30T08:30:00.123Z"
+                    description: an ISO-8601 timestamp string that specifies the token expirity datetime
         "401":
           description: "Access token retrieval failed"
           content:
@@ -536,6 +538,7 @@ paths:
                     type: string
                     format: date-time
                     example: "2022-01-30T08:30:00.123Z"
+                    description: an ISO-8601 timestamp string that specifies the token expirity datetime
         "401":
           description: "Login invalid or expired"
           content:
