@@ -30,8 +30,8 @@ async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string
 async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nameID: string, nonce: string): Promise<{ idToken: string; expiresAt: string }> {
   const expiresIn = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour
   return {
-    idToken: jwt.sign({ appContextHash: parsedAppContext.hash, nameID: nameID, nonce: nonce }, await Settings.getSecret("SUOMIFI_JWT_SECRET"), {
-      algorithm: "HS256",
+    idToken: jwt.sign({ appContextHash: parsedAppContext.hash, nameID: nameID, nonce: nonce }, await Settings.getSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
+      algorithm: "RS256",
       expiresIn: expiresIn,
     }),
     expiresAt: transformExpiresInToExpiresAt_ISOString(expiresIn),
@@ -93,7 +93,7 @@ export default async function authorize(idToken: string, context: string): Promi
       throw new AccessDeniedException("No token");
     }
 
-    const decoded = jwt.verify(token, await Settings.getSecret("SUOMIFI_JWT_SECRET"), { ignoreExpiration: false }) as jwt.JwtPayload;
+    const decoded = jwt.verify(token, await Settings.getSecret("SUOMIFI_JWT_PUBLIC_KEY"), { ignoreExpiration: false, algorithms: ["RS256"] }) as jwt.JwtPayload;
     debug(decoded);
 
     // Validate rest of the fields

@@ -1,5 +1,6 @@
 import { Context } from "openapi-backend";
 import { v4 as uuidv4 } from "uuid";
+
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import { generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
@@ -70,11 +71,13 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         expiresAt: expiresAt,
       };
 
+      const suomiFiLoginStateHash = generateBase64Hash(JSON.stringify(suomiFiLoginState));
+
       return {
         statusCode: 303,
         headers: {
           Location: redirectUrl,
-          "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(suomiFiLoginState)}; SameSite=None; Secure; HttpOnly`,
+          "Set-Cookie": `suomiFiLoginState=${suomiFiLoginStateHash}; SameSite=None; Secure; HttpOnly`,
           "SET-COOKIE": `appContext=; SameSite=None; Secure; HttpOnly`, // Ugly but effective hack to send multiple cookies on aws api gateway
         },
       };
