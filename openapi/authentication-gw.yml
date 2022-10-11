@@ -246,7 +246,7 @@ paths:
                     example: "1233ab213.1233abec213.1233abecd213"
                   expiresAt:
                     type: string
-                    format: timestamp
+                    format: date-time
                     example: "2022-01-30T08:30:00.123Z"
                     description: an ISO-8601 timestamp string that specifies the token expirity datetime
         "401":
@@ -470,7 +470,7 @@ paths:
                     example: "1233ab213.1233abec213.1233abecd213"
                   expiresAt:
                     type: string
-                    format: timestamp
+                    format: date-time
                     example: "2022-01-30T08:30:00.123Z"
                     description: an ISO-8601 timestamp string that specifies the token expirity datetime
         "401":
@@ -536,7 +536,7 @@ paths:
                     example: "1233ab213.1233abec213.1233abecd213"
                   expiresAt:
                     type: string
-                    format: timestamp
+                    format: date-time
                     example: "2022-01-30T08:30:00.123Z"
                     description: an ISO-8601 timestamp string that specifies the token expirity datetime
         "401":

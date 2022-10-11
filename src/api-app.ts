@@ -11,6 +11,13 @@ import Runtime from "./utils/Runtime";
 // Setup the OpenAPI backend
 const api = new OpenAPIBackend({
   definition: "./openapi/authentication-gw.yml",
+  ajvOpts: {
+    formats: {
+      "date-time": (data: string) => {
+        return !isNaN(Date.parse(data));
+      },
+    },
+  },
 });
 
 // register your framework specific request handlers here
