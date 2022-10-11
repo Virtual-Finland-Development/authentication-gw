@@ -5,7 +5,7 @@ import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException } from "../../utils/exceptions";
 import { generateBase64Hash } from "../../utils/hashes";
 import { debug, logAxiosException } from "../../utils/logging";
-import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
@@ -47,8 +47,8 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: TESTBED_LOGIN_URL,
-        "Set-Cookie": `appContext=${parsedAppContext.hash};`,
       },
+      cookies: [prepareCookie("appContext", parsedAppContext.hash)],
     };
   }
 
@@ -69,8 +69,8 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: redirectUrl,
-        "Set-Cookie": `appContext='';`,
       },
+      cookies: [prepareCookie("appContext", "")],
     };
   }
 
@@ -142,8 +142,8 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: LOGOUT_REQUEST_URL,
-        "Set-Cookie": `appContext=${parsedAppContext.hash};`,
       },
+      cookies: [prepareCookie("appContext", parsedAppContext.hash)],
     };
   }
 
@@ -162,8 +162,8 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: redirectUrl,
-        "Set-Cookie": `appContext='';`,
       },
+      cookies: [prepareCookie("appContext", "")],
     };
   }
 

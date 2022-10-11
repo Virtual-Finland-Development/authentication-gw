@@ -17,6 +17,7 @@ export type HttpResponse = {
   statusCode: number;
   headers?: Record<string, string | string[] | boolean | number>;
   body?: string;
+  cookies?: Array<string>; // v2: cookies, https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html
 };
 
 export interface AuthRequestHandler {

@@ -53,6 +53,16 @@ export function prepareErrorRedirectUrl(redirectUrl: string, errorMessage: strin
 
 /**
  *
+ * @param name
+ * @param value
+ * @returns
+ */
+export function prepareCookie(name: string, value: string): string {
+  return `${name}=${value}; SameSite=None; Secure; HttpOnly`;
+}
+
+/**
+ *
  * @param error
  * @returns
  */
