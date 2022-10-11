@@ -3,7 +3,7 @@ import { prepareCookie } from "../../../utils/route-utils";
 
 export default {
   create(suomiFiLoginStateHash: string): Array<string> {
-    const suomiFiCookieChunks = suomiFiLoginStateHash.match(/.{1,4096}/g) || []; // split into chunks of 4096 chars
+    const suomiFiCookieChunks = suomiFiLoginStateHash.match(/.{1,2048}/g) || []; // split into chunks of 2048 chars
     const suomiFiCookies = suomiFiCookieChunks.map((chunk, index) => prepareCookie(`suomiFiLoginState_${index}`, String(chunk)));
     return suomiFiCookies;
   },
