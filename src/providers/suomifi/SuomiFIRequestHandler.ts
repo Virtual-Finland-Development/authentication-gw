@@ -39,7 +39,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: authenticationUrl,
-        "Set-Cookie": `appContext=${parsedAppContext.hash};`,
+        "Set-Cookie": `appContext=${parsedAppContext.hash}; SameSite=None; Secure; HttpOnly`,
       },
     };
   }
@@ -75,7 +75,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         headers: {
           Location: redirectUrl,
           "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(suomiFiLoginState)}; SameSite=None; Secure; HttpOnly`,
-          "SET-COOKIE": `appContext=;`, // Ugly but effective hack to send multiple cookies on aws api gateway
+          "SET-COOKIE": `appContext=; SameSite=None; Secure; HttpOnly`, // Ugly but effective hack to send multiple cookies on aws api gateway
         },
       };
     } catch (error) {
