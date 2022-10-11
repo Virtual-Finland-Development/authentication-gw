@@ -5,13 +5,14 @@ import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import { generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
 import { debug, log } from "../../utils/logging";
-import { prepareErrorRedirectUrl, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import { prepareCookie, prepareErrorRedirectUrl, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { parseBase64XMLBody } from "../../utils/transformers";
 
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SuomiFISettings from "./SuomiFI.config";
 import { createSignedInTokens, generateSaml2RelayState } from "./SuomiFIAuthorizer";
+import SuomiFICookies from "./utils/SuomiFICookies";
 import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
 import { SuomiFiLoginState } from "./utils/SuomifiTypes";
 
@@ -40,8 +41,8 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: authenticationUrl,
-        "Set-Cookie": `appContext=${parsedAppContext.hash}; SameSite=None; Secure; HttpOnly`,
       },
+      cookies: [prepareCookie("appContext", parsedAppContext.hash)],
     };
   }
 
@@ -71,15 +72,17 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         expiresAt: expiresAt,
       };
 
+      // Setup cookies
       const suomiFiLoginStateHash = generateBase64Hash(JSON.stringify(suomiFiLoginState));
+      const suomiFiCookies = SuomiFICookies.create(suomiFiLoginStateHash);
+      const cookies = [...suomiFiCookies, prepareCookie("appContext", "")];
 
       return {
         statusCode: 303,
         headers: {
           Location: redirectUrl,
-          "Set-Cookie": `suomiFiLoginState=${suomiFiLoginStateHash}; SameSite=None; Secure; HttpOnly`,
-          "SET-COOKIE": `appContext=; SameSite=None; Secure; HttpOnly`, // Ugly but effective hack to send multiple cookies on aws api gateway
         },
+        cookies: cookies,
       };
     } catch (error) {
       debug(error);
@@ -89,8 +92,8 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         statusCode: 303,
         headers: {
           Location: redirectUrl,
-          "Set-Cookie": `appContext=;`,
         },
+        cookies: [prepareCookie("appContext", "")],
       };
     }
   }
@@ -140,14 +143,10 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
-    if (context.request.cookies?.suomiFiLoginState) {
+    if (SuomiFICookies.hasSuomifiCookies(context)) {
+      const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
       try {
-        const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
-        if (!loginState.profile) {
-          throw new ValidationError("No profile info on the login state");
-        }
-
+        const loginState = this.#resolveLoginState(context, false); // throws
         const samlClient = await getSuomiFISAML2Client();
         const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, parsedAppContext.hash);
 
@@ -185,17 +184,19 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent),
-        "Set-Cookie": `suomiFiLoginState=;`,
       },
+      cookies: [prepareCookie("suomiFiLoginState", "")],
     };
   }
 
-  #resolveLoginState(context: Context): SuomiFiLoginState {
-    if (typeof context.request.cookies?.suomiFiLoginState === "undefined") {
+  #resolveLoginState(context: Context, authorize: boolean = true): SuomiFiLoginState {
+    if (!SuomiFICookies.hasSuomifiCookies(context)) {
       throw new AccessDeniedException("Not logged in");
     }
 
-    const loginState = JSON.parse(resolveBase64Hash(String(context.request.cookies.suomiFiLoginState)));
+    const suomiFiLoginStateHash = SuomiFICookies.resolve(context);
+    const loginState = JSON.parse(resolveBase64Hash(suomiFiLoginStateHash));
+
     if (!loginState.profile) {
       throw new ValidationError("No profile info on the login state");
     }
@@ -203,10 +204,12 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
       throw new ValidationError("No accessToken info on the login state");
     }
 
-    const requestAccessToken = context.request.requestBody?.accessToken || context.request.requestBody?.loginCode;
-    if (loginState.accessToken !== requestAccessToken) {
-      debug(loginState, context.request);
-      throw new AccessDeniedException("Invalid session token");
+    if (authorize) {
+      const requestAccessToken = context.request.requestBody?.accessToken || context.request.requestBody?.loginCode;
+      if (loginState.accessToken !== requestAccessToken) {
+        debug(loginState, context.request);
+        throw new AccessDeniedException("Invalid session token");
+      }
     }
     return loginState;
   }
