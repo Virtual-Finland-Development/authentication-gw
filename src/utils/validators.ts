@@ -1,6 +1,6 @@
 import { Context } from "openapi-backend";
 import { ValidationError } from "./exceptions";
-import { generateBase64Hash, resolveBase64Hash } from "./hashes";
+import { generateUrlEncodedBase64Hash, resolveUrlEncodedBase64HashJSON } from "./hashes";
 import { debug } from "./logging";
 import { ifAllObjectKeysAreDefined, ifString } from "./transformers";
 
@@ -33,14 +33,14 @@ export function parseAppContext(context: Context | string, provider?: string, gu
   let appContext;
 
   try {
-    appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(appContextHash)));
+    appContext = resolveUrlEncodedBase64HashJSON(appContextHash);
     if (typeof appContext.provider !== "string") {
       appContext.provider = provider;
     }
     if (typeof appContext.guid !== "string") {
       appContext.guid = guid;
     }
-    appContextHash = encodeURIComponent(generateBase64Hash(appContext));
+    appContextHash = generateUrlEncodedBase64Hash(appContext);
   } catch (error) {
     debug(error, appContextHash);
     throw new ValidationError("Bad app context");

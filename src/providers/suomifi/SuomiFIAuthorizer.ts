@@ -5,8 +5,10 @@
 import * as jwt from "jsonwebtoken";
 
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
-import { createSecretHash, generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
+import { cleanPublicKeyForJWT, createSecretHash, generateBase64Hash, generateUrlEncodedBase64Hash, resolveBase64Hash } from "../../utils/hashes";
 import { debug } from "../../utils/logging";
+import { getPublicKey, JWKS } from "../../utils/openId-JWKS";
+import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
 import { leftTrim, transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
 import { ParsedAppContext } from "../../utils/types";
@@ -33,6 +35,8 @@ async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nameID: string
     idToken: jwt.sign({ appContextHash: parsedAppContext.hash, nameID: nameID, nonce: nonce }, await Settings.getSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
       algorithm: "RS256",
       expiresIn: expiresIn,
+      issuer: Runtime.getAppUrl(),
+      keyid: "vfd:authgw:suomifi:jwt",
     }),
     expiresAt: transformExpiresInToExpiresAt_ISOString(expiresIn),
   };
@@ -83,26 +87,48 @@ export async function createSignedInTokens(
 }
 
 /**
+ * @see: https://dev.to/kleeut/building-a-verify-jwt-function-in-typescript-e6d
+ * @returns
+ */
+export async function getJKWSJsonConfiguration(): Promise<JWKS> {
+  return {
+    keys: [
+      {
+        alg: "RS256",
+        kid: "vfd:authgw:suomifi:jwt",
+        e: "AQAB",
+        kty: "RSA",
+        n: generateUrlEncodedBase64Hash(cleanPublicKeyForJWT(await Settings.getSecret("SUOMIFI_JWT_PUBLIC_KEY"))),
+        use: "sig",
+      },
+    ],
+  };
+}
+
+/**
  * @param idToken
  * @param context - which app source is requesting access
  */
 export default async function authorize(idToken: string, context: string): Promise<void> {
   try {
+    // Decode token
     const token = leftTrim(idToken, "Bearer ");
-    if (!token) {
-      throw new AccessDeniedException("No token");
-    }
-
-    const decoded = jwt.verify(token, await Settings.getSecret("SUOMIFI_JWT_PUBLIC_KEY"), { ignoreExpiration: false, algorithms: ["RS256"] }) as jwt.JwtPayload;
-    debug(decoded);
+    const decodedToken = jwt.decode(token, { complete: true });
+    debug(decodedToken);
+    // Validate token
+    const publicKey = await getPublicKey(decodedToken, { issuer: Runtime.getAppUrl(), jwks: await getJKWSJsonConfiguration() });
+    debug(publicKey);
+    const verified = jwt.verify(token, publicKey.pem, { ignoreExpiration: false }) as jwt.JwtPayload;
+    debug(verified);
 
     // Validate rest of the fields
-    const parsedAppContext = parseAppContext(decoded.appContextHash); // Throws
+    const parsedAppContext = parseAppContext(verified.appContextHash); // Throws
     const nonce = await generateNonce(parsedAppContext);
-    if (nonce !== decoded.nonce) {
+    if (nonce !== verified.nonce) {
       throw new AccessDeniedException("Invalid authorizing context secret");
     }
   } catch (error) {
+    debug(error);
     throw new AccessDeniedException(String(error));
   }
 }
