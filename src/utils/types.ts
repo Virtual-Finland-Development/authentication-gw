@@ -15,7 +15,7 @@ export interface AuthenticateResponse {
 
 export type HttpResponse = {
   statusCode: number;
-  headers?: Record<string, string | boolean | number>;
+  headers?: Record<string, string | string[] | boolean | number>;
   body?: string;
 };
 

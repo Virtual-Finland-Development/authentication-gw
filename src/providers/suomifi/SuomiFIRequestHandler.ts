@@ -39,6 +39,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
       statusCode: 303,
       headers: {
         Location: authenticationUrl,
+        "Set-Cookie": `appContext=${parsedAppContext.hash};`,
       },
     };
   }
@@ -73,7 +74,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         statusCode: 303,
         headers: {
           Location: redirectUrl,
-          "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(suomiFiLoginState)}; SameSite=None; Secure; HttpOnly`,
+          "Set-Cookie": [`suomiFiLoginState=${generateBase64Hash(suomiFiLoginState)}; SameSite=None; Secure; HttpOnly`, `appContext=;`],
         },
       };
     } catch (error) {
@@ -84,6 +85,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         statusCode: 303,
         headers: {
           Location: redirectUrl,
+          "Set-Cookie": `appContext=;`,
         },
       };
     }
