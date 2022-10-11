@@ -1,9 +1,9 @@
 // @see: https://github.com/pulumi/examples/tree/master/aws-ts-apigatewayv2-http-api
-import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
+import * as pulumi from "@pulumi/pulumi";
 
 import Settings from "../src/utils/Settings";
-import { createStack, createLambdaRoute, createApiEndpoint } from "./resources/LambdaApiGatewayV2";
+import { createApiEndpoint, createLambdaRoute, createStack } from "./resources/LambdaApiGatewayV2";
 
 const configuration = {
   name: "Authenticator",
@@ -42,7 +42,7 @@ const appRoutes = [
       }),
       environment: {
         STAGE: configuration.stage,
-        APP_CONTEXT_REDIRECT_FALLBACK_URL: Settings.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL"),
+        DEBUG_MODE: Settings.getEnv("DEBUG_MODE", "false"),
       },
       nodeModulesLayer: nodeModulesLayer,
     },
