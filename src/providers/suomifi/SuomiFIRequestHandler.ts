@@ -4,7 +4,7 @@ import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import { generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
 import { debug, log } from "../../utils/logging";
-import { prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import { prepareErrorRedirectUrl, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { parseBase64XMLBody } from "../../utils/transformers";
 
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
@@ -52,12 +52,13 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     const body = parseBase64XMLBody(context.request.body);
     const samlClient = await getSuomiFISAML2Client();
-    const result = await samlClient.validatePostResponseAsync(body); // throws
-
-    const { parsedAppContext, accessToken, idToken, expiresAt } = await createSignedInTokens(body.RelayState, result.profile.nameID); // throws
-    const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, accessToken, this.identityProviderIdent);
 
     try {
+      const result = await samlClient.validatePostResponseAsync(body); // throws
+
+      const { parsedAppContext, accessToken, idToken, expiresAt } = await createSignedInTokens(body.RelayState, result.profile.nameID); // throws
+      const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, accessToken, this.identityProviderIdent);
+
       const suomiFiLoginState = {
         profile: result.profile,
         context: {
@@ -75,9 +76,16 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
           "Set-Cookie": `suomiFiLoginState=${generateBase64Hash(suomiFiLoginState)}; SameSite=None; Secure; HttpOnly`,
         },
       };
-    } catch (err) {
-      debug("AuthenticateResponse", err, () => result.profile.getAssertion());
-      throw new ValidationError("Bad login profile data: AuthnContextClassRef");
+    } catch (error) {
+      debug(error);
+      const parsedAppContext = parseAppContext(context, this.identityProviderIdent); // throws
+      const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, "Authentication failed", this.identityProviderIdent);
+      return {
+        statusCode: 303,
+        headers: {
+          Location: redirectUrl,
+        },
+      };
     }
   }
 

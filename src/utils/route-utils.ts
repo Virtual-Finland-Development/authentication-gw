@@ -39,6 +39,20 @@ export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: str
 
 /**
  *
+ * @param redirectUrl
+ * @param errorMessage
+ * @param providerIdent
+ * @returns
+ */
+export function prepareErrorRedirectUrl(redirectUrl: string, errorMessage: string, providerIdent: string): string {
+  return ensureUrlQueryParams(redirectUrl, [
+    { param: "error", value: errorMessage },
+    { param: "provider", value: providerIdent },
+  ]);
+}
+
+/**
+ *
  * @param error
  * @returns
  */
