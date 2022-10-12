@@ -28,7 +28,7 @@ The authorization request flows use the access token for validating the user's i
 
 _Figure: The authorize requests flow_
 
-Example of the authorization request from the data source server to the authenticatio gw `/authorize` - endpoint:
+Example of the authorization request from the data source server to the authentication gw `/authorize` - endpoint:
 
 ```ts
 const response = await fetch(`${authentication_gw_host}/authorize`, {
