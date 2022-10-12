@@ -58,6 +58,10 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 - Browse the API-docs at http://localhost:3000/
   - In the container, the default `postStartCommand` is set to `npm run start` which should publish the endpoint
 
+### Run with docker compose
+
+- `docker compose up`
+
 ### Run with local tools
 
 - `npm install`
