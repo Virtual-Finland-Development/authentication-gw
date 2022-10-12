@@ -28,6 +28,24 @@ The authorization request flows use the access token for validating the user's i
 
 _Figure: The authorize requests flow_
 
+Example of the authorization request from the data source server to the authenticatio gw `/authorize` - endpoint:
+
+```ts
+const response = await fetch(`${authentication_gw_host}/authorize`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer <idToken>`,
+    "X-authorization-provider": "sinuna",
+    "X-Authorization-Context": "demo productizer app",
+  },
+});
+
+if (response.status !== 200) {
+  throw new Error("Access Denied");
+}
+```
+
 ## Development
 
 The development setup can be set up using vscode devcontainers or with local tools

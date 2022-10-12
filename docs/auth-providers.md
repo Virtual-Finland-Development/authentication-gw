@@ -26,6 +26,10 @@ Sinuna is an Openid Connect -type authentication provider with the following end
 - LogoutRequest: `/auth/openid/sinuna/logout-request`
   - ends the sinuna login session
 
+The id token can be verified using the public key of the authentication provider. The public key can be fetched from the following endpoints:
+
+- https://login.iam.qa.sinuna.fi/oxauth/.well-known/openid-configuration
+
 ## SuomiFi
 
 SuomiFi is an SAML2 -type authentication provider with the following endpoints:
@@ -50,6 +54,10 @@ SuomiFi is an SAML2 -type authentication provider with the following endpoints:
 - LogoutRequest: `/auth/saml2/suomifi/logout-request`
   - ends the suomifi login session
 
+The id token can be verified using the public key of the authentication provider. The public key can be fetched from the following endpoint:
+
+- `/auth/saml2/suomifi/.well-known/jwks.json`
+
 ## Testbed
 
 Testbed is an Openid Connect -type authentication provider with the following endpoints:
@@ -72,3 +80,7 @@ Testbed is an Openid Connect -type authentication provider with the following en
   - `X-authorization-provider: testbed`
 - LogoutRequest: `/auth/openid/testbed/logout-request`
   - uses the `idToken` to end the testbed login session
+
+The id token can be verified using the public key of the authentication provider. The public key can be fetched from the following endpoints:
+
+- https://login.testbed.fi/.well-known/openid-configuration

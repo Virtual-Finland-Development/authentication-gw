@@ -1,5 +1,5 @@
 import { ValidationError } from "../../../utils/exceptions";
-import { createSecretHash, generateBase64Hash, resolveBase64Hash } from "../../../utils/hashes";
+import { createSecretHash, generateUrlEncodedBase64Hash, resolveUrlEncodedBase64HashJSON } from "../../../utils/hashes";
 import Settings from "../../../utils/Settings";
 import { isObject, omitObjectKeys } from "../../../utils/transformers";
 import { AppContext } from "../../../utils/types";
@@ -36,17 +36,15 @@ export const SinunaStateAttributor = new (class SinunaStateAttributor {
     }
   }
   generate(appContext: AppContext): string {
-    return encodeURIComponent(
-      generateBase64Hash({
-        ...appContext,
-        checksum: this.#createCheckSum(appContext),
-      })
-    );
+    return generateUrlEncodedBase64Hash({
+      ...appContext,
+      checksum: this.#createCheckSum(appContext),
+    });
   }
   parse(state: string): AppContext {
     let appContext;
     try {
-      appContext = JSON.parse(resolveBase64Hash(decodeURIComponent(state)));
+      appContext = resolveUrlEncodedBase64HashJSON(state);
     } catch (error) {
       throw new ValidationError("Could not parse state attribute");
     }

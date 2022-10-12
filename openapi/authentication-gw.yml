@@ -549,3 +549,16 @@ paths:
                 properties:
                   message:
                     type: string
+  "/auth/saml2/{provider}/.well-known/jwks.json":
+    get:
+      operationId: Saml2WellKnownJWKSRequest
+      parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: .well-known/jwks.json

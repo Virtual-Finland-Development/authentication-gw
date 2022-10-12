@@ -3,7 +3,26 @@ import * as jwt from "jsonwebtoken";
 import jwktopem from "jwk-to-pem";
 import { debug } from "./logging";
 
-type IssuerConfig = { issuer: string; openIdConfigUrl?: string; jwksUri?: string };
+/* ---------------Types------------------- */
+
+type IssuerConfig = { issuer: string; openIdConfigUrl?: string; jwksUri?: string; jwks?: JWKS };
+
+export type JWKS = {
+  keys: JWK[];
+};
+
+type JWK = {
+  alg: string;
+  kty: string;
+  use: string;
+  n: string;
+  e: string;
+  kid: string;
+  x5t?: string;
+  x5c?: string[];
+};
+
+/* ---------------Public------------------- */
 
 /**
  * Fetch the public key from the JWKS endpoint
@@ -31,6 +50,8 @@ export async function getPublicKey(decodedToken: jwt.Jwt | null, issuerConfig: I
   return { pem: jwktopem(key), key: key };
 }
 
+/* ---------------Private------------------- */
+
 /**
  * Resolve the JWKS endpoint and fetch the public key
  *
@@ -42,19 +63,8 @@ async function getJwksKey(keyId: string, issuerConfig: IssuerConfig): Promise<jw
   let key = await cacheService.get(cacheKey);
   if (!key) {
     debug("Fetching JWKS key..");
-
-    let jwksUri = issuerConfig.jwksUri;
-    if (typeof jwksUri !== "string") {
-      if (typeof issuerConfig.openIdConfigUrl !== "string") {
-        throw new Error("Missing JWKS URI");
-      }
-
-      const verifyConfig = await axios.get(issuerConfig.openIdConfigUrl);
-      jwksUri = String(verifyConfig.data.jwks_uri);
-    }
-
-    const jwks = await axios.get(jwksUri);
-    key = jwks.data.keys.find((key: any) => key.kid === keyId);
+    const jwks = await getJwks(issuerConfig);
+    key = jwks.keys.find((key: jwt.JwtHeader) => key.kid === keyId);
     await cacheService.set(cacheKey, key);
   }
 
@@ -62,6 +72,31 @@ async function getJwksKey(keyId: string, issuerConfig: IssuerConfig): Promise<jw
     throw new Error("Public key not found in jwks endpoint");
   }
   return key;
+}
+
+/**
+ * Gets / resolves the JWKS data
+ *
+ * @param issuerConfig
+ * @returns
+ */
+async function getJwks(issuerConfig: IssuerConfig): Promise<JWKS> {
+  if (issuerConfig.jwks?.keys instanceof Array) {
+    return issuerConfig.jwks;
+  }
+
+  let jwksUri = issuerConfig.jwksUri;
+  if (typeof jwksUri !== "string") {
+    if (typeof issuerConfig.openIdConfigUrl !== "string") {
+      throw new Error("Missing JWKS URI");
+    }
+
+    const verifyConfig = await axios.get(issuerConfig.openIdConfigUrl);
+    jwksUri = String(verifyConfig.data.jwks_uri);
+
+    return (await axios.get(jwksUri)).data;
+  }
+  throw new Error("Missing JWKS Resource");
 }
 
 /**
