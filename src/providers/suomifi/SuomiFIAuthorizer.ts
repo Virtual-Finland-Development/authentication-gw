@@ -5,7 +5,7 @@
 import * as jwt from "jsonwebtoken";
 
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
-import { cleanPublicKeyForJWT, createSecretHash, generateBase64Hash, generateUrlEncodedBase64Hash, resolveBase64Hash } from "../../utils/hashes";
+import { createSecretHash, generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
 import { debug } from "../../utils/logging";
 import { getPublicKey, JWKS } from "../../utils/openId-JWKS";
 import Runtime from "../../utils/Runtime";
@@ -87,21 +87,12 @@ export async function createSignedInTokens(
 }
 
 /**
- * @see: https://dev.to/kleeut/building-a-verify-jwt-function-in-typescript-e6d
+ *
  * @returns
  */
 export async function getJKWSJsonConfiguration(): Promise<JWKS> {
   return {
-    keys: [
-      {
-        alg: "RS256",
-        kid: "vfd:authgw:suomifi:jwt",
-        e: "AQAB",
-        kty: "RSA",
-        n: generateUrlEncodedBase64Hash(cleanPublicKeyForJWT(await Settings.getSecret("SUOMIFI_JWT_PUBLIC_KEY"))),
-        use: "sig",
-      },
-    ],
+    keys: [JSON.parse(await Settings.getSecret("SUOMIFI_JWK"))],
   };
 }
 
