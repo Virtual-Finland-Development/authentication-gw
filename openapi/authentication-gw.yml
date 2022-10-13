@@ -323,13 +323,6 @@ paths:
             type: string
           required: true
           description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
-        - in: query
-          name: provider
-          schema:
-            type: string
-            default: "suomifi"
-          required: false
-          description: "Auth provider name"
       responses:
         "303":
           description: Redirect to the authentication provider service
