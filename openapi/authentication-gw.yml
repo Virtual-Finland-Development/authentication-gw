@@ -506,7 +506,7 @@ paths:
             application/json:
               schema:
                 type: object
-                required: ["profile", "context", "accessToken", "idToken", "expiresAt"]
+                required: ["profile", "context"]
                 properties:
                   profile:
                     type: object
@@ -522,16 +522,6 @@ paths:
                     properties:
                       AuthnContextClassRef:
                         type: string
-                  accessToken:
-                    type: string
-                  idToken:
-                    type: string
-                    example: "1233ab213.1233abec213.1233abecd213"
-                  expiresAt:
-                    type: string
-                    format: date-time
-                    example: "2022-01-30T08:30:00.123Z"
-                    description: an ISO-8601 timestamp string that specifies the token expirity datetime
         "401":
           description: "Login invalid or expired"
           content:

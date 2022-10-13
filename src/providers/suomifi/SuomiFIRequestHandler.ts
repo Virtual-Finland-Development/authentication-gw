@@ -129,7 +129,10 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
     return {
       statusCode: 200,
       headers: getJSONResponseHeaders(),
-      body: JSON.stringify(loginState),
+      body: JSON.stringify({
+        profile: loginState.profile,
+        context: loginState.context,
+      }),
     };
   }
 
