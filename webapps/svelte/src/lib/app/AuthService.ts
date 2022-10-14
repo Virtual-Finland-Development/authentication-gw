@@ -1,5 +1,5 @@
 import AuthenticationGW, { AuthenticationGWProps } from "../api/AuthenticationGW";
-import { AuthTokens } from "../types";
+import { AuthTokens } from "../utils/types";
 import LoginAppComponent from "./LoginAppComponent";
 
 /**

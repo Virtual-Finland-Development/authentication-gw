@@ -8,7 +8,7 @@ const loginApp = new LoginApp({
   protocol: loginFlow.protocol,
 });
 
-let initialized = false;
+let initialized = false; // a svelte reactivity hack
 
 onMount(async () => {
   await loginApp.engage()
@@ -21,7 +21,6 @@ let states = loginApp.UIState.states;
 
 <div class="login-flow-box">
   {#if !initialized}
-    <p style="color: ocean">Initializing...</p>
     <div class="login-state-box">
       <b>{loginFlow.name}</b> <br/>
       <p style="color: ocean">Initializing...</p>
