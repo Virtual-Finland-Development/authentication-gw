@@ -71,7 +71,7 @@
      * Login service defs
      * 
     /**************************************************************************/
-    class BaseLoginApp {
+    class LoginApp {
         name = null;
         endpoints = null;
         authProtocol = null;
@@ -169,7 +169,7 @@
         }
     }
 
-    class BaseAppComponent {
+    class LoginAppComponent {
         parent = null;
         constructor(parent) {
             this.parent = parent;
@@ -188,7 +188,7 @@
     /**
      * Example app auth service
      */
-    class AuthService extends BaseAppComponent {
+    class AuthService extends LoginAppComponent {
         login() {
             this.log("AuthService", "logging in..");
             this.UIState.transitToUrl(`${this.endpoints.LoginRequest}?appContext=${AppSettings.generateAppContext()}`);
@@ -270,7 +270,7 @@
     /**
      * Example app auth state
      */
-    class AuthState extends BaseAppComponent {
+    class AuthState extends LoginAppComponent {
         storeKey = null
         isInTransition = false
         user = {
@@ -340,7 +340,7 @@
     /**
     * Example app UI state, interactions handler
     */
-    class UIState extends BaseAppComponent {
+    class UIState extends LoginAppComponent {
         handleCurrentState() {
             const loginButton = document.querySelector(`#${this.getName()} .login`);
             const logoutButton = document.querySelector(`#${this.getName()} .logout`);
@@ -383,15 +383,15 @@
      * login services
      * 
     /**************************************************************************/
-    const sinuna = new BaseLoginApp({
+    const sinuna = new LoginApp({
         name: "Sinuna",
         authProtocol: "openid",
     });
-    const suomifi = new BaseLoginApp({
+    const suomifi = new LoginApp({
         name: "SuomiFI",
         authProtocol: "saml2",
     });
-    const testbed = new BaseLoginApp({
+    const testbed = new LoginApp({
         name: "Testbed",
         authProtocol: "openid",
     });
