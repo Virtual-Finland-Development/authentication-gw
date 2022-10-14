@@ -54,7 +54,7 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authAPIHost: "http://localhost:3000", // the authentication gw host
+        authenticationGatewayHost: "http://localhost:3000", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
         generateAppContext() { // App context generator
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
@@ -88,18 +88,18 @@
         initializeEndpoints(providerName, authProtocol) {
             const provider = providerName.toLowerCase();
             const protocol = authProtocol.toLowerCase();
-            const authAPIHost = AppSettings.authAPIHost;
+            const authenticationGatewayHost = AppSettings.authenticationGatewayHost;
 
             if (["openid", "saml2"].indexOf(protocol) < 0) {
                 throw new Error(`Unsupported auth protocol: ${protocol}`);
             }
 
             return {
-                LoginRequest: `${authAPIHost}/auth/${protocol}/${provider}/login-request`,
-                LogoutRequest: `${authAPIHost}/auth/${protocol}/${provider}/logout-request`,
-                UserInfoRequest: `${authAPIHost}/auth/${protocol}/${provider}/user-info-request`,
-                AuthTokenRequest: `${authAPIHost}/auth/${protocol}/${provider}/auth-token-request`,
-                AuthorizeRequest: `${authAPIHost}/authorize`,
+                LoginRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/login-request`,
+                LogoutRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/logout-request`,
+                UserInfoRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/user-info-request`,
+                AuthTokenRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/auth-token-request`,
+                AuthorizeRequest: `${authenticationGatewayHost}/authorize`,
             }
         }
 

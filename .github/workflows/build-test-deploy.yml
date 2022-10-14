@@ -40,15 +40,16 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           APP_CONTEXT_REDIRECT_FALLBACK_URL: ${{ secrets.APP_CONTEXT_REDIRECT_FALLBACK_URL }}
-  deploy-web:
+  deploy-web-simple:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Fix example index url
-        run: 'sed -i "s|authAPIHost: \"http://localhost:3000\",|authAPIHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./web/index.html'
+      - name: Fix simple demo app index authgw-url
+        run: |
+          sed -i "s|authenticationGatewayHost: \".*\",|authenticationGatewayHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./webapps/simple/index.html
         env:
           AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{ secrets.AUTH_PROVIDER_REDIRECT_BACK_HOST }}
-      - name: Deploy to S3
+      - name: Deploy Simpleton to S3
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --delete
@@ -58,3 +59,22 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: eu-north-1
           SOURCE_DIR: "webapps/simple"
+  deploy-web-svelte:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Fix svelte demo app index authgw-url
+        run: |
+          sed -i "s|authenticationGatewayHost: \".*\",|authenticationGatewayHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./webapps/svelte/src/AppSettings.ts
+        env:
+          AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{ secrets.AUTH_PROVIDER_REDIRECT_BACK_HOST }}
+      - name: Deploy Svelte-app to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --delete
+        env:
+          AWS_S3_BUCKET: virtual-finland-development-auth-files/svelte
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: eu-north-1
+          SOURCE_DIR: "webapps/svelte"

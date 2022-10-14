@@ -1,4 +1,5 @@
-import { AUTH_GW_ENDPOINT } from "./APISettings";
+import { default as AppSettings } from "../../AppSettings";
+
 import { DefaultService } from "./openapi/generated";
 import { AuthGWClient } from "./openapi/generated/AuthGWClient";
 
@@ -22,15 +23,15 @@ export default class AuthenticationGW {
 
     // Create the openapi client
     this.client = new AuthGWClient({
-      BASE: AUTH_GW_ENDPOINT,
+      BASE: AppSettings.authenticationGatewayHost,
       WITH_CREDENTIALS: true,
     }).default;
 
     // Setup the redirect urls
     const { provider, protocol } = this.props;
     this.redirectUrls = {
-      LoginRequest: `${AUTH_GW_ENDPOINT}/auth/${protocol.toLowerCase()}/${provider}/login-request`,
-      LogoutRequest: `${AUTH_GW_ENDPOINT}/auth/${protocol.toLowerCase()}/${provider}/logout-request`,
+      LoginRequest: `${AppSettings.authenticationGatewayHost}/auth/${protocol.toLowerCase()}/${provider}/login-request`,
+      LogoutRequest: `${AppSettings.authenticationGatewayHost}/auth/${protocol.toLowerCase()}/${provider}/logout-request`,
     };
   }
 
