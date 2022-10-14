@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "predev": "npm run generate-authgw-openapi",
+    "prebuild": "npm run generate-authgw-openapi",
     "generate-authgw-openapi": "ts-node ./src/lib/api/openapi/generate-authgw-openapi.ts"
   },
   "devDependencies": {
