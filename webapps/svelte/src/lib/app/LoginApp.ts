@@ -1,6 +1,6 @@
 import AppSettings from "../../AppSettings";
 import { AuthenticationProtocol } from "../api/AuthenticationGW";
-import { log } from "../helpers";
+import { log } from "../utils/helpers";
 import AuthService from "./AuthService";
 import AuthState from "./AuthState";
 import UIState from "./UIState";
