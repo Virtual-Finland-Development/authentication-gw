@@ -6,7 +6,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #a7a7a7;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -55,7 +55,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #616161;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -68,7 +68,7 @@ button:focus-visible {
 }
 
 .login-flow-box {
-  background-color: #585858;
+  background-color: #949494;
   border-radius: 8px;
   border: 1px solid transparent;
 }
@@ -79,7 +79,7 @@ button:focus-visible {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #2b2b2b;
+  background-color: #727272;
   transition: border-color 0.25s;
 }
 
@@ -94,7 +94,7 @@ button:focus-visible {
 }
 
 .login-state-box span.is-logged-out {
-  color: #7a7a7a;
+  color: #383838;
 }
 
 .login-state-box span.is-loading {
