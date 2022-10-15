@@ -8,6 +8,7 @@ The example login apps that demonstrates how to use the authentication gw in a b
   - is a simple dependency-free html document
 - Svelte: [../webapps/svelte/](../webapps/svelte/)
   - is a svelte+vite app with OpenAPI typescript generators for authgw API client
+  - needs an authgw server running and referenced in [../webapps/svelte/src/AppSettings.ts](../webapps/svelte/src/AppSettings.ts)
 
 See the auth provider specifics at [./auth-providers.md](./auth-providers.md).
 
