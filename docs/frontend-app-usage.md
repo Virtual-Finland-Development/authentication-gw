@@ -1,10 +1,13 @@
 # Frontend app usage
 
-## Example login app
+## Example login apps
 
-The example login app is a simple dependency-free html document that demonstrates how to use the auth gw in a browser:
+The example login apps that demonstrates how to use the authentication gw in a browser:
 
-[../web/index.html](../web/index.html)
+- Simple: [../webapps/simple/index.html](../webapps/simple/index.html)
+  - is a simple dependency-free html document
+- Svelte: [../webapps/svelte/](../webapps/svelte/)
+  - is a svelte+vite app
 
 See the auth provider specifics at [./auth-providers.md](./auth-providers.md).
 
