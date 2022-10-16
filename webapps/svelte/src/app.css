@@ -18,6 +18,7 @@
   -webkit-box-sizing: border-box;
   border: 2vh solid rgb(95, 95, 95);
   overflow: hidden;
+  max-height: 100%;
 }
 
 a {
@@ -74,7 +75,6 @@ button:focus-visible {
 
 .login-flow-box {
   background-color: #949494;
-  border-radius: 8px;
   border: 1px solid transparent;
 }
 
