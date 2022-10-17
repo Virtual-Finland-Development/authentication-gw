@@ -21,7 +21,7 @@ export abstract class BaseRequestHandler {
     let errorMessage = "Authentication failed";
 
     const parsedAppContext = parseAppContext(context, this.identityProviderIdent); // throws
-    const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, errorMessage, this.identityProviderIdent, "AuthenticateResponse");
+    const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, errorMessage, this.identityProviderIdent, "LoginRequest");
     return {
       statusCode: 303,
       headers: {
