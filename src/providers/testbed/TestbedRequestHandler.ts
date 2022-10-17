@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Context } from "openapi-backend";
 import { v4 as uuidv4 } from "uuid";
+import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException } from "../../utils/exceptions";
 import { generateBase64Hash } from "../../utils/hashes";
@@ -12,12 +13,13 @@ import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformer
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import TestbedSettings from "./Testbed.config";
+import authorize from "./TestbedAuthorizer";
 
 /**
  * @see: https://ioxio.com/guides/use-login-portal-in-your-applications
  * @see: https://login.testbed.fi/.well-known/openid-configuration
  */
-export default new (class TestbedRequestHandler implements AuthRequestHandler {
+export default new (class TestbedRequestHandler extends BaseRequestHandler implements AuthRequestHandler {
   identityProviderIdent = TestbedSettings.ident;
 
   async initialize(): Promise<void> {}
@@ -59,19 +61,28 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
    * @returns AuthenticateResponse -> LoginResponse
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
-    debug(context.request.query);
-    const loginCode = String(context.request.query.code);
-    const state = String(context.request.query.state);
-    const parsedAppContext = parseAppContext(state, this.identityProviderIdent);
-    const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loginCode, this.identityProviderIdent);
+    try {
+      debug(context.request.query);
+      const loginCode = String(context.request.query.code);
+      const state = String(context.request.query.state);
+      const parsedAppContext = parseAppContext(state, this.identityProviderIdent);
 
-    return {
-      statusCode: 303,
-      headers: {
-        Location: redirectUrl,
-      },
-      cookies: [prepareCookie("appContext", "")],
-    };
+      if (!loginCode) {
+        throw new Error("Missing login code");
+      }
+
+      const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loginCode, this.identityProviderIdent);
+
+      return {
+        statusCode: 303,
+        headers: {
+          Location: redirectUrl,
+        },
+        cookies: [prepareCookie("appContext", "")],
+      };
+    } catch (error) {
+      return this.getAuthenticateResponseFailedResponse(context, error);
+    }
   }
 
   /**
@@ -128,23 +139,31 @@ export default new (class TestbedRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+    try {
+      const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
 
-    const queryString = new URLSearchParams({
-      post_logout_redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/logout-response"),
-      state: parsedAppContext.hash,
-      id_token_hint: context.request.query.idToken,
-    }).toString();
+      // Verify logout token
+      const idToken = String(context.request.query?.idToken);
+      await authorize(idToken, "logout");
 
-    const LOGOUT_REQUEST_URL = `https://login.testbed.fi/end-session?${queryString}`;
+      const queryString = new URLSearchParams({
+        post_logout_redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/logout-response"),
+        state: parsedAppContext.hash,
+        id_token_hint: idToken,
+      }).toString();
 
-    return {
-      statusCode: 303,
-      headers: {
-        Location: LOGOUT_REQUEST_URL,
-      },
-      cookies: [prepareCookie("appContext", parsedAppContext.hash)],
-    };
+      const LOGOUT_REQUEST_URL = `https://login.testbed.fi/end-session?${queryString}`;
+
+      return {
+        statusCode: 303,
+        headers: {
+          Location: LOGOUT_REQUEST_URL,
+        },
+        cookies: [prepareCookie("appContext", parsedAppContext.hash)],
+      };
+    } catch (error) {
+      return this.getLogoutRequestFailedResponse(context, error);
+    }
   }
 
   /**

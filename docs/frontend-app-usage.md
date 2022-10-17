@@ -58,6 +58,12 @@ eg: `https://${frontendAppHost}/login-handler.html?loginCode={loginCode}&provide
 
 The login code is either a temporary code that can be exchanged for authentication tokens.
 
+### On a Login error
+
+If login fails / the attempt is cancelled etc, the user is redirected to the `redirectUrl` with query parameters: `error`, `provider` and `intent=LoginRequest`.
+
+eg: `https://${frontendAppHost}/login-handler.html?error=Login+failed&provider=sinuna&intent=LoginRequest`
+
 ## AuthTokenRequest
 
 The received `loginCode` is a temporary code which is used in retrieving the actual auth tokens from the `/auth/openid/sinuna/auth-token-request`-endpoint.
@@ -143,3 +149,9 @@ window.location.href = `https://${authEndpointHost}/auth/openid/sinuna/logout-re
 After the logout process is done, the user is redirected to the `redirectUrl` predefined in the `appContext`-variable, with a `logout=success` query parameter.
 
 eg: `https://${frontendAppHost}/login-handler.html?logout=success&provider=sinuna`
+
+### On a Logout error
+
+If logout fails / user is already logged out etc, the user is redirected to the `redirectUrl` with query parameters: `error`, `provider` and `intent=LogoutRequest`.
+
+eg: `https://${frontendAppHost}/login-handler.html?error=Already+logged+out&provider=sinuna&intent=LogoutRequest`

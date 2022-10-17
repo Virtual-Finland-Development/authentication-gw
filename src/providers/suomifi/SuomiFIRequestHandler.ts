@@ -1,10 +1,11 @@
 import { Context } from "openapi-backend";
 import { v4 as uuidv4 } from "uuid";
+import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
-import { debug, log } from "../../utils/logging";
-import { prepareCookie, prepareErrorRedirectUrl, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import { log } from "../../utils/logging";
+import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { parseBase64XMLBody } from "../../utils/transformers";
 
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
@@ -20,7 +21,7 @@ import { SuomiFiLoginState } from "./utils/SuomifiTypes";
  * @see: https://en.wikipedia.org/wiki/SAML_2.0
  * @see: https://github.com/node-saml/node-saml
  */
-export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
+export default new (class SuomiFIRequestHandler extends BaseRequestHandler implements AuthRequestHandler {
   identityProviderIdent = SuomiFISettings.ident;
   async initialize(): Promise<void> {}
 
@@ -82,16 +83,7 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
         cookies: [...suomiFiCookies, prepareCookie("appContext", "")],
       };
     } catch (error) {
-      debug(error);
-      const parsedAppContext = parseAppContext(context, this.identityProviderIdent); // throws
-      const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, "Authentication failed", this.identityProviderIdent);
-      return {
-        statusCode: 303,
-        headers: {
-          Location: redirectUrl,
-        },
-        cookies: [prepareCookie("appContext", "")],
-      };
+      return this.getAuthenticateResponseFailedResponse(context, error);
     }
   }
 
@@ -143,24 +135,28 @@ export default new (class SuomiFIRequestHandler implements AuthRequestHandler {
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    if (SuomiFILoginStateCookies.isLoggedIn(context)) {
-      const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
-      try {
-        const loginState = SuomiFILoginStateCookies.resolveLoginState(context, false); // throws
-        const samlClient = await getSuomiFISAML2Client();
-        const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, parsedAppContext.hash);
+    try {
+      if (SuomiFILoginStateCookies.isLoggedIn(context)) {
+        const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+        try {
+          const loginState = SuomiFILoginStateCookies.resolveLoginState(context, false); // throws
+          const samlClient = await getSuomiFISAML2Client();
+          const logoutRequestUrl = await samlClient.getLogoutUrlAsync(loginState.profile, parsedAppContext.hash);
 
-        return {
-          statusCode: 303,
-          headers: {
-            Location: logoutRequestUrl,
-          },
-        };
-      } catch (error) {
-        throw new ValidationError("Bad login profile data");
+          return {
+            statusCode: 303,
+            headers: {
+              Location: logoutRequestUrl,
+            },
+          };
+        } catch (error) {
+          throw new ValidationError("Bad login profile data");
+        }
       }
+      throw new AccessDeniedException("Not logged in");
+    } catch (error) {
+      return this.getLogoutRequestFailedResponse(context, error);
     }
-    throw new AccessDeniedException("Not logged in");
   }
 
   /**

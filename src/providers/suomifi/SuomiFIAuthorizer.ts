@@ -6,11 +6,11 @@ import * as jwt from "jsonwebtoken";
 
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import { createSecretHash, generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
+import { JWKS, verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
-import { getPublicKey, JWKS } from "../../utils/openId-JWKS";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
-import { leftTrim, transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
+import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
 import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 
@@ -102,15 +102,8 @@ export async function getJKWSJsonConfiguration(): Promise<JWKS> {
  */
 export default async function authorize(idToken: string, context: string): Promise<void> {
   try {
-    // Decode token
-    const token = leftTrim(idToken, "Bearer ");
-    const decodedToken = jwt.decode(token, { complete: true });
-    debug(decodedToken);
-    // Validate token
-    const publicKey = await getPublicKey(decodedToken, { issuer: Runtime.getAppUrl(), jwks: await getJKWSJsonConfiguration() });
-    debug(publicKey);
-    const verified = jwt.verify(token, publicKey.pem, { ignoreExpiration: false }) as jwt.JwtPayload;
-    debug(verified);
+    // Verify token
+    const verified = await verifyIdToken(idToken, { issuer: Runtime.getAppUrl(), jwks: await getJKWSJsonConfiguration() });
 
     // Validate rest of the fields
     const parsedAppContext = parseAppContext(verified.appContextHash); // Throws
