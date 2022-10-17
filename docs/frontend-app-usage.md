@@ -62,7 +62,7 @@ The login code is either a temporary code that can be exchanged for authenticati
 
 If login fails / the attempt is cancelled etc, the user is redirected to the `redirectUrl` with query parameters: `error`, `provider` and `intent=LoginRequest`.
 
-eg: `https://${frontendAppHost}/login-handler.html?error=Login%20failed&provider=sinuna&intent=LoginRequest`
+eg: `https://${frontendAppHost}/login-handler.html?error=Login+failed&provider=sinuna&intent=LoginRequest`
 
 ## AuthTokenRequest
 
@@ -154,4 +154,4 @@ eg: `https://${frontendAppHost}/login-handler.html?logout=success&provider=sinun
 
 If logout fails / user is already logged out etc, the user is redirected to the `redirectUrl` with query parameters: `error`, `provider` and `intent=LogoutRequest`.
 
-eg: `https://${frontendAppHost}/login-handler.html?error=Already%20logged%20out&provider=sinuna&intent=LogoutRequest`
+eg: `https://${frontendAppHost}/login-handler.html?error=Already+logged+out&provider=sinuna&intent=LogoutRequest`
