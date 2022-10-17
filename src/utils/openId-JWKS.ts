@@ -2,6 +2,7 @@ import axios from "axios";
 import * as jwt from "jsonwebtoken";
 import jwktopem from "jwk-to-pem";
 import { debug } from "./logging";
+import { leftTrim } from "./transformers";
 
 /* ---------------Types------------------- */
 
@@ -23,6 +24,40 @@ type JWK = {
 };
 
 /* ---------------Public------------------- */
+
+/**
+ *
+ * @param idToken
+ * @returns
+ */
+export function decodeIdToken(idToken: string): { decodedToken: jwt.Jwt | null; token: string } {
+  // Decode token
+  const token = leftTrim(idToken, "Bearer ");
+  const decodedToken = jwt.decode(token, { complete: true });
+  return {
+    decodedToken: decodedToken,
+    token: token,
+  };
+}
+
+/**
+ *
+ * @param idToken
+ * @param issuerConfig
+ * @returns
+ */
+export async function verifyIdToken(idToken: string, issuerConfig: IssuerConfig): Promise<jwt.JwtPayload> {
+  // Decode token
+  const tokenResult = decodeIdToken(idToken);
+  if (!tokenResult.decodedToken) {
+    throw new Error("Invalid token");
+  }
+
+  // Validate token
+  const publicKey = await getPublicKey(tokenResult.decodedToken, issuerConfig);
+  const verified = jwt.verify(tokenResult.token, publicKey.pem, { ignoreExpiration: false });
+  return verified as jwt.JwtPayload;
+}
 
 /**
  * Fetch the public key from the JWKS endpoint
