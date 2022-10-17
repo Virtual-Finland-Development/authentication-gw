@@ -30,7 +30,7 @@ async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string
  * @returns
  */
 async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nameID: string, nonce: string): Promise<{ idToken: string; expiresAt: string }> {
-  const expiresIn = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour
+  const expiresIn = 60 * 60; // 1 hour
   return {
     idToken: jwt.sign({ appContextHash: parsedAppContext.hash, nameID: nameID, nonce: nonce }, await Settings.getSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
       algorithm: "RS256",

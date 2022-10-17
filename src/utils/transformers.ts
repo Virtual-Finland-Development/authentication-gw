@@ -173,5 +173,6 @@ export function leftTrim(str: string, trim: string): string {
  * @returns Date.toIsoString
  */
 export function transformExpiresInToExpiresAt_ISOString(expiresIn: number): string {
-  return new Date(Date.now() + expiresIn * 1000).toISOString();
+  const expiresAt = Math.floor(Date.now() / 1000) + expiresIn;
+  return new Date(expiresAt * 1000).toISOString();
 }
