@@ -13,6 +13,7 @@ import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformer
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import TestbedSettings from "./Testbed.config";
+import authorize from "./TestbedAuthorizer";
 
 /**
  * @see: https://ioxio.com/guides/use-login-portal-in-your-applications
@@ -142,11 +143,13 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
       const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
 
       // Verify logout token
+      const idToken = String(context.request.query?.idToken);
+      await authorize(idToken, "logout");
 
       const queryString = new URLSearchParams({
         post_logout_redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/logout-response"),
         state: parsedAppContext.hash,
-        id_token_hint: context.request.query.idToken,
+        id_token_hint: idToken,
       }).toString();
 
       const LOGOUT_REQUEST_URL = `https://login.testbed.fi/end-session?${queryString}`;

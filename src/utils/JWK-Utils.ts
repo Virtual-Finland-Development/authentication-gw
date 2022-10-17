@@ -1,3 +1,5 @@
+// @see: https://github.com/auth0/node-jsonwebtoken
+
 import axios from "axios";
 import * as jwt from "jsonwebtoken";
 import jwktopem from "jwk-to-pem";
@@ -30,8 +32,12 @@ type JWK = {
  * @param idToken
  * @returns
  */
-export function decodeIdToken(idToken: string): { decodedToken: jwt.Jwt | null; token: string } {
+export function decodeIdToken(idToken: string | null): { decodedToken: jwt.Jwt | null; token: string } {
   // Decode token
+  if (!idToken) {
+    throw new Error("Missing ID Token");
+  }
+
   const token = leftTrim(idToken, "Bearer ");
   const decodedToken = jwt.decode(token, { complete: true });
   return {
@@ -46,12 +52,9 @@ export function decodeIdToken(idToken: string): { decodedToken: jwt.Jwt | null; 
  * @param issuerConfig
  * @returns
  */
-export async function verifyIdToken(idToken: string, issuerConfig: IssuerConfig): Promise<jwt.JwtPayload> {
+export async function verifyIdToken(idToken: string | null, issuerConfig: IssuerConfig): Promise<jwt.JwtPayload> {
   // Decode token
   const tokenResult = decodeIdToken(idToken);
-  if (!tokenResult.decodedToken) {
-    throw new Error("Invalid token");
-  }
 
   // Validate token
   const publicKey = await getPublicKey(tokenResult.decodedToken, issuerConfig);
