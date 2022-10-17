@@ -44,10 +44,11 @@ export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: str
  * @param providerIdent
  * @returns
  */
-export function prepareErrorRedirectUrl(redirectUrl: string, errorMessage: string, providerIdent: string): string {
+export function prepareErrorRedirectUrl(redirectUrl: string, errorMessage: string, providerIdent: string, intent: string): string {
   return ensureUrlQueryParams(redirectUrl, [
     { param: "error", value: errorMessage },
     { param: "provider", value: providerIdent },
+    { param: "intent", value: intent },
   ]);
 }
 
