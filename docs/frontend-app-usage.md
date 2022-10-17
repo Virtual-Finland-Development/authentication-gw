@@ -154,4 +154,4 @@ eg: `https://${frontendAppHost}/login-handler.html?logout=success&provider=sinun
 
 If logout fails / user is already logged out etc, the user is redirected to the `redirectUrl` with query parameters: `error`, `provider` and `intent=LogoutRequest`.
 
-eg: `https://${frontendAppHost}/login-handler.html?error=Login%20failed&provider=sinuna&intent=LogoutRequest`
+eg: `https://${frontendAppHost}/login-handler.html?error=Already%20logged%20out&provider=sinuna&intent=LogoutRequest`
