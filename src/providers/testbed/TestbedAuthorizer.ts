@@ -1,6 +1,6 @@
 import { AccessDeniedException } from "../../utils/exceptions";
+import { verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
-import { verifyIdToken } from "../../utils/openId-JWKS";
 
 /**
  *

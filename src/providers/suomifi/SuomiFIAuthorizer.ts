@@ -6,8 +6,8 @@ import * as jwt from "jsonwebtoken";
 
 import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import { createSecretHash, generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
+import { JWKS, verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
-import { JWKS, verifyIdToken } from "../../utils/openId-JWKS";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
