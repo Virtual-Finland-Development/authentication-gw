@@ -18,7 +18,7 @@ export abstract class BaseRequestHandler {
   async getAuthenticateResponseFailedResponse(context: Context, error: any): Promise<HttpResponse> {
     debug(error);
 
-    let errorMessage = "Authentication failed";
+    let errorMessage = "Authentication cancelled";
 
     const parsedAppContext = parseAppContext(context, this.identityProviderIdent); // throws
     const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, errorMessage, this.identityProviderIdent, "LoginRequest");
