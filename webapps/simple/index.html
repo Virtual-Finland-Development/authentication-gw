@@ -54,7 +54,7 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authAPIHost: "http://localhost:3000", // the authentication gw host
+        authenticationGatewayHost: "http://localhost:3000", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
         generateAppContext() { // App context generator
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));
@@ -71,7 +71,7 @@
      * Login service defs
      * 
     /**************************************************************************/
-    class BaseLoginApp {
+    class LoginApp {
         name = null;
         endpoints = null;
         authProtocol = null;
@@ -88,18 +88,18 @@
         initializeEndpoints(providerName, authProtocol) {
             const provider = providerName.toLowerCase();
             const protocol = authProtocol.toLowerCase();
-            const authAPIHost = AppSettings.authAPIHost;
+            const authenticationGatewayHost = AppSettings.authenticationGatewayHost;
 
             if (["openid", "saml2"].indexOf(protocol) < 0) {
                 throw new Error(`Unsupported auth protocol: ${protocol}`);
             }
 
             return {
-                LoginRequest: `${authAPIHost}/auth/${protocol}/${provider}/login-request`,
-                LogoutRequest: `${authAPIHost}/auth/${protocol}/${provider}/logout-request`,
-                UserInfoRequest: `${authAPIHost}/auth/${protocol}/${provider}/user-info-request`,
-                AuthTokenRequest: `${authAPIHost}/auth/${protocol}/${provider}/auth-token-request`,
-                AuthorizeRequest: `${authAPIHost}/authorize`,
+                LoginRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/login-request`,
+                LogoutRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/logout-request`,
+                UserInfoRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/user-info-request`,
+                AuthTokenRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/auth-token-request`,
+                AuthorizeRequest: `${authenticationGatewayHost}/authorize`,
             }
         }
 
@@ -169,7 +169,7 @@
         }
     }
 
-    class BaseAppComponent {
+    class LoginAppComponent {
         parent = null;
         constructor(parent) {
             this.parent = parent;
@@ -188,7 +188,7 @@
     /**
      * Example app auth service
      */
-    class AuthService extends BaseAppComponent {
+    class AuthService extends LoginAppComponent {
         login() {
             this.log("AuthService", "logging in..");
             this.UIState.transitToUrl(`${this.endpoints.LoginRequest}?appContext=${AppSettings.generateAppContext()}`);
@@ -266,7 +266,7 @@
     /**
      * Example app auth state
      */
-    class AuthState extends BaseAppComponent {
+    class AuthState extends LoginAppComponent {
         storeKey = null
         isInTransition = false
         user = {
@@ -336,7 +336,7 @@
     /**
     * Example app UI state, interactions handler
     */
-    class UIState extends BaseAppComponent {
+    class UIState extends LoginAppComponent {
         handleCurrentState() {
             const loginButton = document.querySelector(`#${this.getName()} .login`);
             const logoutButton = document.querySelector(`#${this.getName()} .logout`);
@@ -379,15 +379,15 @@
      * login services
      * 
     /**************************************************************************/
-    const sinuna = new BaseLoginApp({
+    const sinuna = new LoginApp({
         name: "Sinuna",
         authProtocol: "openid",
     });
-    const suomifi = new BaseLoginApp({
+    const suomifi = new LoginApp({
         name: "SuomiFI",
         authProtocol: "saml2",
     });
-    const testbed = new BaseLoginApp({
+    const testbed = new LoginApp({
         name: "Testbed",
         authProtocol: "openid",
     });

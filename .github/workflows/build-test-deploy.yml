@@ -44,11 +44,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Fix example index url
-        run: 'sed -i "s|authAPIHost: \"http://localhost:3000\",|authAPIHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./web/index.html'
+      - name: Fix svelte demo app index authgw-url
+        run: |
+          sed -i "s|authenticationGatewayHost: \".*\",|authenticationGatewayHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./webapps/svelte/src/AppSettings.ts
         env:
           AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{ secrets.AUTH_PROVIDER_REDIRECT_BACK_HOST }}
-      - name: Deploy to S3
+      - name: Build the svelte app
+        working-directory: ./webapps/svelte
+        run: |
+          npm install
+          npm run build
+      - name: Deploy Svelte-app to S3
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --delete
@@ -57,4 +63,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: eu-north-1
-          SOURCE_DIR: "web"
+          SOURCE_DIR: "webapps/svelte/dist"
