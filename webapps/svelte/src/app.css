@@ -73,6 +73,12 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+button.is-special:before {
+  font-weight: bold;
+  color: navy;
+  content: "→ ";
+}
+
 .login-flow-box {
   background-color: #949494;
   border: 1px solid transparent;
@@ -104,6 +110,10 @@ button:focus-visible {
 
 .login-state-box span.is-loading {
   color: #ffffe8;
+}
+
+ul.inline li {
+  display: inline;
 }
 
 @media (prefers-color-scheme: light) {

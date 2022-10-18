@@ -13,9 +13,24 @@ export default class AuthService extends LoginAppComponent {
     this.api = new AuthenticationGW(configuration);
   }
 
+  /**
+   *
+   * @param featureName
+   * @returns
+   */
+  hasFeat(featureName: string): boolean {
+    if (featureName === "consentify") {
+      const hasConsents = {
+        testbed: true,
+      };
+      return hasConsents[this.api.provider] === true;
+    }
+    return true; // defaults all-in
+  }
+
   login() {
     this.log("AuthService", "logging in..");
-    this.api.login();
+    this.UIState.transitToUrl(this.api.getLoginUrl());
   }
   async fetchAuthTokens(loginCode) {
     this.log("AuthService", "fetching auth tokens..");
@@ -31,7 +46,18 @@ export default class AuthService extends LoginAppComponent {
     this.api.authorize(tokens?.idToken);
   }
   logout() {
+    this.log("AuthService", "loggin out..");
     const tokens = this.AuthState.getAuthTokens();
-    this.api.logout(tokens.idToken);
+    this.UIState.transitToUrl(this.api.getLogoutUrl(tokens?.idToken));
+  }
+
+  /**
+   * Extra services
+   */
+  consentify() {
+    const consentId = "moro"; // @TODO: what is the context
+    this.log("AuthService", "getting consent for ${consentId}..");
+    const tokens = this.AuthState.getAuthTokens();
+    this.UIState.transitToUrl(this.api.getConsentRequestUrl(consentId, tokens?.idToken));
   }
 }

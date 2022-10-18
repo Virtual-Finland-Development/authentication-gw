@@ -562,11 +562,11 @@ paths:
           required: true
           description: "Authorization: id_token"
         - in: query
-          name: dataSource
+          name: consentId
           schema:
             type: string
           required: true
-          description: "consent dataSource"
+          description: "consent context identifier (dataSource)"
           example: "dpp://digitalliving:v2@testbed.fi/draft/Company/Shareholders"
       responses:
         "303":
@@ -587,7 +587,6 @@ paths:
           required: true
           description: "status of the consent request, allowed values: success, fail"
           example: "success"
-
       responses:
         "303":
           description: Redirect user back to the appContext app

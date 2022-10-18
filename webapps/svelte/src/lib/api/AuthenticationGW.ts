@@ -9,14 +9,22 @@ export type AuthenticationGWProps = { appName: string; provider: string; protoco
 export default class AuthenticationGW {
   props: AuthenticationGWProps;
   client: DefaultService;
+  provider: string;
+  protocol: string;
 
   redirectUrls: {
     LoginRequest: string;
     LogoutRequest: string;
+    ConsentRequest: string;
   };
 
   constructor(props: AuthenticationGWProps) {
     this.props = props;
+
+    const { provider, protocol } = this.props;
+    this.provider = provider.toLowerCase();
+    this.protocol = protocol.toLowerCase();
+
     if (!this.props.logoutRedirectUrl) {
       this.props.logoutRedirectUrl = this.props.redirectUrl;
     }
@@ -28,10 +36,10 @@ export default class AuthenticationGW {
     }).default;
 
     // Setup the redirect urls
-    const { provider, protocol } = this.props;
     this.redirectUrls = {
-      LoginRequest: `${AppSettings.authenticationGatewayHost}/auth/${protocol.toLowerCase()}/${provider}/login-request`,
-      LogoutRequest: `${AppSettings.authenticationGatewayHost}/auth/${protocol.toLowerCase()}/${provider}/logout-request`,
+      LoginRequest: `${AppSettings.authenticationGatewayHost}/auth/${protocol}/${provider}/login-request`,
+      LogoutRequest: `${AppSettings.authenticationGatewayHost}/auth/${protocol}/${provider}/logout-request`,
+      ConsentRequest: `${AppSettings.authenticationGatewayHost}/consent/${provider}/consent-request`,
     };
   }
 
@@ -48,21 +56,21 @@ export default class AuthenticationGW {
   /**
    *
    */
-  login() {
-    window.location.href = `${this.redirectUrls.LoginRequest}?appContext=${this.#generateAppContext()}`;
+  getLoginUrl(): string {
+    return `${this.redirectUrls.LoginRequest}?appContext=${this.#generateAppContext()}`;
   }
 
   /**
    *
    * @param idToken
    */
-  logout(idToken: string) {
+  getLogoutUrl(idToken: string): string {
     const urlParams = new URLSearchParams({
       appContext: this.#generateAppContext(),
       idToken: idToken,
     });
 
-    window.location.href = `${this.redirectUrls.LogoutRequest}?${urlParams.toString()}`;
+    return `${this.redirectUrls.LogoutRequest}?${urlParams.toString()}`;
   }
 
   /**
@@ -81,6 +89,20 @@ export default class AuthenticationGW {
     } catch (error) {
       window.alert(error);
     }
+  }
+
+  /**
+   *
+   * @param consentId
+   * @param idToken
+   */
+  getConsentRequestUrl(consentId: string, idToken: string): string {
+    const urlParams = new URLSearchParams({
+      appContext: this.#generateAppContext(),
+      consentId: consentId,
+      idToken: idToken,
+    });
+    return `${this.redirectUrls.ConsentRequest}?${urlParams.toString()}`;
   }
 
   /**

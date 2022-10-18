@@ -9,7 +9,6 @@ import { HttpResponse } from "../utils/types";
 import { parseAppContext } from "../utils/validators";
 
 export default {
-  identityProviderIdent: TestbedConfig.ident,
   /**
    * GET->REDIRECT: TestbedConsentRequest
    *
@@ -18,8 +17,8 @@ export default {
    */
   async TestbedConsentRequest(context: Context): Promise<HttpResponse> {
     const idToken = String(context.request.query.idToken);
-    const dataSource = String(context.request.query.dataSource);
-    const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent, meta: { dataSource: dataSource, idToken: idToken } });
+    const dataSource = String(context.request.query.consentId);
+    const parsedAppContext = parseAppContext(context, { provider: TestbedConfig.ident, meta: { dataSource: dataSource, idToken: idToken } });
 
     try {
       // Request the consent: https://ioxio.com/guides/how-to-build-an-application#request-consent
@@ -101,7 +100,7 @@ export default {
       };
     } else {
       const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
-        provider: this.identityProviderIdent,
+        provider: TestbedConfig.ident,
         error: "Consent Denied",
         intent: "ConsentRequest",
         type: "info",

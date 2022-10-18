@@ -89,7 +89,7 @@ export class DefaultService {
          */
         provider: string,
         /**
-         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
          */
         appContext: string,
     }): CancelablePromise<void> {
@@ -175,7 +175,7 @@ export class DefaultService {
          */
         provider: string,
         /**
-         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
          */
         appContext: string,
         /**
@@ -212,7 +212,7 @@ export class DefaultService {
          */
         provider: string,
         /**
-         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
          */
         state?: string,
     }): CancelablePromise<void> {
@@ -323,7 +323,7 @@ export class DefaultService {
          */
         provider: string,
         /**
-         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
          */
         appContext: string,
     }): CancelablePromise<void> {
@@ -380,7 +380,7 @@ export class DefaultService {
          */
         provider: string,
         /**
-         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
          */
         appContext: string,
         /**
@@ -554,6 +554,66 @@ export class DefaultService {
             url: '/auth/saml2/{provider}/.well-known/jwks.json',
             path: {
                 'provider': provider,
+            },
+        });
+    }
+
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public testbedConsentRequest({
+        appContext,
+        idToken,
+        consentId,
+    }: {
+        /**
+         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
+         */
+        appContext: string,
+        /**
+         * Authorization: id_token
+         */
+        idToken: string,
+        /**
+         * consent context identifier (dataSource)
+         */
+        consentId: string,
+    }): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/consent/testbed/consent-request',
+            query: {
+                'appContext': appContext,
+                'idToken': idToken,
+                'consentId': consentId,
+            },
+            errors: {
+                303: `Redirect user to the testbed consent page`,
+            },
+        });
+    }
+
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public testbedConsentResponse({
+        status,
+    }: {
+        /**
+         * status of the consent request, allowed values: success, fail
+         */
+        status: string,
+    }): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/consent/testbed/consent-response',
+            query: {
+                'status': status,
+            },
+            errors: {
+                303: `Redirect user back to the appContext app`,
             },
         });
     }

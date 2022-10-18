@@ -6,7 +6,7 @@ export default async function LoginEventListener(loginApp: LoginApp) {
   const affectsThisApp = urlParams.has("provider") && urlParams.get("provider").toLowerCase() === loginApp.getName().toLowerCase();
   if (!loginApp.AuthState.isLoggedIn()) {
     if (affectsThisApp && urlParams.has("loginCode")) {
-      loginApp.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
+      loginApp.log("LoginEventListener", "Login code received, fetching auth token..");
       //
       // Handle login response
       //
@@ -17,13 +17,13 @@ export default async function LoginEventListener(loginApp: LoginApp) {
         await loginApp.AuthState.handleLoggedIn(); // Fetch user info
         loginApp.UIState.resetViewState(); // reset view state
       } catch (error) {
-        loginApp.log("LoginFlowEventsListener", "Failed to fetch auth token", error);
+        loginApp.log("LoginEventListener", "Failed to fetch auth token", error);
       }
     } else {
       loginApp.UIState.handleCurrentState(); // Init UI
     }
   } else if (affectsThisApp && urlParams.has("logout")) {
-    loginApp.log("LoginFlowEventsListener", "Logout event received, logging out");
+    loginApp.log("LoginEventListener", "Logout event received, logging out");
     //
     // Handle logout response
     //
@@ -34,9 +34,17 @@ export default async function LoginEventListener(loginApp: LoginApp) {
     }
   } else {
     //
-    // Handle idle state
+    // Handle logged-in state
     //
     await loginApp.AuthState.handleLoggedIn(); // Validate login
+
+    if (affectsThisApp && urlParams.has("consentToken")) {
+      //
+      // Handle consent response
+      //
+      console.log(urlParams.get("consentToken"));
+    }
+
     loginApp.UIState.handleCurrentState(); // Update UI
   }
 }

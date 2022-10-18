@@ -34,8 +34,10 @@ let states = loginApp.UIState.states;
       <div>
           <button class="login" disabled="{states.login.disabled}" on:click="{() => loginApp.AuthService.login()}">Login</button>
           <button class="logout" disabled="{states.logout.disabled}" on:click="{() => loginApp.AuthService.logout()}">Logout</button>
-          ::: 
-          <button class="authorize" on:click="{() => loginApp.AuthService.authorize()}">Authorize</button>
+          <button class="authorize is-special" disabled="{states.logout.authorize}" on:click="{() => loginApp.AuthService.authorize()}">Authorize</button>
+          {#if loginApp.AuthService.hasFeat('consentify')}
+            <button class="consentify is-special" disabled="{states.logout.consentify}" on:click="{() => loginApp.AuthService.consentify()}">Check Consent</button>
+          {/if}
       </div>
     </div>
   {/if}
