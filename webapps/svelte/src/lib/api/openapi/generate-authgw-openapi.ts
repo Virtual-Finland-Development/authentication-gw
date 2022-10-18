@@ -16,5 +16,6 @@ fs.rm(outputDir, { recursive: true, force: true }, (err) => {
     input: inputFile,
     output: outputDir,
     clientName: "AuthGWClient",
+    useOptions: true,
   });
 });

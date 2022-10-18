@@ -48,17 +48,18 @@ export class DefaultService {
     }
 
     /**
-     * @param authorization
-     * @param xAuthorizationProvider
-     * @param xAuthorizationContext
      * @returns any Access granted message
      * @throws ApiError
      */
-    public authorizeRequest(
+    public authorizeRequest({
+        authorization,
+        xAuthorizationProvider,
+        xAuthorizationContext,
+    }: {
         authorization?: string,
         xAuthorizationProvider?: string,
         xAuthorizationContext?: string,
-    ): CancelablePromise<{
+    }): CancelablePromise<{
         message?: string;
     }> {
         return this.httpRequest.request({
@@ -76,15 +77,22 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param appContext Base64-encoded object with attributes: {appName: string, redirectUrl: string}
      * @returns void
      * @throws ApiError
      */
-    public openIdLoginRequest(
+    public openIdLoginRequest({
+        provider,
+        appContext,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         */
         appContext: string,
-    ): CancelablePromise<void> {
+    }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/auth/openid/{provider}/login-request',
@@ -101,27 +109,37 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param code Login code
-     * @param state Login state string
-     * @param acrValues
-     * @param scope
-     * @param sessionState
-     * @param sid
-     * @param nonce
      * @returns void
      * @throws ApiError
      */
-    public openIdAuthenticateResponse(
+    public openIdAuthenticateResponse({
+        provider,
+        code,
+        state,
+        acrValues,
+        scope,
+        sessionState,
+        sid,
+        nonce,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Login code
+         */
         code: string,
+        /**
+         * Login state string
+         */
         state: string,
         acrValues?: string,
         scope?: string,
         sessionState?: string,
         sid?: string,
         nonce?: string,
-    ): CancelablePromise<void> {
+    }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/auth/openid/{provider}/authenticate-response',
@@ -144,17 +162,27 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param appContext Base64-encoded object with attributes: {appName: string, redirectUrl: string}
-     * @param idToken Logout id_token hint
      * @returns void
      * @throws ApiError
      */
-    public openIdLogoutRequest(
+    public openIdLogoutRequest({
+        provider,
+        appContext,
+        idToken,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         */
         appContext: string,
+        /**
+         * Logout id_token hint
+         */
         idToken?: string,
-    ): CancelablePromise<void> {
+    }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/auth/openid/{provider}/logout-request',
@@ -172,15 +200,22 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param state Base64-encoded object with attributes: {appName: string, redirectUrl: string}
      * @returns void
      * @throws ApiError
      */
-    public openIdLogoutResponse(
+    public openIdLogoutResponse({
+        provider,
+        state,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         */
         state?: string,
-    ): CancelablePromise<void> {
+    }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/auth/openid/{provider}/logout-response',
@@ -197,18 +232,25 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param requestBody Retrieve the authentication token from the auth provider service
      * @returns any Auth token
      * @throws ApiError
      */
-    public openIdAuthTokenRequest(
+    public openIdAuthTokenRequest({
+        provider,
+        requestBody,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Retrieve the authentication token from the auth provider service
+         */
         requestBody: {
             loginCode: string;
             appContext: string;
         },
-    ): CancelablePromise<{
+    }): CancelablePromise<{
         accessToken: string;
         idToken: string;
         /**
@@ -231,18 +273,25 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param requestBody Retrieve user info from the auth provider service
      * @returns any User info object
      * @throws ApiError
      */
-    public openIdUserInfoRequest(
+    public openIdUserInfoRequest({
+        provider,
+        requestBody,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Retrieve user info from the auth provider service
+         */
         requestBody: {
             accessToken: string;
             appContext: string;
         },
-    ): CancelablePromise<{
+    }): CancelablePromise<{
         sub: string;
         inum?: string;
         email?: string;
@@ -262,15 +311,22 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param appContext Base64-encoded object with attributes: {appName: string, redirectUrl: string}
      * @returns void
      * @throws ApiError
      */
-    public saml2LoginRequest(
+    public saml2LoginRequest({
+        provider,
+        appContext,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         */
         appContext: string,
-    ): CancelablePromise<void> {
+    }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/auth/saml2/{provider}/login-request',
@@ -287,13 +343,17 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
      * @returns void
      * @throws ApiError
      */
-    public saml2AuthenticateResponse(
+    public saml2AuthenticateResponse({
+        provider,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
-    ): CancelablePromise<void> {
+    }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/auth/saml2/{provider}/authenticate-response',
@@ -307,17 +367,27 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param appContext Base64-encoded object with attributes: {appName: string, redirectUrl: string}
-     * @param idToken Logout id_token hint
      * @returns void
      * @throws ApiError
      */
-    public saml2LogoutRequest(
+    public saml2LogoutRequest({
+        provider,
+        appContext,
+        idToken,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Base64-encoded object with attributes: {appName: string, redirectUrl: string}
+         */
         appContext: string,
+        /**
+         * Logout id_token hint
+         */
         idToken?: string,
-    ): CancelablePromise<void> {
+    }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/auth/saml2/{provider}/logout-request',
@@ -335,21 +405,37 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param samlResponse Logout response
-     * @param relayState State string
-     * @param sigAlg SigAlg
-     * @param signature Signature
      * @returns void
      * @throws ApiError
      */
-    public saml2LogoutResponse(
+    public saml2LogoutResponse({
+        provider,
+        samlResponse,
+        relayState,
+        sigAlg,
+        signature,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Logout response
+         */
         samlResponse: string,
+        /**
+         * State string
+         */
         relayState: string,
+        /**
+         * SigAlg
+         */
         sigAlg: string,
+        /**
+         * Signature
+         */
         signature: string,
-    ): CancelablePromise<void> {
+    }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/auth/saml2/{provider}/logout-response',
@@ -369,18 +455,25 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param requestBody Retrieve the authentication token from the auth provider service
      * @returns any Auth token
      * @throws ApiError
      */
-    public saml2AuthTokenRequest(
+    public saml2AuthTokenRequest({
+        provider,
+        requestBody,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Retrieve the authentication token from the auth provider service
+         */
         requestBody: {
             loginCode: string;
             appContext: string;
         },
-    ): CancelablePromise<{
+    }): CancelablePromise<{
         accessToken: string;
         idToken: string;
         /**
@@ -403,18 +496,25 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
-     * @param requestBody Retrieve user info from the auth provider service
      * @returns any User info object
      * @throws ApiError
      */
-    public saml2UserInfoRequest(
+    public saml2UserInfoRequest({
+        provider,
+        requestBody,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
+        /**
+         * Retrieve user info from the auth provider service
+         */
         requestBody: {
             accessToken: string;
             appContext: string;
         },
-    ): CancelablePromise<{
+    }): CancelablePromise<{
         profile: {
             nameID: string;
             email: string;
@@ -438,13 +538,17 @@ export class DefaultService {
     }
 
     /**
-     * @param provider Auth provider ident
      * @returns any .well-known/jwks.json
      * @throws ApiError
      */
-    public saml2WellKnownJwksRequest(
+    public saml2WellKnownJwksRequest({
+        provider,
+    }: {
+        /**
+         * Auth provider ident
+         */
         provider: string,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/auth/saml2/{provider}/.well-known/jwks.json',

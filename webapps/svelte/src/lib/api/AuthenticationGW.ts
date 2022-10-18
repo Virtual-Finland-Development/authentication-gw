@@ -71,7 +71,11 @@ export default class AuthenticationGW {
    */
   async authorize(idToken: string) {
     const { provider } = this.props;
-    const response = await this.client.authorizeRequest(`Bearer ${idToken}`, provider, "demo app");
+    const response = await this.client.authorizeRequest({
+      authorization: `Bearer ${idToken}`,
+      xAuthorizationProvider: provider,
+      xAuthorizationContext: "demo app",
+    });
     window.alert(response.message);
   }
 
@@ -86,9 +90,15 @@ export default class AuthenticationGW {
 
     switch (protocol) {
       case "openId":
-        return this.client.openIdAuthTokenRequest(provider, payload);
+        return this.client.openIdAuthTokenRequest({
+          provider: provider,
+          requestBody: payload,
+        });
       case "saml2":
-        return this.client.saml2AuthTokenRequest(provider, payload);
+        return this.client.saml2AuthTokenRequest({
+          provider: provider,
+          requestBody: payload,
+        });
       default:
         throw new Error(`Invalid protocol: ${protocol}`);
     }
@@ -105,9 +115,15 @@ export default class AuthenticationGW {
 
     switch (protocol) {
       case "openId":
-        return this.client.openIdUserInfoRequest(provider, payload);
+        return this.client.openIdUserInfoRequest({
+          provider: provider,
+          requestBody: payload,
+        });
       case "saml2":
-        return this.client.saml2UserInfoRequest(provider, payload);
+        return this.client.saml2UserInfoRequest({
+          provider: provider,
+          requestBody: payload,
+        });
       default:
         throw new Error(`Invalid protocol: ${protocol}`);
     }
