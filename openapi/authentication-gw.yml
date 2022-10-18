@@ -88,7 +88,7 @@ paths:
           schema:
             type: string
           required: true
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
       responses:
         "303":
           description: Redirect to the authentication provider service
@@ -166,7 +166,7 @@ paths:
           schema:
             type: string
           required: true
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
         - in: query
           name: idToken
           schema:
@@ -198,7 +198,7 @@ paths:
           schema:
             type: string
           required: false
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
       responses:
         "303":
           description: Authentication providers callback url, redirect back to the app context
@@ -322,7 +322,7 @@ paths:
           schema:
             type: string
           required: true
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
       responses:
         "303":
           description: Redirect to the authentication provider service
@@ -364,7 +364,7 @@ paths:
           schema:
             type: string
           required: true
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
         - in: query
           name: idToken
           schema:
@@ -545,3 +545,54 @@ paths:
       responses:
         "200":
           description: .well-known/jwks.json
+  "/consent/testbed/consent-request":
+    get:
+      operationId: TestbedConsentRequest
+      parameters:
+        - in: query
+          name: appContext
+          schema:
+            type: string
+          required: true
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
+        - in: query
+          name: idToken
+          schema:
+            type: string
+          required: true
+          description: "Authorization: id_token"
+        - in: query
+          name: dataSource
+          schema:
+            type: string
+          required: true
+          description: "consent dataSource"
+          example: "dpp://digitalliving:v2@testbed.fi/draft/Company/Shareholders"
+      responses:
+        "303":
+          description: Redirect user to the testbed consent page
+          headers:
+            location:
+              description: Testbed consent request url
+              schema:
+                type: string
+  "/consent/testbed/consent-response":
+    get:
+      operationId: TestbedConsentResponse
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+          required: true
+          description: "status of the consent request, allowed values: success, fail"
+          example: "success"
+
+      responses:
+        "303":
+          description: Redirect user back to the appContext app
+          headers:
+            location:
+              description: appContext redirectUrl
+              schema:
+                type: string
