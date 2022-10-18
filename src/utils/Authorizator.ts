@@ -4,6 +4,7 @@ import SuomiFIConfig from "../providers/suomifi/SuomiFI.config";
 import SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
 import TestbedConfig from "../providers/testbed/Testbed.config";
 import TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
+import { ValidationError } from "./exceptions";
 
 import { omitEmptyObjectKeys } from "./transformers";
 import { AuthorizeFunc } from "./types";
@@ -17,7 +18,7 @@ function getAuthorizator(authHeaders: { provider: string; [attr: string]: string
   } else if (provider === TestbedConfig.ident.toLowerCase()) {
     return TestbedAuthorizer;
   } else {
-    throw new Error("Unknown auth provider");
+    throw new ValidationError("Unknown auth provider");
   }
 }
 

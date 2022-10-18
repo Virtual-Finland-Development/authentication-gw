@@ -3,6 +3,7 @@
 import axios from "axios";
 import * as jwt from "jsonwebtoken";
 import jwktopem from "jwk-to-pem";
+import { ValidationError } from "./exceptions";
 import { debug } from "./logging";
 import { leftTrim } from "./transformers";
 
@@ -75,13 +76,13 @@ export async function getPublicKey(decodedToken: jwt.Jwt | null, issuerConfig: I
 
   // Verify input token
   if (typeof keyId !== "string" || typeof payload !== "object" || payload === null) {
-    throw new Error("Bad request");
+    throw new ValidationError("Bad request");
   }
 
   // Verify issuer before fetching the public key
   const { iss } = payload;
   if (iss !== issuerConfig.issuer) {
-    throw new Error("Invalid issuer");
+    throw new ValidationError("Invalid issuer");
   }
 
   const key = await getJwksKey(keyId, issuerConfig);
