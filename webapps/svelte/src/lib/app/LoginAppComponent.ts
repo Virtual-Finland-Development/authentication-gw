@@ -1,12 +1,14 @@
+import LoginApp from "./LoginApp";
+
 export default class LoginAppComponent {
-  parent = null;
+  parent: LoginApp = null;
   getName: any;
   log: any;
   UIState: any;
   AuthState: any;
   AuthService: any;
 
-  constructor(parent) {
+  constructor(parent: LoginApp) {
     this.parent = parent;
     this.getName = this.parent.getName.bind(parent);
     this.log = this.parent.log.bind(parent);
