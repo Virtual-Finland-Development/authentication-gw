@@ -64,9 +64,14 @@ The login code is either a temporary code that can be exchanged for authenticati
 
 ### On a Login error
 
-If login fails / the attempt is cancelled etc, the user is redirected to the `redirectUrl` with query parameters: `error`, `provider` and `intent=LoginRequest`.
+If login fails / the attempt is cancelled etc, the user is redirected to the `redirectUrl` with a query parameters package:
 
-eg: `https://${frontendAppHost}/login-handler.html?error=Login+failed&provider=sinuna&intent=LoginRequest`
+- `error`: the error message
+- `type`: message type, one of `danger`, `warning`, `info`
+- `provider`: authentication provider, eg. `sinuna`
+- `intent=LoginRequest`: intent of the request, with a login situation its always `LoginRequest`
+
+eg: `https://${frontendAppHost}/login-handler.html?error=Authentication+cancelled&type=info&provider=sinuna&intent=LoginRequest`
 
 ## AuthTokenRequest
 
@@ -156,6 +161,11 @@ eg: `https://${frontendAppHost}/login-handler.html?logout=success&provider=sinun
 
 ### On a Logout error
 
-If logout fails / user is already logged out etc, the user is redirected to the `redirectUrl` with query parameters: `error`, `provider` and `intent=LogoutRequest`.
+If logout fails / user is already logged out etc, the user is redirected to the `redirectUrl` with with a query parameters package:
 
-eg: `https://${frontendAppHost}/login-handler.html?error=Already+logged+out&provider=sinuna&intent=LogoutRequest`
+- `error`: the error message
+- `type`: message type, one of `danger`, `warning`, `info`
+- `provider`: authentication provider, eg. `sinuna`
+- `intent=LogoutRequest`: intent of the request, with a logout situation its always `LogoutRequest`
+
+eg: `https://${frontendAppHost}/login-handler.html?error=Already+logged+out&type=info&provider=sinuna&intent=LogoutRequest`
