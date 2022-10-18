@@ -34,7 +34,8 @@ let states = loginApp.UIState.states;
       <div>
           <button class="login" disabled="{states.login.disabled}" on:click="{() => loginApp.AuthService.login()}">Login</button>
           <button class="logout" disabled="{states.logout.disabled}" on:click="{() => loginApp.AuthService.logout()}">Logout</button>
-          <button class="authorize" disabled="{states.authorize.disabled}" on:click="{() => loginApp.AuthService.authorize()}">Authorize</button>
+          ::: 
+          <button class="authorize" on:click="{() => loginApp.AuthService.authorize()}">Authorize</button>
       </div>
     </div>
   {/if}

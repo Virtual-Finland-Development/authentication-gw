@@ -28,7 +28,7 @@ export default class AuthService extends LoginAppComponent {
   async authorize() {
     this.log("AuthService", "authorizing..");
     const tokens = this.AuthState.getAuthTokens();
-    this.api.authorize(tokens.idToken);
+    this.api.authorize(tokens?.idToken);
   }
   logout() {
     const tokens = this.AuthState.getAuthTokens();
