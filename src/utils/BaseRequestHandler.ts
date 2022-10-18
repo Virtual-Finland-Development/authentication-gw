@@ -29,7 +29,7 @@ export abstract class BaseRequestHandler {
       errorType = "warning";
     }
 
-    const parsedAppContext = parseAppContext(context, this.identityProviderIdent); // throws
+    const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent }); // throws
     const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
       error: errorMessage,
       provider: this.identityProviderIdent,
@@ -67,7 +67,7 @@ export abstract class BaseRequestHandler {
       errorType = "warning";
     }
 
-    const parsedAppContext = parseAppContext(context, this.identityProviderIdent); // throws
+    const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent }); // throws
     const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
       error: errorMessage,
       provider: this.identityProviderIdent,
