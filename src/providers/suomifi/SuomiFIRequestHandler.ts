@@ -34,7 +34,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const parsedAppContext = parseAppContext(context, this.identityProviderIdent, uuidv4());
+    const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent, guid: uuidv4() }); // throws
     const samlClient = await getSuomiFISAML2Client();
     const RelayState = await generateSaml2RelayState(parsedAppContext);
     const authenticationUrl = await samlClient.getAuthorizeUrlAsync(RelayState);
@@ -113,7 +113,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
    * @returns
    */
   async AuthTokenRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, this.identityProviderIdent); // throws
+    parseAppContext(context, { provider: this.identityProviderIdent }); // throws
     const loginState = SuomiFILoginStateCookies.resolveLoginState(context); // throws
 
     return {
@@ -134,7 +134,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
    * @returns
    */
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, this.identityProviderIdent); // throws
+    parseAppContext(context, { provider: this.identityProviderIdent }); // throws
     const loginState = SuomiFILoginStateCookies.resolveLoginState(context); // throws
 
     return {
@@ -156,7 +156,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
   async LogoutRequest(context: Context): Promise<HttpResponse> {
     try {
       if (SuomiFILoginStateCookies.isLoggedIn(context)) {
-        const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+        const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
         try {
           const loginState = SuomiFILoginStateCookies.resolveLoginState(context, false); // throws
           const samlClient = await getSuomiFISAML2Client();
@@ -193,7 +193,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
     } catch (error) {
       log("Error", "LogoutResponse", error);
     }
-    const parsedAppContext = parseAppContext(String(body.RelayState), this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(String(body.RelayState), { provider: this.identityProviderIdent }); // throws
 
     return {
       statusCode: 303,

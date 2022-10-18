@@ -33,7 +33,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
 
     const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
     const SCOPE = SinunaSettings.scope;
@@ -80,7 +80,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    * @returns
    */
   async AuthTokenRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, this.identityProviderIdent); // Valites app context
+    parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
     const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
 
     const SCOPE = SinunaSettings.scope;
@@ -129,7 +129,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
     try {
-      const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+      const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
       const LOGOUT_CALLBACK_REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/logout-response");
       const LOGOUT_REQUEST_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${LOGOUT_CALLBACK_REDIRECT_URI}`;
 
@@ -152,7 +152,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    * @returns
    */
   async LogoutResponse(context: Context): Promise<HttpResponse> {
-    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
     const redirectUrl = prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent);
 
     return {
@@ -171,7 +171,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    * @returns
    */
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, this.identityProviderIdent); // Valites app context
+    parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
 
     const accessToken = context.request.requestBody.accessToken;
 

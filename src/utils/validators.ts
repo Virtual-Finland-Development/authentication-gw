@@ -13,7 +13,7 @@ import { ParsedAppContext } from "./types";
  * @throws ValidationError if invalid app context
  * @returns parsed app context
  */
-export function parseAppContext(context: Context | string, provider?: string, guid?: string): ParsedAppContext {
+export function parseAppContext(context: Context | string, fillers?: { provider?: string; guid?: string; meta?: Record<string, string> }): ParsedAppContext {
   let appContextHash;
 
   if (typeof context === "string") {
@@ -35,10 +35,13 @@ export function parseAppContext(context: Context | string, provider?: string, gu
   try {
     appContext = resolveUrlEncodedBase64HashJSON(appContextHash);
     if (typeof appContext.provider !== "string") {
-      appContext.provider = provider;
+      appContext.provider = fillers?.provider;
     }
     if (typeof appContext.guid !== "string") {
-      appContext.guid = guid;
+      appContext.guid = fillers?.guid;
+    }
+    if (typeof appContext.meta === "undefined") {
+      appContext.meta = fillers?.meta;
     }
     appContextHash = generateUrlEncodedBase64Hash(appContext);
   } catch (error) {

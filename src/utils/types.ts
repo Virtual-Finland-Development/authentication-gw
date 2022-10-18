@@ -5,6 +5,7 @@ export type AppContext = {
   redirectUrl: string;
   guid?: string;
   provider?: string;
+  meta?: Record<string, string>; // Additional metadata
 };
 
 export type ParsedAppContext = { object: AppContext; hash: string };
