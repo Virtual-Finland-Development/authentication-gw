@@ -56,7 +56,7 @@ export default class AuthService extends LoginAppComponent {
    */
   consentify() {
     const consentId = "moro"; // @TODO: what is the context
-    this.log("AuthService", "getting consent for ${consentId}..");
+    this.log("AuthService", `getting consent for ${consentId}..`);
     const tokens = this.AuthState.getAuthTokens();
     this.UIState.transitToUrl(this.api.getConsentRequestUrl(consentId, tokens?.idToken));
   }
