@@ -79,7 +79,7 @@ export default class AuthenticationGW {
       });
       window.alert(response.message);
     } catch (error) {
-      window.alert(error.statusText);
+      window.alert(error);
     }
   }
 
