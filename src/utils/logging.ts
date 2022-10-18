@@ -16,6 +16,8 @@ export function debug(...messages: Array<any>) {
           debugMessages.push("Failed to stringify debug message");
           debugMessages.push(error);
         }
+      } else if (typeof message === "object" && message !== null) {
+        debugMessages.push(JSON.stringify(message));
       } else {
         debugMessages.push(message);
       }
