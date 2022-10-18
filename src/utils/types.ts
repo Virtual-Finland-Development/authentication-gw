@@ -20,6 +20,11 @@ export type HttpResponse = {
   cookies?: Array<string>; // v2: cookies, https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html
 };
 
+/**
+ * Output error message level
+ */
+export type NotifyErrorType = "info" | "warning" | "danger";
+
 export interface AuthRequestHandler {
   /**
    * Must have an init

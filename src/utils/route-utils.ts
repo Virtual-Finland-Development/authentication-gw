@@ -8,7 +8,7 @@ import { AccessDeniedException, ValidationError } from "../utils/exceptions";
 import { debug, log } from "../utils/logging";
 import { ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
 import { getJSONResponseHeaders } from "./default-headers";
-import { AuthRequestHandler, HttpResponse } from "./types";
+import { AuthRequestHandler, HttpResponse, NotifyErrorType } from "./types";
 import { parseAppContext } from "./validators";
 
 /**
@@ -44,11 +44,12 @@ export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: str
  * @param providerIdent
  * @returns
  */
-export function prepareErrorRedirectUrl(redirectUrl: string, errorMessage: string, providerIdent: string, intent: string): string {
+export function prepareErrorRedirectUrl(redirectUrl: string, message: { error: string; provider: string; intent: string; type: NotifyErrorType }): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { param: "error", value: errorMessage },
-    { param: "provider", value: providerIdent },
-    { param: "intent", value: intent },
+    { param: "error", value: message.error },
+    { param: "provider", value: message.provider },
+    { param: "intent", value: message.intent },
+    { param: "type", value: message.type },
   ]);
 }
 

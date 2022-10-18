@@ -1,10 +1,12 @@
+import { ErrorWithXmlStatus } from "node-saml/lib/types";
+import { parseXml2JsFromString } from "node-saml/lib/xml";
 import { Context } from "openapi-backend";
 import { v4 as uuidv4 } from "uuid";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 
 import { getJSONResponseHeaders } from "../../utils/default-headers";
-import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
-import { log } from "../../utils/logging";
+import { AccessDeniedException, NoticeException, ValidationError } from "../../utils/exceptions";
+import { debug, log } from "../../utils/logging";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { parseBase64XMLBody } from "../../utils/transformers";
 
@@ -83,6 +85,23 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
         cookies: [...suomiFiCookies, prepareCookie("appContext", "")],
       };
     } catch (error) {
+      if (error instanceof ErrorWithXmlStatus) {
+        // Prepare correct failure response
+        try {
+          const xmlObj = await parseXml2JsFromString(error.xmlStatus);
+          const statusValue = xmlObj.Status?.StatusCode?.[0]?.StatusCode?.[0]?.["$"]?.Value;
+          switch (statusValue) {
+            case "urn:oasis:names:tc:SAML:2.0:status:RequestDenied":
+              error = new AccessDeniedException("Authentication provider rejected the request");
+              break;
+            case "urn:oasis:names:tc:SAML:2.0:status:AuthnFailed":
+              error = new NoticeException("Authentication cancelled");
+              break;
+          }
+        } catch (error) {
+          debug("Parsing error", error);
+        }
+      }
       return this.getAuthenticateResponseFailedResponse(context, error);
     }
   }
@@ -153,7 +172,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
           throw new ValidationError("Bad login profile data");
         }
       }
-      throw new AccessDeniedException("Not logged in");
+      throw new NoticeException("Already logged out");
     } catch (error) {
       return this.getLogoutRequestFailedResponse(context, error);
     }

@@ -3,7 +3,7 @@ import { Context } from "openapi-backend";
 import { v4 as uuidv4 } from "uuid";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
-import { AccessDeniedException } from "../../utils/exceptions";
+import { AccessDeniedException, NoticeException, ValidationError } from "../../utils/exceptions";
 import { generateBase64Hash } from "../../utils/hashes";
 import { debug, logAxiosException } from "../../utils/logging";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
@@ -142,9 +142,17 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
     try {
       const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
 
-      // Verify logout token
       const idToken = String(context.request.query?.idToken);
-      await authorize(idToken, "logout");
+      if (!idToken) {
+        throw new ValidationError("Missing ID token");
+      }
+
+      try {
+        // Verify logout token
+        await authorize(idToken, "logout");
+      } catch (error) {
+        throw new NoticeException("Already logged out");
+      }
 
       const queryString = new URLSearchParams({
         post_logout_redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/logout-response"),
