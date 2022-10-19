@@ -67,9 +67,18 @@ export default class ConsentService extends LoginAppComponent {
     }
   }
 
+  /**
+   *
+   * @param consentId
+   */
   async verifyConsentId(consentId: string): Promise<void> {
-    this.log("ConsentService", `Verifying consent id: ${consentId}..`);
-    const tokens = this.AuthState.getAuthTokens();
-    const results = await this.consentApi.verifyConsentId(consentId, tokens.idToken);
+    try {
+      this.log("ConsentService", `Verifying consent id: ${consentId}..`);
+      const consentToken = this.app.ConsentState.getConsentTokenFor(consentId);
+      const response = await this.consentApi.verifyConsentToken(consentToken);
+      window.alert(`Received good validation: ${JSON.stringify(response.data, null, 2)}`);
+    } catch (error) {
+      window.alert(`Received a request error: ${JSON.stringify(error, null, 2)}`);
+    }
   }
 }

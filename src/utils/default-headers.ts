@@ -18,6 +18,6 @@ export function getCORSHeaders(origin?: string) {
   return {
     ...getDefaultHeaders(origin),
     "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Origin, Content-type, Accept, Authorization, X-Authorization-Provider, X-Authorization-Context",
+    "Access-Control-Allow-Headers": "Origin, Content-type, Accept, Authorization, X-Authorization-Provider, X-Authorization-Context, X-Consent-Token",
   };
 }

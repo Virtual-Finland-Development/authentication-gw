@@ -4,6 +4,7 @@ import OpenAPIBackend from "openapi-backend";
 import BaseRoutes from "./routes/BaseRoutes";
 import OpenIdAuthRoutes from "./routes/OpenidAuthRoutes";
 import Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
+import TestbedSpecialRoutes from "./routes/TestbedSpecialRoutes";
 
 import { getCORSHeaders } from "./utils/default-headers";
 import { debug, log } from "./utils/logging";
@@ -26,6 +27,7 @@ const api = new OpenAPIBackend({
 api.register({
   ...OpenIdAuthRoutes,
   ...Saml2AuthRoutes,
+  ...TestbedSpecialRoutes,
   ...BaseRoutes,
 });
 

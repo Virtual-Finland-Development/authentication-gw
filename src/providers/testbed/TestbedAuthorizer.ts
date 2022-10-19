@@ -17,3 +17,19 @@ export default async function authorize(idToken: string, context?: string): Prom
     throw new AccessDeniedException(String(error));
   }
 }
+
+/**
+ *
+ * @param consentToken
+ * @see: https://ioxio.com/guides/verify-consent-in-a-data-source
+ */
+export async function verifyConsent(consentToken: string): Promise<void> {
+  try {
+    // Verify token
+    const verified = await verifyIdToken(consentToken, { issuer: "https://consent.testbed.fi", jwksUri: "https://consent.testbed.fi/.well-known/jwks.json" });
+    debug(verified);
+  } catch (error) {
+    console.log(error);
+    throw new AccessDeniedException("Unverified");
+  }
+}

@@ -73,9 +73,9 @@ paths:
                   message:
                     type: string
                     default: "Access Denied"
-  "/reverse-proxy":
+  "/testbed-reverse-proxy":
     post:
-      operationId: reverseProxy
+      operationId: TestbedReverseProxy
       requestBody:
         description: Request contents
         required: true
@@ -96,6 +96,35 @@ paths:
       responses:
         "200":
           description: Response data
+  "/consent/testbed/verify":
+    post:
+      operationId: TestbedConsentVerify
+      parameters:
+        - in: header
+          name: X-Consent-Token
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Verified message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Verified"
+        "401":
+          description: Unverified message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Unverified"
   "/auth/openid/{provider}/login-request":
     get:
       operationId: OpenIdLoginRequest

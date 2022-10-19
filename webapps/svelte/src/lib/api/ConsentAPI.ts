@@ -11,7 +11,7 @@ export default class ConsentAPI {
    */
   async getConsentSituation(consentId: string, idToken: string, returnUrl?: string): Promise<{ status: string; consentToken?: string; redirectUrl?: string }> {
     // Request the consent: https://ioxio.com/guides/how-to-build-an-application#request-consent
-    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/reverse-proxy`, {
+    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/testbed-reverse-proxy`, {
       method: "POST",
       url: `https://consent.testbed.fi/Consent/Request`,
       data: {
@@ -52,7 +52,7 @@ export default class ConsentAPI {
    */
   async getConsentToken(consentId: string, idToken: string): Promise<string> {
     // Retrieve the consent token: https://ioxio.com/guides/how-to-build-an-application#request-the-consent-token
-    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/reverse-proxy`, {
+    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/testbed-reverse-proxy`, {
       method: "POST",
       url: `https://consent.testbed.fi/Consent/Request`,
       data: {
@@ -79,7 +79,7 @@ export default class ConsentAPI {
    */
   async testConsentIdRequest(dataSourceUrl: string, inputData: any, consentToken: string, idToken: string): Promise<any> {
     // Test with a request: https://ioxio.com/guides/how-to-build-an-application#using-the-consent-token
-    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/reverse-proxy`, {
+    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/testbed-reverse-proxy`, {
       method: "POST",
       url: dataSourceUrl,
       data: inputData,
@@ -99,5 +99,13 @@ export default class ConsentAPI {
    * @param idToken
    * @returns
    */
-  async verifyConsentId(consentId: string, idToken: string): Promise<any> {}
+  async verifyConsentToken(consentToken: string): Promise<any> {
+    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/consent/testbed/verify`, null, {
+      headers: {
+        "X-Consent-Token": consentToken,
+      },
+    });
+
+    return response;
+  }
 }

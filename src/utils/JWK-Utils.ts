@@ -86,6 +86,7 @@ export async function getPublicKey(decodedToken: jwt.Jwt | null, issuerConfig: I
   }
 
   const key = await getJwksKey(keyId, issuerConfig);
+  debug("Found public key");
   return { pem: jwktopem(key), key: key };
 }
 
@@ -108,7 +109,7 @@ async function getJwksKey(keyId: string, issuerConfig: IssuerConfig): Promise<jw
   }
 
   if (!key) {
-    throw new Error("Public key not found in jwks endpoint");
+    throw new ValidationError("Public key not found in jwks endpoint");
   }
   return key;
 }
@@ -132,10 +133,12 @@ async function getJwks(issuerConfig: IssuerConfig): Promise<JWKS> {
 
     const verifyConfig = await axios.get(issuerConfig.openIdConfigUrl);
     jwksUri = String(verifyConfig.data.jwks_uri);
-
-    return (await axios.get(jwksUri)).data;
   }
-  throw new Error("Missing JWKS Resource");
+
+  if (typeof jwksUri !== "string") {
+    throw new Error("Missing JWKS Resource");
+  }
+  return (await axios.get(jwksUri)).data;
 }
 
 /**
