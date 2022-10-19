@@ -15,7 +15,6 @@ export default class AuthenticationGW {
   redirectUrls: {
     LoginRequest: string;
     LogoutRequest: string;
-    ConsentRequest: string;
   };
 
   constructor(props: AuthenticationGWProps) {
@@ -37,9 +36,8 @@ export default class AuthenticationGW {
 
     // Setup the redirect urls
     this.redirectUrls = {
-      LoginRequest: `${AppSettings.authenticationGatewayHost}/auth/${protocol}/${provider}/login-request`,
-      LogoutRequest: `${AppSettings.authenticationGatewayHost}/auth/${protocol}/${provider}/logout-request`,
-      ConsentRequest: `${AppSettings.authenticationGatewayHost}/consent/${provider}/consent-request`,
+      LoginRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/login-request`,
+      LogoutRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/logout-request`,
     };
   }
 
@@ -89,20 +87,6 @@ export default class AuthenticationGW {
     } catch (error) {
       window.alert(error);
     }
-  }
-
-  /**
-   *
-   * @param consentId
-   * @param idToken
-   */
-  getConsentRequestUrl(consentId: string, idToken: string): string {
-    const urlParams = new URLSearchParams({
-      appContext: this.#generateAppContext(),
-      consentId: consentId,
-      idToken: idToken,
-    });
-    return `${this.redirectUrls.ConsentRequest}?${urlParams.toString()}`;
   }
 
   /**

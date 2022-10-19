@@ -30,13 +30,25 @@ let states = loginApp.UIState.states;
       <div class="login-state-box">
           <b>{loginFlow.name}</b> <br/>
           <span class="label">State:</span> <span class="{states.info.textStyleClass}">{states.info.text}</span>
+          {#if loginApp.ifHasFeature('consents')}
+            {#if loginApp.ConsentState.hasConsents()}
+              <div class="consents">
+                {#each loginApp.ConsentState.getConsentIds() as consentId}
+                  <div class="consent">
+                    <span class="label">Consent:</span> <span>{consentId}</span>
+                  </div>
+                {/each}
+              </div>
+            {/if}
+          {/if}
       </div>
       <div>
           <button class="login" disabled="{states.login.disabled}" on:click="{() => loginApp.AuthService.login()}">Login</button>
           <button class="logout" disabled="{states.logout.disabled}" on:click="{() => loginApp.AuthService.logout()}">Logout</button>
+          <span>:::</span>
           <button class="authorize is-special" disabled="{states.authorize.disabled}" on:click="{() => loginApp.AuthService.authorize()}">Authorize</button>
-          {#if loginApp.AuthService.hasFeat('consentify')}
-            <button class="consentify is-special" disabled="{states.consentify.disabled}" on:click="{() => loginApp.AuthService.consentify()}">Check Consent</button>
+          {#if loginApp.ifHasFeature('consents')}
+            <button class="consentify is-special" disabled="{states.consentify.disabled}" on:click="{() => loginApp.ConsentService.consentify()}">Check Consent</button>
           {/if}
       </div>
     </div>

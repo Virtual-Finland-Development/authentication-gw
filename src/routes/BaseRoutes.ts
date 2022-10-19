@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Context } from "openapi-backend";
 import Authorizator from "../utils/Authorizator";
 import { getJSONResponseHeaders } from "../utils/default-headers";
@@ -22,7 +23,19 @@ export default {
     body: "OK",
     headers: { "Content-Type": "text/plain" },
   }),
-
+  async reverseProxy(context: Context) {
+    const response = await axios.request({
+      method: context.request.requestBody.method,
+      url: context.request.requestBody.url,
+      data: context.request.requestBody.data,
+      headers: context.request.requestBody.headers,
+    });
+    return {
+      statusCode: 200,
+      headers: getJSONResponseHeaders(),
+      body: JSON.stringify(response.data),
+    };
+  },
   /**
    *  POST: authorize request using the access token and app context
    *

@@ -6,58 +6,33 @@ import LoginAppComponent from "./LoginAppComponent";
  * Example app auth service
  */
 export default class AuthService extends LoginAppComponent {
-  api: AuthenticationGW;
+  authApi: AuthenticationGW;
 
   constructor(loginApp, configuration: AuthenticationGWProps) {
     super(loginApp);
-    this.api = new AuthenticationGW(configuration);
-  }
-
-  /**
-   *
-   * @param featureName
-   * @returns
-   */
-  hasFeat(featureName: string): boolean {
-    if (featureName === "consentify") {
-      const hasConsents = {
-        testbed: true,
-      };
-      return hasConsents[this.api.provider] === true;
-    }
-    return true; // defaults all-in
+    this.authApi = new AuthenticationGW(configuration);
   }
 
   login() {
     this.log("AuthService", "logging in..");
-    this.UIState.transitToUrl(this.api.getLoginUrl());
+    this.UIState.transitToUrl(this.authApi.getLoginUrl(), "auth");
   }
   async fetchAuthTokens(loginCode) {
     this.log("AuthService", "fetching auth tokens..");
-    return this.api.getAuthTokens(loginCode);
+    return this.authApi.getAuthTokens(loginCode);
   }
   async fetchUserInfo(tokens: AuthTokens) {
     this.log("AuthService", "fetching user info..");
-    return this.api.getUserInfo(tokens.accessToken);
+    return this.authApi.getUserInfo(tokens.accessToken);
   }
   async authorize() {
     this.log("AuthService", "authorizing..");
     const tokens = this.AuthState.getAuthTokens();
-    this.api.authorize(tokens?.idToken);
+    this.authApi.authorize(tokens?.idToken);
   }
   logout() {
     this.log("AuthService", "loggin out..");
     const tokens = this.AuthState.getAuthTokens();
-    this.UIState.transitToUrl(this.api.getLogoutUrl(tokens?.idToken));
-  }
-
-  /**
-   * Extra services
-   */
-  consentify() {
-    const consentId = "dpp://digitalliving:v2@testbed.fi/draft/Company/Shareholders"; // @TODO: what is the context
-    this.log("AuthService", `getting consent for ${consentId}..`);
-    const tokens = this.AuthState.getAuthTokens();
-    this.UIState.transitToUrl(this.api.getConsentRequestUrl(consentId, tokens?.idToken));
+    this.UIState.transitToUrl(this.authApi.getLogoutUrl(tokens?.idToken), "auth");
   }
 }

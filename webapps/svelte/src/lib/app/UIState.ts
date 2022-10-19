@@ -1,21 +1,40 @@
+import AppSettings from "../../AppSettings";
+import SimpleJSONStore from "../utils/SimpleJSONStore";
 import LoginAppComponent from "./LoginAppComponent";
 
 type UIStateElements = {
   [elementName: string]: { disabled?: boolean; text?: string | null; textStyleClass?: string | null };
 };
 
+type KnownTransitionNames = "auth" | "consent";
+
 /**
  * Example app UI state, interactions handler
  */
 export default class UIState extends LoginAppComponent {
-  states: UIStateElements = {
-    login: { disabled: true },
-    logout: { disabled: true },
-    authorize: { disabled: true },
-    consentify: { disabled: true },
-    info: { text: "...", textStyleClass: "is-loading" },
-  };
+  states: UIStateElements;
 
+  #transitions: SimpleJSONStore;
+
+  constructor(loginApp) {
+    super(loginApp);
+    this.states = {
+      login: { disabled: true },
+      logout: { disabled: true },
+      authorize: { disabled: true },
+      consentify: { disabled: true },
+      info: { text: "...", textStyleClass: "is-loading" },
+    };
+  }
+
+  initialize() {
+    super.initialize();
+    this.#transitions = new SimpleJSONStore(`${AppSettings.appName}_${this.app.getName()}_transitions`, { auth: "variableStorage", consent: "sessionStorage" });
+  }
+
+  /**
+   *
+   */
   handleCurrentState(): void {
     if (this.AuthState.isLoading()) {
       this.states.login.disabled = true;
@@ -41,17 +60,27 @@ export default class UIState extends LoginAppComponent {
     }
   }
 
-  flagTransition() {
-    this.AuthState.isInTransition = true;
+  flagTransition(transitionName: KnownTransitionNames) {
+    this.#transitions.set(transitionName, true);
     this.handleCurrentState();
   }
-  transitToUrl(url) {
-    this.flagTransition();
+
+  transitToUrl(url, transitionName: KnownTransitionNames) {
+    this.flagTransition(transitionName);
     window.location.href = url;
   }
-  resetViewState() {
+
+  resetViewState(transitionName: KnownTransitionNames) {
     window.history.replaceState({}, document.title, window.location.pathname); // clear url params
-    this.AuthState.isInTransition = false;
+    this.#transitions.set(transitionName, false);
     this.handleCurrentState();
+  }
+
+  setTransition(transitionName: KnownTransitionNames, value: boolean) {
+    this.#transitions.set(transitionName, value);
+  }
+
+  ifInTransition(transitionName: KnownTransitionNames): boolean {
+    return Boolean(this.#transitions.get(transitionName));
   }
 }

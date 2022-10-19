@@ -3,6 +3,9 @@ import { AuthenticationProtocol } from "../api/AuthenticationGW";
 import { log } from "../utils/helpers";
 import AuthService from "./AuthService";
 import AuthState from "./AuthState";
+import ConsentEventListener from "./ConsentEventListener";
+import ConsentService from "./ConsentService";
+import ConsentState from "./ConsentState";
 import LoginEventListener from "./LoginEventListener";
 import UIState from "./UIState";
 
@@ -12,6 +15,9 @@ export default class LoginApp {
   UIState: UIState;
   AuthState: AuthState;
   AuthService: AuthService;
+
+  ConsentState: ConsentState;
+  ConsentService: ConsentService;
 
   constructor(configuration: { name: string; protocol: AuthenticationProtocol }) {
     this.name = configuration.name;
@@ -24,12 +30,18 @@ export default class LoginApp {
       protocol: configuration.protocol,
       redirectUrl: window.location.origin + window.location.pathname, // the url without query params etc
     });
+
+    this.ConsentState = new ConsentState(this);
+    this.ConsentService = new ConsentService(this);
   }
 
   initializeComponents() {
     this.UIState.initialize();
     this.AuthState.initialize();
     this.AuthService.initialize();
+
+    this.ConsentState.initialize();
+    this.ConsentService.initialize();
   }
 
   getName() {
@@ -46,5 +58,18 @@ export default class LoginApp {
   async engage() {
     this.initializeComponents();
     await LoginEventListener(this); // Listen for auth events
+    await ConsentEventListener(this); // Listen for consent events
+  }
+
+  /**
+   *
+   * @param feature
+   * @returns
+   */
+  ifHasFeature(feature: string): boolean {
+    if (feature === "consents") {
+      return this.getName() === "Testbed";
+    }
+    return true;
   }
 }

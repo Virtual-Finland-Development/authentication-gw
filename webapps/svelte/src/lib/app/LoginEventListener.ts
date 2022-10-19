@@ -15,7 +15,7 @@ export default async function LoginEventListener(loginApp: LoginApp) {
         const tokens = await loginApp.AuthService.fetchAuthTokens(loginCode);
         loginApp.AuthState.login(tokens); // Store token in local storage
         await loginApp.AuthState.handleLoggedIn(); // Fetch user info
-        loginApp.UIState.resetViewState(); // reset view state
+        loginApp.UIState.resetViewState("auth"); // reset view state
       } catch (error) {
         loginApp.log("LoginEventListener", "Failed to fetch auth token", error);
       }
@@ -30,21 +30,13 @@ export default async function LoginEventListener(loginApp: LoginApp) {
     const logoutResponse = urlParams.get("logout");
     if (logoutResponse === "success") {
       loginApp.AuthState.logout();
-      loginApp.UIState.resetViewState(); // reset view state
+      loginApp.UIState.resetViewState("auth"); // reset view state
     }
   } else {
     //
     // Handle logged-in state
     //
     await loginApp.AuthState.handleLoggedIn(); // Validate login
-
-    if (affectsThisApp && urlParams.has("consentToken")) {
-      //
-      // Handle consent response
-      //
-      console.log(urlParams.get("consentToken"));
-    }
-
     loginApp.UIState.handleCurrentState(); // Update UI
   }
 }

@@ -1,4 +1,5 @@
 import AppSettings from "../../AppSettings";
+import SimpleJSONStore from "../utils/SimpleJSONStore";
 import { AuthTokens } from "../utils/types";
 import LoginAppComponent from "./LoginAppComponent";
 
@@ -6,15 +7,15 @@ import LoginAppComponent from "./LoginAppComponent";
  * Example app auth state
  */
 export default class AuthState extends LoginAppComponent {
-  storeKey = null;
-  isInTransition = false;
+  #store: SimpleJSONStore;
+
   user = {
     email: null,
   };
 
   constructor(loginApp) {
     super(loginApp);
-    this.storeKey = `${AppSettings.appName}_${loginApp.getName()}_authState`;
+    this.#store = new SimpleJSONStore(`${AppSettings.appName}_${loginApp.getName()}_authState`);
   }
 
   /**
@@ -22,11 +23,12 @@ export default class AuthState extends LoginAppComponent {
    * @param tokens
    */
   login(tokens: AuthTokens) {
-    this.isInTransition = true;
+    this.UIState.setTransition("auth", true);
+
     if (typeof tokens === "object" && tokens !== null) {
       if (typeof tokens.accessToken === "string" && typeof tokens.idToken === "string") {
         this.log("AuthState", "logged in");
-        localStorage.setItem(this.storeKey, JSON.stringify(tokens));
+        this.#store.set("tokens", tokens);
       } else {
         throw new Error("Invalid token response");
       }
@@ -39,10 +41,11 @@ export default class AuthState extends LoginAppComponent {
    *
    */
   logout() {
-    this.isInTransition = true;
+    this.UIState.setTransition("auth", true);
     this.user.email = null;
     this.log("AuthState", "logged out");
-    localStorage.removeItem(this.storeKey);
+    this.#store.clear("tokens");
+    this.app.ConsentState.clear();
   }
 
   /**
@@ -50,7 +53,7 @@ export default class AuthState extends LoginAppComponent {
    * @returns
    */
   isLoggedIn(): boolean {
-    return this.getAuthTokens() !== null;
+    return this.#store.has("tokens");
   }
 
   /**
@@ -58,7 +61,7 @@ export default class AuthState extends LoginAppComponent {
    * @returns
    */
   isLoading(): boolean {
-    return this.isInTransition || (this.isLoggedIn() && this.user.email === null);
+    return this.UIState.ifInTransition("auth") || (this.isLoggedIn() && this.user.email === null);
   }
 
   /**
@@ -66,10 +69,7 @@ export default class AuthState extends LoginAppComponent {
    * @returns
    */
   getAuthTokens(): AuthTokens {
-    try {
-      return JSON.parse(localStorage.getItem(this.storeKey));
-    } catch (error) {}
-    return null;
+    return this.#store.get("tokens");
   }
 
   /**
@@ -83,7 +83,7 @@ export default class AuthState extends LoginAppComponent {
       // Auth invalidated
       this.log("AuthState", "login invalidated");
       this.logout();
-      this.UIState.resetViewState(); // reset view state
+      this.UIState.resetViewState("auth"); // reset view state
     }
   }
 }

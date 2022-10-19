@@ -73,6 +73,29 @@ paths:
                   message:
                     type: string
                     default: "Access Denied"
+  "/reverse-proxy":
+    post:
+      operationId: reverseProxy
+      requestBody:
+        description: Request contents
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["method", "url"]
+              properties:
+                method:
+                  type: string
+                url:
+                  type: string
+                data:
+                  type: object
+                headers:
+                  type: object
+      responses:
+        "200":
+          description: Response data
   "/auth/openid/{provider}/login-request":
     get:
       operationId: OpenIdLoginRequest
@@ -545,53 +568,3 @@ paths:
       responses:
         "200":
           description: .well-known/jwks.json
-  "/consent/testbed/consent-request":
-    get:
-      operationId: TestbedConsentRequest
-      parameters:
-        - in: query
-          name: appContext
-          schema:
-            type: string
-          required: true
-          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
-        - in: query
-          name: idToken
-          schema:
-            type: string
-          required: true
-          description: "Authorization: id_token"
-        - in: query
-          name: consentId
-          schema:
-            type: string
-          required: true
-          description: "consent context identifier (dataSource)"
-          example: "dpp://digitalliving:v2@testbed.fi/draft/Company/Shareholders"
-      responses:
-        "303":
-          description: Redirect user to the testbed consent page
-          headers:
-            location:
-              description: Testbed consent request url
-              schema:
-                type: string
-  "/consent/testbed/consent-response":
-    get:
-      operationId: TestbedConsentResponse
-      parameters:
-        - in: query
-          name: status
-          schema:
-            type: string
-          required: true
-          description: "status of the consent request, allowed values: success, fail"
-          example: "success"
-      responses:
-        "303":
-          description: Redirect user back to the appContext app
-          headers:
-            location:
-              description: appContext redirectUrl
-              schema:
-                type: string
