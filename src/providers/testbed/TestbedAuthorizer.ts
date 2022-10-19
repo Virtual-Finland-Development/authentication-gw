@@ -29,7 +29,7 @@ export async function verifyConsent(consentToken: string): Promise<void> {
     const verified = await verifyIdToken(consentToken, { issuer: "https://consent.testbed.fi", jwksUri: "https://consent.testbed.fi/.well-known/jwks.json" });
     debug(verified);
   } catch (error) {
-    console.log(error);
+    debug(error);
     throw new AccessDeniedException("Unverified");
   }
 }
