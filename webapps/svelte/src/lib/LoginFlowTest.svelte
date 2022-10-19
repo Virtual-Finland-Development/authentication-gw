@@ -36,6 +36,7 @@ let states = loginApp.UIState.states;
                 {#each loginApp.ConsentState.getConsentIds() as consentId}
                   <div class="consent">
                     <span class="label">Consent:</span> <span>{consentId}</span>
+                    <span>:::</span>
                     <button class="is-small is-special" on:click="{() => loginApp.ConsentService.verifyConsentId(consentId)}">Verify</button>
                     <button class="is-small is-special" on:click="{() => loginApp.ConsentService.testConsentIdRequest(consentId)}">Test</button>
                   </div>

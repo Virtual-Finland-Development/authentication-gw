@@ -121,6 +121,12 @@ ul.inline li {
   display: inline;
 }
 
+.consent span {
+  font-size: 0.8em;
+  font-weight: 400;
+  color: #ffffff;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
