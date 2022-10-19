@@ -79,6 +79,11 @@ button.is-special:before {
   content: "→ ";
 }
 
+button.is-small {
+  font-size: 0.8em;
+  padding: 0.4em 0.8em;
+}
+
 .login-flow-box {
   background-color: #949494;
   border: 1px solid transparent;

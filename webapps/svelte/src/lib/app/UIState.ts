@@ -70,10 +70,14 @@ export default class UIState extends LoginAppComponent {
     window.location.href = url;
   }
 
-  resetViewState(transitionName: KnownTransitionNames) {
+  resetViewState(transitionName: KnownTransitionNames, refresh: boolean = false) {
     window.history.replaceState({}, document.title, window.location.pathname); // clear url params
     this.#transitions.set(transitionName, false);
-    this.handleCurrentState();
+    if (refresh) {
+      window.location.reload();
+    } else {
+      this.handleCurrentState();
+    }
   }
 
   setTransition(transitionName: KnownTransitionNames, value: boolean) {

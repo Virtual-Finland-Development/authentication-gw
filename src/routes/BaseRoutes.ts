@@ -25,7 +25,7 @@ export default {
     headers: { "Content-Type": "text/plain" },
   }),
   async reverseProxy(context: Context) {
-    const acl = ["https://consent.testbed.fi"];
+    const acl = ["https://consent.testbed.fi/", "https://gateway.testbed.fi/"];
     const aclMatches = acl.filter((aclUrl) => context.request.requestBody.url.startsWith(aclUrl));
     if (aclMatches.length === 0) {
       throw new AccessDeniedException();
