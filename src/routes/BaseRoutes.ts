@@ -2,6 +2,7 @@ import axios from "axios";
 import { Context } from "openapi-backend";
 import Authorizator from "../utils/Authorizator";
 import { getJSONResponseHeaders } from "../utils/default-headers";
+import { AccessDeniedException } from "../utils/exceptions";
 import { HttpResponse } from "../utils/types";
 
 export default {
@@ -24,6 +25,12 @@ export default {
     headers: { "Content-Type": "text/plain" },
   }),
   async reverseProxy(context: Context) {
+    const acl = ["https://consent.testbed.fi"];
+    const aclMatches = acl.filter((aclUrl) => context.request.requestBody.url.startsWith(aclUrl));
+    if (aclMatches.length === 0) {
+      throw new AccessDeniedException();
+    }
+
     const response = await axios.request({
       method: context.request.requestBody.method,
       url: context.request.requestBody.url,
