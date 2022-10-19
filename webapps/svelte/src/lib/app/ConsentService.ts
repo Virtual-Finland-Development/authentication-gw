@@ -15,13 +15,34 @@ export default class ConsentService extends LoginAppComponent {
   }
 
   /**
+   *
+   */
+  async prepareConsentSituation(handleGrantedConsent: boolean = false) {
+    this.log("ConsentService", `Preparing consent situation for ${CONSENT_ID}..`);
+    const tokens = this.AuthState.getAuthTokens();
+    const consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, tokens.idToken);
+    this.app.ConsentState.setConsentSituation(consentSituation);
+
+    if (handleGrantedConsent && consentSituation.status === "consentGranted") {
+      this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
+      this.app.ConsentState.setConsentTokenFor(CONSENT_ID, consentSituation.consentToken);
+    }
+
+    return consentSituation;
+  }
+
+  /**
    * Consent flow initiator
    */
   async consentify() {
     this.log("ConsentService", `getting consent for ${CONSENT_ID}..`);
     const tokens = this.AuthState.getAuthTokens();
 
-    const consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, tokens?.idToken);
+    let consentSituation = this.app.ConsentState.getConsentSituation();
+    if (!consentSituation) {
+      consentSituation = await this.prepareConsentSituation();
+    }
+
     if (consentSituation.status === "verifyUserConsent") {
       this.UIState.transitToUrl(consentSituation.redirectUrl, "consent");
     } else if (consentSituation.status === "consentGranted") {

@@ -72,4 +72,14 @@ export default class LoginApp {
     }
     return true;
   }
+
+  /**
+   *
+   */
+  async handleLoggedIn() {
+    const success = await this.AuthState.handleLoggedIn(); // Validate login
+    if (success && this.ifHasFeature("consents")) {
+      await this.ConsentState.handleLoggedIn();
+    }
+  }
 }

@@ -14,7 +14,7 @@ export default async function LoginEventListener(loginApp: LoginApp) {
       try {
         const tokens = await loginApp.AuthService.fetchAuthTokens(loginCode);
         loginApp.AuthState.login(tokens); // Store token in local storage
-        await loginApp.AuthState.handleLoggedIn(); // Fetch user info
+        await loginApp.handleLoggedIn(); // Fetch user info
         loginApp.UIState.resetViewState("auth"); // reset view state
       } catch (error) {
         loginApp.log("LoginEventListener", "Failed to fetch auth token", error);
@@ -36,7 +36,7 @@ export default async function LoginEventListener(loginApp: LoginApp) {
     //
     // Handle logged-in state
     //
-    await loginApp.AuthState.handleLoggedIn(); // Validate login
+    await loginApp.handleLoggedIn(); // Validate login
     loginApp.UIState.handleCurrentState(); // Update UI
   }
 }

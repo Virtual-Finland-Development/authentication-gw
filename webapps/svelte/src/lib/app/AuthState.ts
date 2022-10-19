@@ -75,15 +75,18 @@ export default class AuthState extends LoginAppComponent {
   /**
    *
    */
-  async handleLoggedIn() {
+  async handleLoggedIn(): Promise<boolean> {
+    let isLoggedIn = false;
     try {
       const tokens = this.getAuthTokens();
       this.user = await this.AuthService.fetchUserInfo(tokens);
+      isLoggedIn = true;
     } catch (error) {
       // Auth invalidated
       this.log("AuthState", "login invalidated");
       this.logout();
       this.UIState.resetViewState("auth"); // reset view state
     }
+    return isLoggedIn;
   }
 }

@@ -1,5 +1,6 @@
 import axios from "axios";
 import AppSettings from "../../AppSettings";
+import { ConsentSituation } from "../app/ConsentState";
 
 export default class ConsentAPI {
   /**
@@ -9,7 +10,7 @@ export default class ConsentAPI {
    * @param returnUrl
    * @returns
    */
-  async getConsentSituation(consentId: string, idToken: string, returnUrl?: string): Promise<{ status: string; consentToken?: string; redirectUrl?: string }> {
+  async getConsentSituation(consentId: string, idToken: string, returnUrl?: string): Promise<ConsentSituation> {
     // Request the consent: https://ioxio.com/guides/how-to-build-an-application#request-consent
     const response = await axios.post(`${AppSettings.authenticationGatewayHost}/testbed-reverse-proxy`, {
       method: "POST",

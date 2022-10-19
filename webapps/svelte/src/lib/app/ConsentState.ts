@@ -2,15 +2,19 @@ import AppSettings from "../../AppSettings";
 import SimpleJSONStore from "../utils/SimpleJSONStore";
 import LoginAppComponent from "./LoginAppComponent";
 
+export type ConsentSituation = { status: string; consentToken?: string; redirectUrl?: string };
+
 /**
  * Example app consent state
  */
 export default class ConsentState extends LoginAppComponent {
   #consentStore: SimpleJSONStore;
+  #consentSituation: ConsentSituation;
 
   constructor(loginApp) {
     super(loginApp);
     this.#consentStore = new SimpleJSONStore(`${AppSettings.appName}_${loginApp.getName()}_consentsState`);
+    this.#consentSituation = null;
   }
 
   /**
@@ -63,8 +67,7 @@ export default class ConsentState extends LoginAppComponent {
    * @returns
    */
   hasConsents(): boolean {
-    const store = this.#consentStore.get();
-    return Object.keys(store).length > 0;
+    return this.#consentStore.has();
   }
 
   /**
@@ -74,5 +77,19 @@ export default class ConsentState extends LoginAppComponent {
   getConsentIds(): string[] {
     const store = this.#consentStore.get();
     return Object.keys(store);
+  }
+
+  getConsentSituation(): ConsentSituation {
+    return this.#consentSituation;
+  }
+  setConsentSituation(consentSituation: ConsentSituation): void {
+    this.#consentSituation = consentSituation;
+  }
+
+  /**
+   *
+   */
+  async handleLoggedIn() {
+    await this.app.ConsentService.prepareConsentSituation(true);
   }
 }

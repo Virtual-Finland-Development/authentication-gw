@@ -77,6 +77,54 @@ export class DefaultService {
     }
 
     /**
+     * @returns any Response data
+     * @throws ApiError
+     */
+    public testbedReverseProxy({
+        requestBody,
+    }: {
+        /**
+         * Request contents
+         */
+        requestBody: {
+            method: string;
+            url: string;
+            data?: any;
+            headers?: any;
+        },
+    }): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/testbed-reverse-proxy',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @returns any Verified message
+     * @throws ApiError
+     */
+    public testbedConsentVerify({
+        xConsentToken,
+    }: {
+        xConsentToken?: string,
+    }): CancelablePromise<{
+        message?: string;
+    }> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/consent/testbed/verify',
+            headers: {
+                'X-Consent-Token': xConsentToken,
+            },
+            errors: {
+                401: `Unverified message`,
+            },
+        });
+    }
+
+    /**
      * @returns void
      * @throws ApiError
      */

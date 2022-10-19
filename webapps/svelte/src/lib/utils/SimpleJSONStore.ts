@@ -1,7 +1,11 @@
+type StorageDrivers = {
+  [key: string]: "variableStorage" | "localStorage" | "sessionStorage";
+};
+
 export default class SimpleJSONStore {
   storeKey: string;
-  drivers: { [key: string]: string } = {};
-  constructor(storeKey: string, drivers?: { [key: string]: string }) {
+  drivers: StorageDrivers = {};
+  constructor(storeKey: string, drivers?: StorageDrivers) {
     this.storeKey = storeKey;
     if (drivers) {
       this.drivers = drivers;
@@ -42,9 +46,13 @@ export default class SimpleJSONStore {
       storage.removeItem(this.storeKey);
     }
   }
-  has(key: string) {
+  has(key?: string) {
     const store = this.get();
-    return store.hasOwnProperty(key);
+
+    if (typeof key === "string") {
+      return store.hasOwnProperty(key);
+    }
+    return Object.keys(store).length > 0;
   }
 
   #getDriverForKey(key: string) {
