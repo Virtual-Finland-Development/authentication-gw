@@ -1,20 +1,22 @@
+import LoginApp from "./LoginApp";
+
 export default class LoginAppComponent {
-  parent = null;
+  app: LoginApp = null;
   getName: any;
   log: any;
   UIState: any;
   AuthState: any;
   AuthService: any;
 
-  constructor(parent) {
-    this.parent = parent;
-    this.getName = this.parent.getName.bind(parent);
-    this.log = this.parent.log.bind(parent);
+  constructor(app: LoginApp) {
+    this.app = app;
+    this.getName = this.app.getName.bind(app);
+    this.log = this.app.log.bind(app);
   }
 
   initialize() {
-    this.UIState = this.parent.UIState;
-    this.AuthState = this.parent.AuthState;
-    this.AuthService = this.parent.AuthService;
+    this.UIState = this.app.UIState;
+    this.AuthState = this.app.AuthState;
+    this.AuthService = this.app.AuthService;
   }
 }

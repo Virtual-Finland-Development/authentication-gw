@@ -31,7 +31,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
    * @returns
    */
   async LoginRequest(context: Context): Promise<HttpResponse> {
-    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
     const clientId = await Settings.getSecret("TESTBED_CLIENT_ID");
     const queryString = new URLSearchParams({
       response_type: "code",
@@ -65,7 +65,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
       debug(context.request.query);
       const loginCode = String(context.request.query.code);
       const state = String(context.request.query.state);
-      const parsedAppContext = parseAppContext(state, this.identityProviderIdent);
+      const parsedAppContext = parseAppContext(state, { provider: this.identityProviderIdent });
 
       if (!loginCode) {
         throw new Error("Missing login code");
@@ -92,7 +92,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
    * @returns
    */
   async AuthTokenRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, this.identityProviderIdent); // Valites app context
+    parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
     const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
 
     const SCOPE = TestbedSettings.scope;
@@ -140,7 +140,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
     try {
-      const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+      const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
 
       const idToken = String(context.request.query?.idToken);
       if (!idToken) {
@@ -182,7 +182,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
    * @returns
    */
   async LogoutResponse(context: Context): Promise<HttpResponse> {
-    const parsedAppContext = parseAppContext(context, this.identityProviderIdent);
+    const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
     const redirectUrl = prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent);
 
     return {
@@ -201,7 +201,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
    * @returns
    */
   async UserInfoRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, this.identityProviderIdent); // Valites app context
+    parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
 
     const accessToken = context.request.requestBody.accessToken;
 

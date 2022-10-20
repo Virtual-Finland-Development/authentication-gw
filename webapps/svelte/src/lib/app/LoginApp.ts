@@ -3,6 +3,10 @@ import { AuthenticationProtocol } from "../api/AuthenticationGW";
 import { log } from "../utils/helpers";
 import AuthService from "./AuthService";
 import AuthState from "./AuthState";
+import ConsentEventListener from "./ConsentEventListener";
+import ConsentService from "./ConsentService";
+import ConsentState from "./ConsentState";
+import LoginEventListener from "./LoginEventListener";
 import UIState from "./UIState";
 
 export default class LoginApp {
@@ -11,6 +15,9 @@ export default class LoginApp {
   UIState: UIState;
   AuthState: AuthState;
   AuthService: AuthService;
+
+  ConsentState: ConsentState;
+  ConsentService: ConsentService;
 
   constructor(configuration: { name: string; protocol: AuthenticationProtocol }) {
     this.name = configuration.name;
@@ -23,12 +30,18 @@ export default class LoginApp {
       protocol: configuration.protocol,
       redirectUrl: window.location.origin + window.location.pathname, // the url without query params etc
     });
+
+    this.ConsentState = new ConsentState(this);
+    this.ConsentService = new ConsentService(this);
   }
 
   initializeComponents() {
     this.UIState.initialize();
     this.AuthState.initialize();
     this.AuthService.initialize();
+
+    this.ConsentState.initialize();
+    this.ConsentService.initialize();
   }
 
   getName() {
@@ -44,49 +57,29 @@ export default class LoginApp {
 
   async engage() {
     this.initializeComponents();
-    await this.engageLoginFlowEventsListener();
+    await LoginEventListener(this); // Listen for auth events
+    await ConsentEventListener(this); // Listen for consent events
   }
 
-  /**************************************************************************
-  * 
-  * Event listeners
-  * 
-  /**************************************************************************/
-  async engageLoginFlowEventsListener() {
-    const urlParams = new URLSearchParams(window.location.search);
+  /**
+   *
+   * @param feature
+   * @returns
+   */
+  ifHasFeature(feature: string): boolean {
+    if (feature === "consents") {
+      return this.getName() === "Testbed";
+    }
+    return true;
+  }
 
-    const affectsThisApp = urlParams.has("provider") && urlParams.get("provider").toLowerCase() === this.getName().toLowerCase();
-    if (!this.AuthState.isLoggedIn()) {
-      if (affectsThisApp && urlParams.has("loginCode")) {
-        this.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
-        //
-        // Handle login response
-        //
-        const loginCode = urlParams.get("loginCode");
-        try {
-          const tokens = await this.AuthService.fetchAuthTokens(loginCode);
-          this.AuthState.login(tokens); // Store token in local storage
-          await this.AuthState.handleLoggedIn(); // Fetch user info
-          this.UIState.resetViewState(); // reset view state
-        } catch (error) {
-          this.log("LoginFlowEventsListener", "Failed to fetch auth token", error);
-        }
-      } else {
-        this.UIState.handleCurrentState(); // Init UI
-      }
-    } else if (affectsThisApp && urlParams.has("logout")) {
-      this.log("LoginFlowEventsListener", "Logout event received, logging out");
-      //
-      // Handle logout response
-      //
-      const logoutResponse = urlParams.get("logout");
-      if (logoutResponse === "success") {
-        this.AuthState.logout();
-        this.UIState.resetViewState(); // reset view state
-      }
-    } else {
-      await this.AuthState.handleLoggedIn(); // Validate login
-      this.UIState.handleCurrentState(); // Update UI
+  /**
+   *
+   */
+  async handleLoggedIn() {
+    const success = await this.AuthState.handleLoggedIn(); // Validate login
+    if (success && this.ifHasFeature("consents")) {
+      await this.ConsentState.handleLoggedIn();
     }
   }
 }

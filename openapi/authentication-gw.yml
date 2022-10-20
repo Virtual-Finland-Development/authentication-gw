@@ -73,6 +73,58 @@ paths:
                   message:
                     type: string
                     default: "Access Denied"
+  "/testbed-reverse-proxy":
+    post:
+      operationId: TestbedReverseProxy
+      requestBody:
+        description: Request contents
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["method", "url"]
+              properties:
+                method:
+                  type: string
+                url:
+                  type: string
+                data:
+                  type: object
+                headers:
+                  type: object
+      responses:
+        "200":
+          description: Response data
+  "/consent/testbed/verify":
+    post:
+      operationId: TestbedConsentVerify
+      parameters:
+        - in: header
+          name: X-Consent-Token
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Verified message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Verified"
+        "401":
+          description: Unverified message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Unverified"
   "/auth/openid/{provider}/login-request":
     get:
       operationId: OpenIdLoginRequest
@@ -88,7 +140,7 @@ paths:
           schema:
             type: string
           required: true
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
       responses:
         "303":
           description: Redirect to the authentication provider service
@@ -166,7 +218,7 @@ paths:
           schema:
             type: string
           required: true
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
         - in: query
           name: idToken
           schema:
@@ -198,7 +250,7 @@ paths:
           schema:
             type: string
           required: false
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
       responses:
         "303":
           description: Authentication providers callback url, redirect back to the app context
@@ -322,7 +374,7 @@ paths:
           schema:
             type: string
           required: true
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
       responses:
         "303":
           description: Redirect to the authentication provider service
@@ -364,7 +416,7 @@ paths:
           schema:
             type: string
           required: true
-          description: "Base64-encoded object with attributes: {appName: string, redirectUrl: string}"
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
         - in: query
           name: idToken
           schema:

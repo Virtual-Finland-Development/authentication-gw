@@ -22,7 +22,6 @@ export default {
     body: "OK",
     headers: { "Content-Type": "text/plain" },
   }),
-
   /**
    *  POST: authorize request using the access token and app context
    *
