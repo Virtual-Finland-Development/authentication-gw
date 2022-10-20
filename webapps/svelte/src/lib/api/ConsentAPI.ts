@@ -81,6 +81,7 @@ export default class ConsentAPI {
    * @returns
    */
   async verifyConsentToken(consentToken: string): Promise<any> {
+    // Verify the consent token: https://ioxio.com/guides/verify-consent-in-a-data-source
     const response = await axios.post(`${AppSettings.authenticationGatewayHost}/consent/testbed/verify`, null, {
       headers: {
         "X-Consent-Token": consentToken,
