@@ -15,12 +15,12 @@ export default class ConsentService extends LoginAppComponent {
   }
 
   /**
-   *
+   * Prepares consent situation
    */
   async prepareConsentSituation(handleGrantedConsent: boolean = false) {
     this.log("ConsentService", `Preparing consent situation for ${CONSENT_ID}..`);
     const tokens = this.AuthState.getAuthTokens();
-    const consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, tokens.idToken);
+    const consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, tokens?.idToken);
     this.app.ConsentState.setConsentSituation(consentSituation);
 
     if (handleGrantedConsent && consentSituation.status === "consentGranted") {
@@ -36,7 +36,6 @@ export default class ConsentService extends LoginAppComponent {
    */
   async consentify() {
     this.log("ConsentService", `getting consent for ${CONSENT_ID}..`);
-    const tokens = this.AuthState.getAuthTokens();
 
     let consentSituation = this.app.ConsentState.getConsentSituation();
     if (!consentSituation) {
@@ -80,7 +79,7 @@ export default class ConsentService extends LoginAppComponent {
           lon: 24.945831,
         },
         consentToken,
-        tokens.idToken
+        tokens?.idToken
       );
       window.alert(`Received valid data: ${JSON.stringify(results, null, 2)}`);
     } catch (error) {

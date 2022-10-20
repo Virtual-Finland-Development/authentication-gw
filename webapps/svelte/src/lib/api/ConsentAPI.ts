@@ -12,37 +12,44 @@ export default class ConsentAPI {
    */
   async getConsentSituation(consentId: string, idToken: string, returnUrl?: string): Promise<ConsentSituation> {
     // Request the consent: https://ioxio.com/guides/how-to-build-an-application#request-consent
-    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/testbed-reverse-proxy`, {
-      method: "POST",
-      url: `https://consent.testbed.fi/Consent/Request`,
-      data: {
-        dataSource: consentId,
-      },
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-      },
-    });
+    try {
+      const response = await axios.post(`${AppSettings.authenticationGatewayHost}/testbed-reverse-proxy`, {
+        method: "POST",
+        url: `https://consent.testbed.fi/Consent/Request`,
+        data: {
+          dataSource: consentId,
+        },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
 
-    if (response.data.type === "verifyUserConsent") {
-      if (typeof returnUrl !== "string") {
-        returnUrl = window.location.href;
+      if (response.data.type === "verifyUserConsent") {
+        if (typeof returnUrl !== "string") {
+          returnUrl = window.location.href;
+        }
+        const redirectUrl = `${response.data.verifyUrl}?${new URLSearchParams({
+          returnUrl: returnUrl,
+        }).toString()}`;
+
+        return {
+          status: "verifyUserConsent",
+          redirectUrl: redirectUrl,
+        };
+      } else if (response.data.type === "consentGranted") {
+        return {
+          status: "consentGranted",
+          consentToken: response.data.consentToken,
+        };
       }
-      const redirectUrl = `${response.data.verifyUrl}?${new URLSearchParams({
-        returnUrl: returnUrl,
-      }).toString()}`;
-
-      return {
-        status: "verifyUserConsent",
-        redirectUrl: redirectUrl,
-      };
-    } else if (response.data.type === "consentGranted") {
-      return {
-        status: "consentGranted",
-        consentToken: response.data.consentToken,
-      };
+      throw new Error("Unexpected response");
+    } catch (error) {
+      console.log("/Consent/Request error:", error);
     }
-    throw new Error("Unexpected response");
+    return {
+      status: "failed",
+    };
   }
 
   /**
