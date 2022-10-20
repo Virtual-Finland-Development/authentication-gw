@@ -1,6 +1,6 @@
 import axios from "axios";
 import AppSettings from "../../AppSettings";
-import { ConsentSituation } from "../app/ConsentState";
+export type ConsentSituation = { status: string; consentToken?: string; redirectUrl?: string };
 
 export default class ConsentAPI {
   /**
@@ -50,33 +50,6 @@ export default class ConsentAPI {
     return {
       status: "failed",
     };
-  }
-
-  /**
-   *
-   * @param consentId
-   * @param idToken
-   * @returns
-   */
-  async getConsentToken(consentId: string, idToken: string): Promise<string> {
-    // Retrieve the consent token: https://ioxio.com/guides/how-to-build-an-application#request-the-consent-token
-    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/testbed-reverse-proxy`, {
-      method: "POST",
-      url: `https://consent.testbed.fi/Consent/Request`,
-      data: {
-        dataSource: consentId,
-      },
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-      },
-    });
-
-    if (response.data.type !== "consentGranted") {
-      throw new Error("Consent not granted");
-    }
-
-    return response.data.consentToken;
   }
 
   /**

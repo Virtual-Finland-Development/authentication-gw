@@ -9,7 +9,7 @@ export default async function ConsentEventListener(loginApp: LoginApp) {
       const status = urlParams.get("status");
       if (status === "success") {
         loginApp.log("ConsentEventListener", "Consent success");
-        await loginApp.ConsentService.resolveConsentToken();
+        await loginApp.ConsentService.consentify();
       } else {
         loginApp.log("ConsentEventListener", "Consent failure");
       }

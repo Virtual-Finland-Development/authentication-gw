@@ -1,4 +1,4 @@
-import ConsentAPI from "../api/ConsentAPI";
+import ConsentAPI, { ConsentSituation } from "../api/ConsentAPI";
 import LoginAppComponent from "./LoginAppComponent";
 
 const CONSENT_ID = "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"; // @TODO: what is the context
@@ -8,60 +8,50 @@ const CONSENT_ID = "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"; 
  */
 export default class ConsentService extends LoginAppComponent {
   consentApi: ConsentAPI;
+  #consentSituation: ConsentSituation;
 
   constructor(loginApp) {
     super(loginApp);
     this.consentApi = new ConsentAPI();
   }
+  /* ---------------consent requests------------------- */
 
   /**
    * Prepares consent situation
    */
-  async prepareConsentSituation(handleGrantedConsent: boolean = false) {
+  async initializeConsentService(handleGrantedConsent: boolean = false): Promise<ConsentSituation> {
     this.log("ConsentService", `Preparing consent situation for ${CONSENT_ID}..`);
     const tokens = this.AuthState.getAuthTokens();
-    const consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, tokens?.idToken);
-    this.app.ConsentState.setConsentSituation(consentSituation);
+    this.#consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, tokens?.idToken);
 
-    if (handleGrantedConsent && consentSituation.status === "consentGranted") {
+    if (handleGrantedConsent && this.#consentSituation.status === "consentGranted") {
       this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
-      this.app.ConsentState.setConsentTokenFor(CONSENT_ID, consentSituation.consentToken);
+      this.app.ConsentState.setConsentTokenFor(CONSENT_ID, this.#consentSituation.consentToken);
     }
 
-    return consentSituation;
+    return this.#consentSituation;
   }
 
   /**
    * Consent flow initiator
    */
   async consentify() {
-    this.log("ConsentService", `getting consent for ${CONSENT_ID}..`);
+    this.log("ConsentService", `Resolving the consent for ${CONSENT_ID}..`);
 
-    let consentSituation = this.app.ConsentState.getConsentSituation();
-    if (!consentSituation) {
-      consentSituation = await this.prepareConsentSituation();
+    if (!this.#consentSituation) {
+      throw new Error("Consent service state not initialized");
     }
 
-    if (consentSituation.status === "verifyUserConsent") {
-      this.UIState.transitToUrl(consentSituation.redirectUrl, "consent");
-    } else if (consentSituation.status === "consentGranted") {
+    if (this.#consentSituation.status === "verifyUserConsent") {
+      this.UIState.transitToUrl(this.#consentSituation.redirectUrl, "consent");
+    } else if (this.#consentSituation.status === "consentGranted") {
       this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
-      this.app.ConsentState.setConsentTokenFor(CONSENT_ID, consentSituation.consentToken);
+      this.app.ConsentState.setConsentTokenFor(CONSENT_ID, this.#consentSituation.consentToken);
       this.app.UIState.resetViewState("consent", true); // reset view state
     }
   }
 
-  /**
-   *
-   */
-  async resolveConsentToken(): Promise<void> {
-    this.log("ConsentService", `getting consent token for ${CONSENT_ID}..`);
-    const tokens = this.AuthState.getAuthTokens();
-    const consentToken = await this.consentApi.getConsentToken(CONSENT_ID, tokens?.idToken);
-    this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
-    this.app.ConsentState.setConsentTokenFor(CONSENT_ID, consentToken);
-    this.app.UIState.resetViewState("consent", true); // reset view state
-  }
+  /* ---------------testing requests------------------- */
 
   /**
    *
