@@ -8,18 +8,15 @@ permissions:
   contents: read
 
 jobs:
-  deploy-api:
+  authgw-deployment:
     runs-on: ubuntu-latest
     environment: dev
-    strategy:
-      matrix:
-        node-version: [16.x]
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.x
       - name: Build
         run: |
           npm install
@@ -43,7 +40,6 @@ jobs:
           APP_CONTEXT_REDIRECT_FALLBACK_URL: ${{ secrets.APP_CONTEXT_REDIRECT_FALLBACK_URL }}
   deploy-web:
     runs-on: ubuntu-latest
-    environment: dev
     steps:
       - uses: actions/checkout@v3
       - name: Fix svelte demo app index authgw-url
