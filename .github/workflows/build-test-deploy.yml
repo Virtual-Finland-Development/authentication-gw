@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  deployment:
+  deploy-api:
     runs-on: ubuntu-latest
     environment: dev
     strategy:
