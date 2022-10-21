@@ -8,8 +8,9 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  deployment:
     runs-on: ubuntu-latest
+    environment: dev
     strategy:
       matrix:
         node-version: [16.x]
