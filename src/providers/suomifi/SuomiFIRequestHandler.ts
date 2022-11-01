@@ -59,6 +59,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
     const samlClient = await getSuomiFISAML2Client();
 
     try {
+      debug("SAML2: AuthenticateResponse: body:", body);
       const result = await samlClient.validatePostResponseAsync(body); // throws
 
       const { parsedAppContext, accessToken, idToken, expiresAt } = await createSignedInTokens(body.RelayState, result.profile.nameID); // throws
