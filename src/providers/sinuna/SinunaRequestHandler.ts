@@ -3,7 +3,7 @@ import { Context } from "openapi-backend";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 
 import { getJSONResponseHeaders } from "../../utils/default-headers";
-import { AccessDeniedException } from "../../utils/exceptions";
+import { AccessDeniedException, NoticeException } from "../../utils/exceptions";
 import { generateBase64Hash } from "../../utils/hashes";
 import { debug, logAxiosException } from "../../utils/logging";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
@@ -58,6 +58,10 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     try {
+      if (context.request.query.error) {
+        throw new NoticeException(String(context.request.query.error_description) || String(context.request.query.error));
+      }
+
       const authenticateResponse = parseSinunaAuthenticateResponse(context.request.query);
       const appContextObj = authenticateResponse.appContextObj;
       const redirectUrl = prepareLoginRedirectUrl(appContextObj.redirectUrl, authenticateResponse.loginCode, this.identityProviderIdent);

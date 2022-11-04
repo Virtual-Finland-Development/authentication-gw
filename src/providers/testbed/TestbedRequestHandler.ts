@@ -63,6 +63,11 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     try {
       debug(context.request.query);
+
+      if (context.request.query.error) {
+        throw new NoticeException(String(context.request.query.error_description) || String(context.request.query.error));
+      }
+
       const loginCode = String(context.request.query.code);
       const state = String(context.request.query.state);
       const parsedAppContext = parseAppContext(state, { provider: this.identityProviderIdent });

@@ -164,13 +164,13 @@ paths:
           description: "Login code"
           schema:
             type: string
-          required: true
+          required: false
         - in: query
           name: state
           description: "Login state string"
           schema:
             type: string
-          required: true
+          required: false
         - in: query
           name: acr_values
           schema:
@@ -193,6 +193,16 @@ paths:
           required: false
         - in: query
           name: nonce
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: error
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: error_description
           schema:
             type: string
           required: false
