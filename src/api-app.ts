@@ -89,7 +89,7 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
  * @returns
  */
 async function handleSwaggerDocsRequest(event: APIGatewayProxyEventV2) {
-  if (event.rawPath === "/docs/authentication-gw.yml") {
+  if (event.rawPath === "/docs/openapi/authentication-gw.yml") {
     return {
       statusCode: 200,
       body: await fs.readFile("./openapi/authentication-gw.yml", "utf8"),
