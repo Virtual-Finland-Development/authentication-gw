@@ -7,7 +7,7 @@ import { ifObjectEmpty } from "../../src/utils/transformers";
 export type LambdaApiGatewayV2Stack = {
   role: aws.iam.Role;
   apiGateway: aws.apigatewayv2.Api;
-  tags: { Project: string };
+  tags: { [name: string]: string };
 };
 
 type LambdaFunctionConfig = {
@@ -24,6 +24,12 @@ type LambdaRouteConfig = {
   path: string;
 };
 
+export type StackConfig = {
+  name: string;
+  stage: string;
+  project: string;
+};
+
 /* ---------------Public------------------- */
 
 /**
@@ -31,14 +37,14 @@ type LambdaRouteConfig = {
  * @param apiGatewayName
  * @returns
  */
-export function createStack(apiGatewayName: string, projectTag: string): LambdaApiGatewayV2Stack {
+export function createStack(apiGatewayName: string, configuration: StackConfig): LambdaApiGatewayV2Stack {
   const apiGw = getApiGateway(apiGatewayName);
   const role = getLambdaRole();
 
   return {
     apiGateway: apiGw,
     role: role,
-    tags: { Project: projectTag },
+    tags: { Name: configuration.name, Environment: configuration.stage, Project: configuration.project },
   };
 }
 

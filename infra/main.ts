@@ -3,11 +3,12 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
 import Settings from "../src/utils/Settings";
-import { createApiEndpoint, createLambdaRoute, createStack } from "./resources/LambdaApiGatewayV2";
+import { createApiEndpoint, createLambdaRoute, createStack, StackConfig } from "./resources/LambdaApiGatewayV2";
 
-const configuration = {
+const configuration: StackConfig = {
   name: "Authenticator",
-  stage: "dev",
+  stage: pulumi.getStack(),
+  project: "Virtual Finland",
 };
 
 /**
@@ -24,7 +25,7 @@ const nodeModulesLayer = new aws.lambda.LayerVersion("authentication-gw-dependen
 /**
  * Stack
  */
-const stack = createStack(`${configuration.stage}-authentication-gw`, configuration.name);
+const stack = createStack(`${configuration.stage}-authentication-gw`, configuration);
 
 /**
  * Routes
