@@ -47,19 +47,6 @@ const appRoutes = [
       nodeModulesLayer: nodeModulesLayer,
     },
   }),
-  createLambdaRoute(stack, {
-    route: { name: "api-docs", method: "GET", path: "/docs/{proxy+}" },
-    lambdaFunction: {
-      name: "authentication-gw-dev-api-docs",
-      handler: "api-docs.handler",
-      code: new pulumi.asset.AssetArchive({
-        ".": new pulumi.asset.FileArchive("../dist"),
-        "./openapi": new pulumi.asset.FileArchive("../openapi"),
-      }),
-      environment: {},
-      nodeModulesLayer: nodeModulesLayer,
-    },
-  }),
 ];
 
 // Export the Api gateway endpoint

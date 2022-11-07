@@ -10,6 +10,7 @@ import { getCORSHeaders } from "./utils/default-headers";
 import { debug, log } from "./utils/logging";
 import { InternalServerErrorHandler } from "./utils/route-utils";
 import Runtime from "./utils/Runtime";
+const { promises: fs } = require("fs");
 
 // Setup the OpenAPI backend
 const api = new OpenAPIBackend({
@@ -51,6 +52,11 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
 
     log(event.requestContext.http.method, event.rawPath);
 
+    // Handle the special, backend overriding routes
+    if (event.rawPath.startsWith("/docs") && event.requestContext.http.method === "GET") {
+      return handleSwaggerDocsRequest(event);
+    }
+
     // Pass lambda event cookies to openapi-backend
     if (event.cookies instanceof Array && event.cookies.length > 0) {
       debug("Cookies", JSON.stringify(event.cookies));
@@ -75,3 +81,32 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
     return InternalServerErrorHandler(error);
   }
 };
+
+/**
+ * Swagger docs handler
+ *
+ * @param event
+ * @returns
+ */
+async function handleSwaggerDocsRequest(event: APIGatewayProxyEventV2) {
+  if (event.rawPath === "/docs/authentication-gw.yml") {
+    return {
+      statusCode: 200,
+      body: await fs.readFile("./openapi/authentication-gw.yml", "utf8"),
+      headers: {
+        "Content-Type": "text/yaml",
+      },
+    };
+  } else if (event.rawPath === "/docs/" || event.rawPath === "/docs" || event.rawPath === "/docs/index.html") {
+    return {
+      statusCode: 200,
+      body: await fs.readFile("./openapi/index.html", "utf-8"),
+      headers: { "Content-Type": "text/html" },
+    };
+  }
+
+  return {
+    statusCode: 404,
+    body: "Not found",
+  };
+}

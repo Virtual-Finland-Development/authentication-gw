@@ -11,12 +11,7 @@ export default {
       location: "/docs/",
     },
   }),
-  swagger: async () => ({
-    statusCode: 307,
-    headers: {
-      location: "/docs/",
-    },
-  }),
+  swagger: async () => {}, // This is handled by the api-app.ts
   healthCheck: async () => ({
     statusCode: 200,
     body: "OK",

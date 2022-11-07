@@ -26,7 +26,6 @@
   "homepage": "https://github.com/Virtual-Finland-Development/authentication-gw#readme",
   "dependencies": {
     "aws-sdk": "^2.1214.0",
-    "aws-serverless-swagger-ui": "^1.0.1",
     "axios": "^0.27.2",
     "jsonwebtoken": "^8.5.1",
     "jwk-to-pem": "^2.0.5",

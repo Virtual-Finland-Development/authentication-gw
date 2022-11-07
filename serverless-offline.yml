@@ -23,10 +23,3 @@ functions:
           path: /{proxy+}
     environment:
       STAGE: "offline"
-      APP_CONTEXT_REDIRECT_FALLBACK_URL: ${env:APP_CONTEXT_REDIRECT_FALLBACK_URL, 'http://localhost:8000'}
-  api-docs:
-    handler: dist/api-docs.handler
-    events:
-      - httpApi:
-          method: GET
-          path: /docs/{proxy+}
