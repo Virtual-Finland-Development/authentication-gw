@@ -30,7 +30,7 @@ jobs:
       - name: Deploy with Pulumi
         uses: pulumi/actions@v3
         with:
-          work-dir: ./pulumi
+          work-dir: ./infra
           command: up
           stack-name: virtualfinland/dev
         env:

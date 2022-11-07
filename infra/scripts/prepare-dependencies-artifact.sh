@@ -3,7 +3,7 @@
 set -o errexit
 
 PROJECT_ROOT_DIR="$( realpath $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../ )"
-PULUMI_ROOT_DIR="${PROJECT_ROOT_DIR}/pulumi/"
+PULUMI_ROOT_DIR="${PROJECT_ROOT_DIR}/infra/"
 ARCHIVES_ROOT_DIR="${PULUMI_ROOT_DIR}/.lambda/layers/"
 
 # Prep
