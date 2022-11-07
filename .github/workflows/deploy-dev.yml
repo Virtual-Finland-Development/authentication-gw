@@ -1,0 +1,11 @@
+name: Automaticly build, test and deploy the dev-stage
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy-dev:
+    uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-test-deploy.yml@main
+    secrets: inherit
+    with:
+      environment: dev
