@@ -1,6 +1,6 @@
-import { describe, expect, test, beforeAll } from "@jest/globals";
+import { beforeAll, describe, expect, test } from "@jest/globals";
 import * as pulumi from "@pulumi/pulumi";
-import { createStack, LambdaApiGatewayV2Stack } from "../pulumi/resources/LambdaApiGatewayV2";
+import { createStack, LambdaApiGatewayV2Stack } from "../infra/resources/LambdaApiGatewayV2";
 
 // Pulumi testing mode setup
 function pulumiTestModeEngager() {
@@ -37,14 +37,14 @@ describe("Api Gateway V2 Stack", () => {
 });
 
 describe("Pulumi Infrastucture", () => {
-  let infra: typeof import("../pulumi/main");
+  let infra: typeof import("../infra/main");
 
   // Pulumi testing mode setup
   beforeAll(pulumiTestModeEngager);
 
   // Prep test
   beforeAll(async function () {
-    infra = await import("../pulumi/main");
+    infra = await import("../infra/main");
   });
 
   describe("Endpoint URL", () => {

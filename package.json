@@ -8,11 +8,11 @@
     "serve": "serverless offline --config ./serverless-offline.yml",
     "watch": "tsc --skipLibCheck -w",
     "test": "jest",
-    "prepare-dependencies-artifact": "./pulumi/scripts/prepare-dependencies-artifact.sh",
+    "prepare-dependencies-artifact": "./infra/scripts/prepare-dependencies-artifact.sh",
     "predeploy": "npm-run-all build prepare-dependencies-artifact",
-    "deploy": "pulumi -C ./pulumi up --yes",
-    "deploy-preview": "npm run predeploy && pulumi -C ./pulumi preview",
-    "clean": "rimraf dist pulumi/.lambda"
+    "deploy": "pulumi -C ./infra up --yes",
+    "deploy-preview": "npm run predeploy && pulumi -C ./infra preview",
+    "clean": "rimraf dist infra/.lambda"
   },
   "repository": {
     "type": "git",
