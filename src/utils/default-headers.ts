@@ -19,5 +19,6 @@ export function getCORSHeaders(origin?: string) {
     ...getDefaultHeaders(origin),
     "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Origin, Content-type, Accept, Authorization, X-Authorization-Provider, X-Authorization-Context, X-Consent-Token",
+    "Access-Control-Max-Age": 86400,
   };
 }

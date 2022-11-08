@@ -44,7 +44,7 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
     // Handle options request
     if (event.requestContext.http.method === "OPTIONS") {
       return {
-        statusCode: 200,
+        statusCode: 202, // Accepted
         headers: getCORSHeaders(),
       };
     }
