@@ -14,15 +14,14 @@ paths:
               description: /docs/
               schema:
                 type: string
-  "/swagger":
+  "/docs":
     get:
       operationId: swagger
       responses:
-        "303":
-          description: Redirect to the API documentation
-          headers:
-            location:
-              description: /docs/
+        "200":
+          description: Swagger API documentation
+          content:
+            text/html:
               schema:
                 type: string
   "/health":
