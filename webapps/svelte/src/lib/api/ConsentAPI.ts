@@ -13,7 +13,7 @@ export default class ConsentAPI {
   async getConsentSituation(consentId: string, idToken: string, returnUrl?: string): Promise<ConsentSituation> {
     // Request the consent: https://ioxio.com/guides/how-to-build-an-application#request-consent
     try {
-      const response = await axios.post(`${AppSettings.authenticationGatewayHost}/testbed-reverse-proxy`, {
+      const response = await axios.post(`${AppSettings.testbedAPIHost}/testbed/reverse-proxy`, {
         method: "POST",
         url: `https://consent.testbed.fi/Consent/Request`,
         data: {
@@ -60,7 +60,7 @@ export default class ConsentAPI {
    */
   async testConsentIdRequest(dataSourceUrl: string, inputData: any, consentToken: string, idToken: string): Promise<any> {
     // Test with a request: https://ioxio.com/guides/how-to-build-an-application#using-the-consent-token
-    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/testbed-reverse-proxy`, {
+    const response = await axios.post(`${AppSettings.testbedAPIHost}/testbed/reverse-proxy`, {
       method: "POST",
       url: dataSourceUrl,
       data: inputData,

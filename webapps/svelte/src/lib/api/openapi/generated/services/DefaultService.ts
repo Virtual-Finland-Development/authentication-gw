@@ -23,16 +23,13 @@ export class DefaultService {
     }
 
     /**
-     * @returns void
+     * @returns string Swagger API documentation
      * @throws ApiError
      */
-    public swagger(): CancelablePromise<void> {
+    public swagger(): CancelablePromise<string> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/swagger',
-            errors: {
-                303: `Redirect to the API documentation`,
-            },
+            url: '/docs',
         });
     }
 
@@ -73,31 +70,6 @@ export class DefaultService {
             errors: {
                 401: `Access denied message`,
             },
-        });
-    }
-
-    /**
-     * @returns any Response data
-     * @throws ApiError
-     */
-    public testbedReverseProxy({
-        requestBody,
-    }: {
-        /**
-         * Request contents
-         */
-        requestBody: {
-            method: string;
-            url: string;
-            data?: any;
-            headers?: any;
-        },
-    }): CancelablePromise<any> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/testbed-reverse-proxy',
-            body: requestBody,
-            mediaType: 'application/json',
         });
     }
 
@@ -169,6 +141,8 @@ export class DefaultService {
         sessionState,
         sid,
         nonce,
+        error,
+        errorDescription,
     }: {
         /**
          * Auth provider ident
@@ -177,16 +151,18 @@ export class DefaultService {
         /**
          * Login code
          */
-        code: string,
+        code?: string,
         /**
          * Login state string
          */
-        state: string,
+        state?: string,
         acrValues?: string,
         scope?: string,
         sessionState?: string,
         sid?: string,
         nonce?: string,
+        error?: string,
+        errorDescription?: string,
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
@@ -202,6 +178,8 @@ export class DefaultService {
                 'session_state': sessionState,
                 'sid': sid,
                 'nonce': nonce,
+                'error': error,
+                'error_description': errorDescription,
             },
             errors: {
                 303: `Authentication providers callback url, redirect back to the app context, provide loginCode and provider -variables as query params`,
