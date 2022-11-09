@@ -3,9 +3,11 @@ import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, NoticeException } from "../../utils/exceptions";
+import { decodeIdToken } from "../../utils/JWK-Utils";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
+import { ensureObject } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SinunaSettings from "./Sinuna.config";
@@ -88,6 +90,8 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
     try {
       // Get the token
       const tokens = await SinunaRequests.getTokensWithLoginCode(loggedInCode);
+      // Decode id token
+      const idTokenPayload = { email: ensureObject(decodeIdToken(tokens.idToken)?.decodedToken?.payload) };
       // Get user info
       const userInfo = await SinunaRequests.getUserInfoWithAccessToken(tokens.accessToken);
 
@@ -97,7 +101,10 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
         body: JSON.stringify({
           idToken: tokens.idToken,
           expiresAt: tokens.expiresAt,
-          profileData: userInfo,
+          profileData: {
+            ...idTokenPayload,
+            ...userInfo,
+          },
         }),
       };
     } catch (error) {

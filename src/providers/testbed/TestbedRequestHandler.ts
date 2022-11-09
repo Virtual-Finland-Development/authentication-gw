@@ -3,10 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, NoticeException, ValidationError } from "../../utils/exceptions";
+import { decodeIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
+import { ensureObject } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import TestbedSettings from "./Testbed.config";
@@ -101,6 +103,8 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
     try {
       // Get the token
       const tokens = await TestbedRequests.getTokensWithLoginCode(loggedInCode);
+      // Decode id token
+      const idTokenPayload = { email: ensureObject(decodeIdToken(tokens.idToken)?.decodedToken?.payload).email };
       // Get user info
       const userInfo = await TestbedRequests.getUserInfoWithAccessToken(tokens.accessToken);
 
@@ -110,7 +114,10 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
         body: JSON.stringify({
           idToken: tokens.idToken,
           expiresAt: tokens.expiresAt,
-          profileData: userInfo,
+          profileData: {
+            ...idTokenPayload,
+            ...userInfo,
+          },
         }),
       };
     } catch (error) {

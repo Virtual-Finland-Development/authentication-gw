@@ -71,6 +71,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
           context: {
             AuthnContextClassRef: profileAssertion["Assertion"]["AuthnStatement"][0]["AuthnContext"][0]["AuthnContextClassRef"][0]["_"],
           },
+          email: result.profile.email,
         },
         accessToken: accessToken,
         idToken: idToken,
