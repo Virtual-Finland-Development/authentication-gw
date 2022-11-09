@@ -22,12 +22,12 @@ export default class AuthService extends LoginAppComponent {
   }
   async authorize() {
     this.log("AuthService", "authorizing..");
-    const tokens = this.AuthState.getAuthTokens();
-    this.authApi.authorize(tokens?.idToken);
+    const authFields = this.AuthState.getAuthFields();
+    this.authApi.authorize(authFields?.idToken);
   }
   logout() {
     this.log("AuthService", "loggin out..");
-    const tokens = this.AuthState.getAuthTokens();
-    this.UIState.transitToUrl(this.authApi.getLogoutUrl(tokens?.idToken), "auth");
+    const authFields = this.AuthState.getAuthFields();
+    this.UIState.transitToUrl(this.authApi.getLogoutUrl(authFields?.idToken), "auth");
   }
 }

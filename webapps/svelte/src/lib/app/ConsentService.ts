@@ -21,8 +21,8 @@ export default class ConsentService extends LoginAppComponent {
    */
   async initializeConsentService(handleGrantedConsent: boolean = false): Promise<ConsentSituation> {
     this.log("ConsentService", `Preparing consent situation for ${CONSENT_ID}..`);
-    const tokens = this.AuthState.getAuthTokens();
-    this.#consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, tokens?.idToken);
+    const authFields = this.AuthState.getAuthFields();
+    this.#consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, authFields?.idToken);
 
     if (handleGrantedConsent && this.#consentSituation.status === "consentGranted") {
       this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
@@ -59,7 +59,7 @@ export default class ConsentService extends LoginAppComponent {
    */
   async testConsentIdRequest(consentId: string): Promise<void> {
     this.log("ConsentService", `Testing consent request with: ${consentId}..`);
-    const tokens = this.AuthState.getAuthTokens();
+    const authFields = this.AuthState.getAuthFields();
     const consentToken = this.app.ConsentState.getConsentTokenFor(consentId);
     try {
       const results = await this.consentApi.testConsentIdRequest(
@@ -69,7 +69,7 @@ export default class ConsentService extends LoginAppComponent {
           lon: 24.945831,
         },
         consentToken,
-        tokens?.idToken
+        authFields?.idToken
       );
       window.alert(`Received valid data: ${JSON.stringify(results, null, 2)}`);
     } catch (error) {
