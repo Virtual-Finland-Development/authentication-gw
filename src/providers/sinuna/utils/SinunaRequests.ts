@@ -29,7 +29,8 @@ export async function getTokensWithLoginCode(loggedInCode: string): Promise<{ ac
       },
     }
   );
-  debug(response.data);
+
+  debug("getTokensWithLoginCode", response.data);
 
   return {
     accessToken: response.data.access_token,
@@ -50,7 +51,7 @@ export async function getUserInfoWithAccessToken(accessToken: string) {
     },
   });
 
-  debug(response.data);
+  debug("getUserInfoWithAccessToken", response.data);
 
-  return response;
+  return response.data;
 }

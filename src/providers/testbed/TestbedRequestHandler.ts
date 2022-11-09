@@ -66,15 +66,15 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
         throw new NoticeException(String(context.request.query.error_description) || String(context.request.query.error));
       }
 
-      const loginCode = String(context.request.query.code);
+      const loggedInCode = String(context.request.query.code);
       const state = String(context.request.query.state);
       const parsedAppContext = parseAppContext(state, { provider: this.identityProviderIdent });
 
-      if (!loginCode) {
+      if (!loggedInCode) {
         throw new Error("Missing login code");
       }
 
-      const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loginCode, this.identityProviderIdent);
+      const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loggedInCode, this.identityProviderIdent);
 
       return {
         statusCode: 303,
