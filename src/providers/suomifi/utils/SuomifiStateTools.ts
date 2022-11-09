@@ -1,4 +1,4 @@
-import { decrypt, encrypt } from "../../../utils/hashes";
+import { decryptObject, encryptObject } from "../../../utils/hashes";
 import { decodeIdToken } from "../../../utils/JWK-Utils";
 import Settings from "../../../utils/Settings";
 import { SuomiFiLoginState, SuomiFiProfile } from "./SuomifiTypes";
@@ -9,7 +9,7 @@ import { SuomiFiLoginState, SuomiFiProfile } from "./SuomifiTypes";
  * @returns
  */
 export async function createSuomiFiLoggedInCode(loggedInState: SuomiFiLoginState): Promise<string> {
-  return encrypt(loggedInState, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+  return encryptObject(loggedInState, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
 }
 
 /**
@@ -18,7 +18,7 @@ export async function createSuomiFiLoggedInCode(loggedInState: SuomiFiLoginState
  * @returns
  */
 export async function extractSuomiFiLoggedInState(loggedInCode: string): Promise<SuomiFiLoginState> {
-  return decrypt(loggedInCode, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+  return decryptObject(loggedInCode, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
 }
 
 /**
