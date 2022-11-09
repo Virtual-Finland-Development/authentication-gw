@@ -73,28 +73,28 @@ If login fails / the attempt is cancelled etc, the user is redirected to the `re
 
 eg: `https://${frontendAppHost}/login-handler.html?error=Authentication+cancelled&type=info&provider=sinuna&intent=LoginRequest`
 
-## AuthTokenRequest
+## LoggedInRequest
 
-The received `loginCode` is a temporary code which is used in retrieving the actual auth tokens from the `/auth/openid/sinuna/auth-token-request`-endpoint.
+The received `loggedInCode` is a temporary code which is used in retrieving the actual login state from the `/auth/openid/sinuna/logged-in-request`-endpoint.
 
 ```js
-const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/auth-token-request`, {
+const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/logged-in-request`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    loginCode: loginCode,
+    loggedInCode: loggedInCode,
     appContext: appContext, // url-encoded base64 string
   }),
 });
-const { accessToken, idToken } = await response.json();
+const { idToken, profileData } = await response.json();
 ```
 
-The retrieved tokens:
+The retrieved data:
 
 - idToken: a JWT token that can be used to authenticate the user in the backend
-- accessToken: a hash that can be used to retrieve user information with the UserInfoRequest-call
+- profileData: a JSON object containing the user profile data
 
 Store the token in the browser's local storage.
 
@@ -122,28 +122,6 @@ fetch(`https://data-product-endpoint.example`, {
 ```
 
 If the endpoint need authorization and the request fails with a `401` status code, the token is expired and the user should be redirected to the login page.
-
-### UserInfoRequest
-
-In the frontend app the `accessToken` could be used like this:
-
-```js
-const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/user-info-request`, {
-  method: "POST",
-  credentials: "include", // Make sure to include cookies
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    accessToken: accessToken,
-    appContext: appContext, // url-encoded base64 string
-  }),
-});
-
-const { email } = await response.json();
-```
-
-If the request fails with a `401` status code, the token is expired and the user should be redirected to the login page.
 
 ## LogoutRequest
 

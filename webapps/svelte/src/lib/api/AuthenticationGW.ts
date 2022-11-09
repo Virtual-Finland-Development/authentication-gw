@@ -94,43 +94,18 @@ export default class AuthenticationGW {
    * @param accesToken
    * @returns
    */
-  async getAuthTokens(loginCode: string) {
+  async getLoggedInState(loggedInCode: string) {
     const { provider, protocol } = this.props;
-    const payload = { loginCode: loginCode, appContext: this.#generateAppContext() };
+    const payload = { loggedInCode: loggedInCode, appContext: this.#generateAppContext() };
 
     switch (protocol) {
       case "openId":
-        return this.client.openIdAuthTokenRequest({
+        return this.client.openIdLoggedInRequest({
           provider: provider,
           requestBody: payload,
         });
       case "saml2":
-        return this.client.saml2AuthTokenRequest({
-          provider: provider,
-          requestBody: payload,
-        });
-      default:
-        throw new Error(`Invalid protocol: ${protocol}`);
-    }
-  }
-
-  /**
-   *
-   * @param accesToken
-   * @returns
-   */
-  async getUserInfo(accessToken: string) {
-    const { provider, protocol } = this.props;
-    const payload = { accessToken: accessToken, appContext: this.#generateAppContext() };
-
-    switch (protocol) {
-      case "openId":
-        return this.client.openIdUserInfoRequest({
-          provider: provider,
-          requestBody: payload,
-        });
-      case "saml2":
-        return this.client.saml2UserInfoRequest({
+        return this.client.saml2LoggedInRequest({
           provider: provider,
           requestBody: payload,
         });

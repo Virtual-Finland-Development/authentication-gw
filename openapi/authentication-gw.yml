@@ -475,7 +475,7 @@ paths:
             application/json:
               schema:
                 type: object
-                required: ["accessToken", "idToken", "expiresAt"]
+                required: ["idToken", "expiresAt", "profileData"]
                 properties:
                   idToken:
                     type: string

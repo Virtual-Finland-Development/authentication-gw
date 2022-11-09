@@ -1,7 +1,11 @@
 import AppSettings from "../../AppSettings";
 import SimpleJSONStore from "../utils/SimpleJSONStore";
-import { AuthTokens } from "../utils/types";
 import LoginAppComponent from "./LoginAppComponent";
+
+export type AuthStateFields = {
+  idToken: string;
+  profileData: any;
+};
 
 /**
  * Example app auth state
@@ -20,20 +24,20 @@ export default class AuthState extends LoginAppComponent {
 
   /**
    *
-   * @param tokens
+   * @param authFields
    */
-  login(tokens: AuthTokens) {
+  login(authFields: AuthStateFields) {
     this.UIState.setTransition("auth", true);
 
-    if (typeof tokens === "object" && tokens !== null) {
-      if (typeof tokens.accessToken === "string" && typeof tokens.idToken === "string") {
+    if (typeof authFields === "object" && authFields !== null) {
+      if (typeof authFields.idToken === "string") {
         this.log("AuthState", "logged in");
-        this.#store.set("tokens", tokens);
+        this.#store.set("authFields", authFields);
       } else {
         throw new Error("Invalid token response");
       }
     } else {
-      throw new Error("Invalid tokens");
+      throw new Error("Invalid authFields");
     }
   }
 
@@ -44,7 +48,7 @@ export default class AuthState extends LoginAppComponent {
     this.UIState.setTransition("auth", true);
     this.user.email = null;
     this.log("AuthState", "logged out");
-    this.#store.clear("tokens");
+    this.#store.clear("authFields");
     this.app.ConsentState.clear();
   }
 
@@ -53,7 +57,7 @@ export default class AuthState extends LoginAppComponent {
    * @returns
    */
   isLoggedIn(): boolean {
-    return this.#store.has("tokens");
+    return this.#store.has("authFields");
   }
 
   /**
@@ -68,8 +72,8 @@ export default class AuthState extends LoginAppComponent {
    *
    * @returns
    */
-  getAuthTokens(): AuthTokens {
-    return this.#store.get("tokens");
+  getAuthFields(): AuthStateFields {
+    return this.#store.get("authFields");
   }
 
   /**
@@ -78,8 +82,12 @@ export default class AuthState extends LoginAppComponent {
   async handleLoggedIn(): Promise<boolean> {
     let isLoggedIn = false;
     try {
-      const tokens = this.getAuthTokens();
-      this.user = await this.AuthService.fetchUserInfo(tokens);
+      const authFields = this.getAuthFields();
+      if (!authFields.profileData) {
+        throw new Error("No profile data");
+      }
+
+      this.user = authFields.profileData;
       isLoggedIn = true;
     } catch (error) {
       // Auth invalidated

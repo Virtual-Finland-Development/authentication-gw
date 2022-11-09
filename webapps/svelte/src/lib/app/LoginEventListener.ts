@@ -12,8 +12,8 @@ export default async function LoginEventListener(loginApp: LoginApp) {
       //
       const loginCode = urlParams.get("loginCode");
       try {
-        const tokens = await loginApp.AuthService.fetchAuthTokens(loginCode);
-        loginApp.AuthState.login(tokens); // Store token in local storage
+        const loggedInState = await loginApp.AuthService.fetchLoggedInState(loginCode);
+        loginApp.AuthState.login(loggedInState); // Store state in local storage
         await loginApp.handleLoggedIn(); // Fetch user info
         loginApp.UIState.resetViewState("auth"); // reset view state
       } catch (error) {
