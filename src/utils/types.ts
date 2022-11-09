@@ -49,12 +49,12 @@ export interface AuthRequestHandler {
   AuthenticateResponse(context: Context): Promise<HttpResponse>;
 
   /**
-   *  POST: The route for the access token exchange: loginCode -> accessToken, idToken
+   * POST: transform loggedInCode to LoggedInResponse
    *
    * @param context
    * @returns
    */
-  AuthTokenRequest?(context: Context): Promise<HttpResponse>;
+  LoggedInRequest(context: Context): Promise<HttpResponse>;
 
   /**
    * GET->REDIRECT: The route for handling the logout flow
@@ -71,22 +71,6 @@ export interface AuthRequestHandler {
    * @returns
    */
   LogoutResponse(context: Context): Promise<HttpResponse>;
-
-  /**
-   *  POST: get user info with the access token
-   *
-   * @param context
-   * @returns
-   */
-  UserInfoRequest(context: Context): Promise<HttpResponse>;
-
-  /**
-   *  POST: authorize request using the access token and app context
-   *
-   * @param context
-   * @returns
-   */
-  AuthorizeRequest?(context: Context): Promise<HttpResponse>;
 }
 
 /**

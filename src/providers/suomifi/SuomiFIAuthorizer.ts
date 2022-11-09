@@ -13,7 +13,13 @@ import Settings from "../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
 import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import { SuomiFiProfile } from "./utils/SuomifiTypes";
 
+/**
+ *
+ * @param parsedAppContext
+ * @returns
+ */
 async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string> {
   if (!parsedAppContext.object.guid) {
     throw new ValidationError("Missing guid from app context");
@@ -29,10 +35,13 @@ async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string
  * @param nonce
  * @returns
  */
-async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nameID: string, nonce: string): Promise<{ idToken: string; expiresAt: string }> {
+async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nonce: string, suomifiProfile: SuomiFiProfile): Promise<{ idToken: string; expiresAt: string }> {
   const expiresIn = 60 * 60; // 1 hour
+  const { nameID, nameIDFormat, issuer } = suomifiProfile;
+  const suomifiKeyPayload = { appContextHash: parsedAppContext.hash, nonce: nonce, ...{ nameID, nameIDFormat, issuer } };
+
   return {
-    idToken: jwt.sign({ appContextHash: parsedAppContext.hash, nameID: nameID, nonce: nonce }, await Settings.getStageSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
+    idToken: jwt.sign(suomifiKeyPayload, await Settings.getStageSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
       algorithm: "RS256",
       expiresIn: expiresIn,
       issuer: Runtime.getAppUrl(),
@@ -65,7 +74,7 @@ export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext
  */
 export async function createSignedInTokens(
   RelayState: string,
-  nameID: string
+  suomifiProfile: SuomiFiProfile
 ): Promise<{ parsedAppContext: ParsedAppContext; accessToken: string; idToken: string; expiresAt: string }> {
   const { appContextHash, nonce } = JSON.parse(resolveBase64Hash(RelayState));
   const parsedAppContext = parseAppContext(appContextHash);
@@ -75,7 +84,7 @@ export async function createSignedInTokens(
   }
 
   // Sign the authentication for later authorization checks
-  const { idToken, expiresAt } = await signAsLoggedIn(parsedAppContext, nameID, nonce);
+  const { idToken, expiresAt } = await signAsLoggedIn(parsedAppContext, nonce, suomifiProfile);
   const accessToken = String(parsedAppContext.object.guid); // access to the userInfo endpoint is granted with the guid
 
   return {

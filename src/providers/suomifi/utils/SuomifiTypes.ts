@@ -1,11 +1,11 @@
+export type SuomiFiProfile = { nameID: string; nameIDFormat: string; issuer: string; [attr: string]: any };
+
 export type SuomiFiLoginState = {
-  profile: {
-    nameID: string;
-    email?: string;
-    [attr: string]: any;
-  };
-  context: {
-    AuthnContextClassRef: string;
+  profileData: {
+    profile: SuomiFiProfile;
+    context: {
+      AuthnContextClassRef: string;
+    };
   };
   accessToken: string;
   idToken: string;

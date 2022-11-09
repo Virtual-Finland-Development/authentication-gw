@@ -14,12 +14,13 @@ import { parseAppContext } from "./validators";
 /**
  *
  * @param redirectUrl
+ * @param loggedInCode
  * @param providerIdent
  * @returns
  */
-export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, providerIdent: string): string {
+export function prepareLoginRedirectUrl(redirectUrl: string, loggedInCode: string, providerIdent: string): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { param: "loginCode", value: loginCode },
+    { param: "loggedInCode", value: loggedInCode },
     { param: "provider", value: providerIdent },
   ]);
 }

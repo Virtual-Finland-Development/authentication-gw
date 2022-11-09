@@ -1,4 +1,6 @@
-import { createHmac } from "crypto";
+import { createCipheriv, createDecipheriv, createHmac, randomBytes } from "crypto";
+
+const CRYPT_ALGORITHM = "aes-256-cbc";
 
 /**
  * sha256 encryption helper
@@ -72,4 +74,33 @@ export function resolveUrlEncodedBase64HashJSON(hash: string): any {
  */
 export function cleanPublicKeyForJWT(key: string): string {
   return key.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "").replace(/\s/g, "");
+}
+
+/**
+ *
+ * @param data
+ * @param key
+ * @returns
+ */
+export function encrypt(data: any, key: string): string {
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(CRYPT_ALGORITHM, key, iv);
+  const encrypted = Buffer.concat([cipher.update(data), cipher.final()]);
+  return generateUrlEncodedBase64Hash({
+    iv: iv.toString("hex"),
+    content: encrypted.toString("hex"),
+  });
+}
+
+/**
+ *
+ * @param data
+ * @param key
+ * @returns
+ */
+export function decrypt(data: string, key: string): any {
+  const { iv, content } = resolveUrlEncodedBase64HashJSON(data);
+  const decipher = createDecipheriv(CRYPT_ALGORITHM, key, Buffer.from(iv, "hex"));
+  const decrpyted = Buffer.concat([decipher.update(Buffer.from(content, "hex")), decipher.final()]);
+  return decrpyted.toString();
 }

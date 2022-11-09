@@ -1,19 +1,17 @@
-import axios from "axios";
 import { Context } from "openapi-backend";
 import { v4 as uuidv4 } from "uuid";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, NoticeException, ValidationError } from "../../utils/exceptions";
-import { generateBase64Hash } from "../../utils/hashes";
-import { debug, logAxiosException } from "../../utils/logging";
+import { debug } from "../../utils/logging";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
-import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import TestbedSettings from "./Testbed.config";
 import authorize from "./TestbedAuthorizer";
+import * as TestbedRequests from "./utils/TestbedRequests";
 
 /**
  * @see: https://ioxio.com/guides/use-login-portal-in-your-applications
@@ -91,49 +89,32 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
   }
 
   /**
-   *  POST: The route for the access token exchange: loginCode -> accessToken, idToken
+   * POST: transform loggedInCode to LoggedInResponse
    *
    * @param context
    * @returns
    */
-  async AuthTokenRequest(context: Context): Promise<HttpResponse> {
+  async LoggedInRequest(context: Context): Promise<HttpResponse> {
     parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
-    const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
+    const loggedInCode = context.request.requestBody.loggedInCode; // request body already validated by openapi-backend
 
-    const SCOPE = TestbedSettings.scope;
-    const CLIENT_ID = await Settings.getSecret("TESTBED_CLIENT_ID");
-    const CLIENT_SECRET = await Settings.getSecret("TESTBED_CLIENT_SECRET");
-    const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/testbed/authenticate-response");
     try {
-      const response = await axios.post(
-        `https://login.testbed.fi/api/oauth/token`,
-        new URLSearchParams({
-          grant_type: "authorization_code",
-          code: loginCode,
-          scope: SCOPE,
-          redirect_uri: REDIRECT_URI,
-        }).toString(),
-        {
-          headers: {
-            Authorization: "Basic " + generateBase64Hash(`${CLIENT_ID}:${CLIENT_SECRET}`),
-          },
-        }
-      );
-
-      debug(response.data);
+      // Get the token
+      const tokens = await TestbedRequests.getTokensWithLoginCode(loggedInCode);
+      // Get user info
+      const userInfo = await TestbedRequests.getUserInfoWithAccessToken(tokens.accessToken);
 
       return {
         statusCode: 200,
         headers: getJSONResponseHeaders(),
         body: JSON.stringify({
-          accessToken: response.data.access_token,
-          idToken: response.data.id_token,
-          expiresAt: transformExpiresInToExpiresAt_ISOString(response.data.expires_in),
+          idToken: tokens.idToken,
+          expiresAt: tokens.expiresAt,
+          profileData: userInfo,
         }),
       };
     } catch (error) {
-      logAxiosException(error);
-      throw new AccessDeniedException(String(error));
+      throw new AccessDeniedException(error);
     }
   }
 
@@ -197,36 +178,5 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
       },
       cookies: [prepareCookie("appContext", "")],
     };
-  }
-
-  /**
-   *  POST: get user info with the access token
-   *
-   * @param context
-   * @returns
-   */
-  async UserInfoRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
-
-    const accessToken = context.request.requestBody.accessToken;
-
-    try {
-      const response = await axios.post(`https://login.testbed.fi/api/oauth/userinfo`, null, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      debug(response.data);
-
-      return {
-        statusCode: 200,
-        headers: getJSONResponseHeaders(),
-        body: JSON.stringify(response.data),
-      };
-    } catch (error) {
-      logAxiosException(error);
-      throw new AccessDeniedException(String(error));
-    }
   }
 })();
