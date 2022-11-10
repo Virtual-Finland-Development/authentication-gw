@@ -1,5 +1,5 @@
 import { ValidationError } from "../../../utils/exceptions";
-import { decryptObject, encryptObject } from "../../../utils/hashes";
+import { decryptObject, encrypt, encryptObject } from "../../../utils/hashes";
 import { decodeIdToken } from "../../../utils/JWK-Utils";
 import Settings from "../../../utils/Settings";
 import { SuomiFiLoginState, SuomiFiProfile } from "./SuomifiTypes";
@@ -37,10 +37,10 @@ export function parseSuomiFiBasicProfileFromIdToken(idToken: string): SuomiFiPro
  * @see: https://palveluhallinta.suomi.fi/fi/tuki/artikkelit/590ad07b14bbb10001966f50
  *
  * @param profileData
- * @returns
+ * @returns encrypted sotu, pid or other id
  */
-export function parseSuomiFiUserIdFromProfileData(profileData: SuomiFiProfile): string {
-  const getIdentifier = () => {
+export async function resolveSuomiFiUserIdFromProfileData(profileData: SuomiFiProfile): Promise<string> {
+  const getIdentifier = (profileData: SuomiFiProfile) => {
     if (profileData["http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"]) {
       // Eidas
       return profileData["http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"];
@@ -56,11 +56,11 @@ export function parseSuomiFiUserIdFromProfileData(profileData: SuomiFiProfile): 
     return profileData.email || profileData.mail;
   };
 
-  const identifier = getIdentifier();
+  const identifier = getIdentifier(profileData);
 
   if (!identifier) {
     throw new ValidationError("Could not resolve the user identifier from the Suomi.fi profile data");
   }
 
-  return identifier;
+  return encrypt(identifier, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
 }

@@ -13,6 +13,7 @@ import Settings from "../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
 import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import { resolveSuomiFiUserIdFromProfileData } from "./utils/SuomifiStateTools";
 import { SuomiFiProfile } from "./utils/SuomifiTypes";
 
 /**
@@ -35,10 +36,11 @@ async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string
  * @param nonce
  * @returns
  */
-async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nonce: string, suomifiProfile: SuomiFiProfile): Promise<{ idToken: string; expiresAt: string }> {
+async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nonce: string, suomifiProfile: SuomiFiProfile): Promise<{ idToken: string; expiresAt: string; userId: string }> {
   const expiresIn = 60 * 60; // 1 hour
   const { nameID, nameIDFormat, issuer, sessionIndex } = suomifiProfile;
-  const suomifiKeyPayload = { appContextHash: parsedAppContext.hash, nonce: nonce, ...{ nameID, nameIDFormat, issuer, sessionIndex } };
+  const userId = await resolveSuomiFiUserIdFromProfileData(suomifiProfile);
+  const suomifiKeyPayload = { appContextHash: parsedAppContext.hash, nonce: nonce, ...{ nameID, nameIDFormat, issuer, sessionIndex, userId } };
 
   return {
     idToken: jwt.sign(suomifiKeyPayload, await Settings.getStageSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
@@ -48,6 +50,7 @@ async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nonce: string,
       keyid: "vfd:authgw:suomifi:jwt",
     }),
     expiresAt: transformExpiresInToExpiresAt_ISOString(expiresIn),
+    userId: userId,
   };
 }
 
@@ -69,13 +72,13 @@ export async function generateSaml2RelayState(parsedAppContext: ParsedAppContext
  * Parses and validates the relay state hash, create logged in tokens
  *
  * @param RelayState
- * @param nameID - The user's unique identifier
+ * @param suomifiProfile
  * @returns
  */
 export async function createSignedInTokens(
   RelayState: string,
   suomifiProfile: SuomiFiProfile
-): Promise<{ parsedAppContext: ParsedAppContext; accessToken: string; idToken: string; expiresAt: string }> {
+): Promise<{ parsedAppContext: ParsedAppContext; idToken: string; expiresAt: string; userId: string }> {
   const { appContextHash, nonce } = JSON.parse(resolveBase64Hash(RelayState));
   const parsedAppContext = parseAppContext(appContextHash);
   const parsedNonce = await generateNonce(parsedAppContext);
@@ -84,14 +87,13 @@ export async function createSignedInTokens(
   }
 
   // Sign the authentication for later authorization checks
-  const { idToken, expiresAt } = await signAsLoggedIn(parsedAppContext, nonce, suomifiProfile);
-  const accessToken = String(parsedAppContext.object.guid); // access to the userInfo endpoint is granted with the guid
+  const { idToken, expiresAt, userId } = await signAsLoggedIn(parsedAppContext, nonce, suomifiProfile);
 
   return {
     parsedAppContext: parsedAppContext,
-    accessToken: accessToken,
     idToken: idToken,
     expiresAt: expiresAt,
+    userId: userId,
   };
 }
 

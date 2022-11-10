@@ -15,7 +15,7 @@ import { parseAppContext } from "../../utils/validators";
 import SuomiFISettings from "./SuomiFI.config";
 import { createSignedInTokens, generateSaml2RelayState, getJKWSJsonConfiguration } from "./SuomiFIAuthorizer";
 import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
-import { createSuomiFiLoggedInCode, extractSuomiFiLoggedInState, parseSuomiFiBasicProfileFromIdToken, parseSuomiFiUserIdFromProfileData } from "./utils/SuomifiStateTools";
+import { createSuomiFiLoggedInCode, extractSuomiFiLoggedInState, parseSuomiFiBasicProfileFromIdToken } from "./utils/SuomifiStateTools";
 
 /**
  * @see: https://palveluhallinta.suomi.fi/en/sivut/tunnistus/kayttoonotto/kayttoonoton-vaiheet
@@ -60,7 +60,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
     try {
       const result = await samlClient.validatePostResponseAsync(body); // throws
 
-      const { parsedAppContext, idToken, expiresAt } = await createSignedInTokens(body.RelayState, result.profile); // throws
+      const { parsedAppContext, idToken, expiresAt, userId } = await createSignedInTokens(body.RelayState, result.profile); // throws
       const profileAssertion = result.profile.getAssertion();
       debug(profileAssertion);
 
@@ -72,7 +72,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
             AuthnContextClassRef: profileAssertion["Assertion"]["AuthnStatement"][0]["AuthnContext"][0]["AuthnContextClassRef"][0]["_"],
           },
           email: result.profile.email,
-          userId: parseSuomiFiUserIdFromProfileData(result),
+          userId: userId,
         },
         idToken: idToken,
         expiresAt: expiresAt,
