@@ -1,3 +1,4 @@
+import { ValidationError } from "../../../utils/exceptions";
 import { decryptObject, encryptObject } from "../../../utils/hashes";
 import { decodeIdToken } from "../../../utils/JWK-Utils";
 import Settings from "../../../utils/Settings";
@@ -39,17 +40,27 @@ export function parseSuomiFiBasicProfileFromIdToken(idToken: string): SuomiFiPro
  * @returns
  */
 export function parseSuomiFiUserIdFromProfileData(profileData: SuomiFiProfile): string {
-  if (profileData["http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"]) {
-    // Eidas
-    return profileData["http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"];
+  const getIdentifier = () => {
+    if (profileData["http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"]) {
+      // Eidas
+      return profileData["http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"];
+    }
+    if (profileData["urn:oid:1.2.246.21"]) {
+      // nationalIdentificationNumber
+      return profileData["urn:oid:1.2.246.21"];
+    }
+    if (profileData["urn:oid:1.2.246.517.3002.111.17"]) {
+      // foreignPersonIdentifier, suppea
+      return profileData["urn:oid:1.2.246.517.3002.111.17"];
+    }
+    return profileData.email || profileData.mail;
+  };
+
+  const identifier = getIdentifier();
+
+  if (!identifier) {
+    throw new ValidationError("Could not resolve the user identifier from the Suomi.fi profile data");
   }
-  if (profileData["urn:oid:1.2.246.21"]) {
-    // nationalIdentificationNumber
-    return profileData["urn:oid:1.2.246.21"];
-  }
-  if (profileData["urn:oid:1.2.246.517.3002.111.17"]) {
-    // foreignPersonIdentifier, suppea
-    return profileData["urn:oid:1.2.246.517.3002.111.17"];
-  }
-  return profileData.email;
+
+  return identifier;
 }
