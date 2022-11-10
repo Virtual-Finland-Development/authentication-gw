@@ -310,14 +310,19 @@ paths:
                     description: an ISO-8601 timestamp string that specifies the token expirity datetime
                   profileData:
                     type: object
-                    required: ["sub"]
+                    required: ["userId"]
                     properties:
-                      sub:
-                        type: string
-                      inum:
+                      userId:
                         type: string
                       email:
                         type: string
+                      profile:
+                        type: object
+                        properties:
+                          sub:
+                            type: string
+                          inum:
+                            type: string
         "401":
           description: "Logged In details retrieval failed"
           content:
@@ -412,11 +417,15 @@ paths:
                     description: an ISO-8601 timestamp string that specifies the token expirity datetime
                   profileData:
                     type: object
-                    required: ["profile", "context"]
+                    required: ["userId", "profile", "context"]
                     properties:
+                      userId:
+                        type: string
+                      email:
+                        type: string
                       profile:
                         type: object
-                        required: ["nameID", "email"]
+                        required: ["nameID"]
                         properties:
                           nameID:
                             type: string

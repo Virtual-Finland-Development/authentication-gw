@@ -60,7 +60,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
     try {
       const result = await samlClient.validatePostResponseAsync(body); // throws
 
-      const { parsedAppContext, accessToken, idToken, expiresAt } = await createSignedInTokens(body.RelayState, result.profile); // throws
+      const { parsedAppContext, idToken, expiresAt } = await createSignedInTokens(body.RelayState, result.profile); // throws
       const profileAssertion = result.profile.getAssertion();
       debug(profileAssertion);
 
@@ -72,8 +72,8 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
             AuthnContextClassRef: profileAssertion["Assertion"]["AuthnStatement"][0]["AuthnContext"][0]["AuthnContextClassRef"][0]["_"],
           },
           email: result.profile.email,
+          userId: result.profile.nameID,
         },
-        accessToken: accessToken,
         idToken: idToken,
         expiresAt: expiresAt,
       });

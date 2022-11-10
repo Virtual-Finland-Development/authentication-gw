@@ -94,6 +94,11 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
       const idTokenPayload = { email: ensureObject(decodeIdToken(tokens.idToken)?.decodedToken?.payload) };
       // Get user info
       const userInfo = await SinunaRequests.getUserInfoWithAccessToken(tokens.accessToken);
+      // Merge
+      const profile = {
+        ...idTokenPayload,
+        ...userInfo,
+      };
 
       return {
         statusCode: 200,
@@ -102,8 +107,9 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
           idToken: tokens.idToken,
           expiresAt: tokens.expiresAt,
           profileData: {
-            ...idTokenPayload,
-            ...userInfo,
+            userId: profile.inum,
+            email: profile.email,
+            profile: profile,
           },
         }),
       };

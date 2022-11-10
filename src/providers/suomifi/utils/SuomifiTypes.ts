@@ -6,9 +6,9 @@ export type SuomiFiLoginState = {
     context: {
       AuthnContextClassRef: string;
     };
-    email?: string;
+    email: string;
+    userId: string;
   };
-  accessToken: string;
   idToken: string;
   expiresAt: string;
 };

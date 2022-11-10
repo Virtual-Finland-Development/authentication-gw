@@ -107,7 +107,11 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
       const idTokenPayload = { email: ensureObject(decodeIdToken(tokens.idToken)?.decodedToken?.payload).email };
       // Get user info
       const userInfo = await TestbedRequests.getUserInfoWithAccessToken(tokens.accessToken);
-
+      // Merge
+      const profile = {
+        ...idTokenPayload,
+        ...userInfo,
+      };
       return {
         statusCode: 200,
         headers: getJSONResponseHeaders(),
@@ -115,8 +119,9 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
           idToken: tokens.idToken,
           expiresAt: tokens.expiresAt,
           profileData: {
-            ...idTokenPayload,
-            ...userInfo,
+            userId: profile.sub,
+            email: profile.email,
+            profile: profile,
           },
         }),
       };

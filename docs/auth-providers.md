@@ -14,8 +14,8 @@ Sinuna is an Openid Connect -type authentication provider with the following end
     - `idToken` is a JWT token that contains the user's identity information
     - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
     - `profileData` is a JSON object that contains the user's profile data
-      - example profileData: `{"inum": "bazbar1231231", "sub":"1234567890","email":"John@Doe"}`
-        - `inum`: is the user ID in the Sinuna system
+      - example profileData: `{"userId": "bazbar1231231", "email":"John@Doe", "profile": {"inum": "bazbar1231231", "sub": "e2dasdxcasd"}}`
+        - `userId`: is the user ID in the Sinuna system
         - `email`: is the user email
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
@@ -39,10 +39,10 @@ SuomiFi is an SAML2 -type authentication provider with the following endpoints:
     - `idToken` is a JWT token that contains the user's identity information
     - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
     - `profileData` is a JSON object that contains the user's profile data
-      - example profileData: `{"context": {"AuthnContextClassRef": "http://ftn.ficora.fi/2017/loa2"}, "profile": {"nameID": "a21sxxasxaxas323", "email":"John@Doe"}, "accessToken": jwt.233höpölöpöasd.32313cc}`
-        - `context.AuthnContextClassRef`: is the authentication level information
-        - `profile.nameID`: is the user ID in the SuomiFi system
-        - `profile.email`: is the user email (if available)
+      - example profileData: `{"userId": "a21sxxasxaxas323", "email": "John@Doe", "context": {"AuthnContextClassRef": "http://ftn.ficora.fi/2017/loa2"}, "profile": {"nameID": "a21sxxasxaxas323", "email":"John@Doe"}}`
+        - `userId`: is the user ID in the SuomiFi system
+        - `email`: is the user email (if available)
+        - `context.AuthnContextClassRef`: the authentication level reference
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
   - `X-authorization-provider: suomifi`
@@ -65,9 +65,9 @@ Testbed is an Openid Connect -type authentication provider with the following en
     - `idToken` is a JWT token that contains the user's identity information
     - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
     - `profileData` is a JSON object that contains the user's profile data
-      - example profileData: `{"sub":"1234567890","name":"1234567890"}`
-        - `sub`: is the user ID in the Testbed system
-        - `name` _(disrecard)_: is the user name, but not currently available
+      - example profileData: `{"userId": "1234567890", "email":"John@Doe", "profile": "sub":"1234567890","name":"1234567890"}`
+        - `userId`: is the user ID in the Testbed system
+        - `email`: is the user testbed-email
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
   - `X-authorization-provider: testbed`
