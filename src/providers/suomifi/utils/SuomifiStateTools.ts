@@ -28,6 +28,6 @@ export async function extractSuomiFiLoggedInState(loginCode: string): Promise<Su
  */
 export function parseSuomiFiBasicProfileFromIdToken(idToken: string): SuomiFiProfile {
   const { decodedToken } = decodeIdToken(idToken);
-  const { nameID, nameIDFormat, issuer } = decodedToken as any;
-  return { nameID, nameIDFormat, issuer };
+  const { nameID, nameIDFormat, issuer, sessionIndex } = decodedToken as any;
+  return { nameID, nameIDFormat, issuer, sessionIndex };
 }

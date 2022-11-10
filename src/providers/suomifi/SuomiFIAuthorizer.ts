@@ -37,8 +37,8 @@ async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string
  */
 async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nonce: string, suomifiProfile: SuomiFiProfile): Promise<{ idToken: string; expiresAt: string }> {
   const expiresIn = 60 * 60; // 1 hour
-  const { nameID, nameIDFormat, issuer } = suomifiProfile;
-  const suomifiKeyPayload = { appContextHash: parsedAppContext.hash, nonce: nonce, ...{ nameID, nameIDFormat, issuer } };
+  const { nameID, nameIDFormat, issuer, sessionIndex } = suomifiProfile;
+  const suomifiKeyPayload = { appContextHash: parsedAppContext.hash, nonce: nonce, ...{ nameID, nameIDFormat, issuer, sessionIndex } };
 
   return {
     idToken: jwt.sign(suomifiKeyPayload, await Settings.getStageSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
