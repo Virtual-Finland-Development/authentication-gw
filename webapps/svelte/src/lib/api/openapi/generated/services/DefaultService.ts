@@ -125,7 +125,7 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public openIdLoginRequest({
+    public openIdAuthenticationRequest({
         provider,
         appContext,
     }: {
@@ -140,7 +140,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/auth/openid/{provider}/login-request',
+            url: '/auth/openid/{provider}/authentication-request',
             path: {
                 'provider': provider,
             },
@@ -286,7 +286,7 @@ export class DefaultService {
      * @returns any Logged In Response
      * @throws ApiError
      */
-    public openIdLoggedInRequest({
+    public openIdLoginRequest({
         provider,
         requestBody,
     }: {
@@ -298,7 +298,7 @@ export class DefaultService {
          * Retrieve the authentication token from the auth provider service
          */
         requestBody: {
-            loggedInCode: string;
+            loginCode: string;
             appContext: string;
         },
     }): CancelablePromise<{
@@ -315,14 +315,14 @@ export class DefaultService {
     }> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/auth/openid/{provider}/logged-in-request',
+            url: '/auth/openid/{provider}/login-request',
             path: {
                 'provider': provider,
             },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                401: `Logged-in details retrieval failed`,
+                401: `Logged In details retrieval failed`,
             },
         });
     }
@@ -331,7 +331,7 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public saml2LoginRequest({
+    public saml2AuthenticationRequest({
         provider,
         appContext,
     }: {
@@ -346,7 +346,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/auth/saml2/{provider}/login-request',
+            url: '/auth/saml2/{provider}/authentication-request',
             path: {
                 'provider': provider,
             },
@@ -379,6 +379,55 @@ export class DefaultService {
             },
             errors: {
                 303: `Authentication providers callback url, redirect back to the app context`,
+            },
+        });
+    }
+
+    /**
+     * @returns any Logged In Response
+     * @throws ApiError
+     */
+    public saml2LoginRequest({
+        provider,
+        requestBody,
+    }: {
+        /**
+         * Auth provider ident
+         */
+        provider: string,
+        /**
+         * Retrieve the authentication token from the auth provider service
+         */
+        requestBody: {
+            loginCode: string;
+            appContext: string;
+        },
+    }): CancelablePromise<{
+        idToken: string;
+        /**
+         * an ISO-8601 timestamp string that specifies the token expirity datetime
+         */
+        expiresAt: string;
+        profileData: {
+            profile: {
+                nameID: string;
+                email: string;
+            };
+            context: {
+                AuthnContextClassRef: string;
+            };
+        };
+    }> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/auth/saml2/{provider}/login-request',
+            path: {
+                'provider': provider,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Logged-in details retrieval failed`,
             },
         });
     }
@@ -467,55 +516,6 @@ export class DefaultService {
             },
             errors: {
                 303: `Authentication providers callback url, redirect back to the app context`,
-            },
-        });
-    }
-
-    /**
-     * @returns any Logged In Response
-     * @throws ApiError
-     */
-    public saml2LoggedInRequest({
-        provider,
-        requestBody,
-    }: {
-        /**
-         * Auth provider ident
-         */
-        provider: string,
-        /**
-         * Retrieve the authentication token from the auth provider service
-         */
-        requestBody: {
-            loggedInCode: string;
-            appContext: string;
-        },
-    }): CancelablePromise<{
-        idToken: string;
-        /**
-         * an ISO-8601 timestamp string that specifies the token expirity datetime
-         */
-        expiresAt: string;
-        profileData: {
-            profile: {
-                nameID: string;
-                email: string;
-            };
-            context: {
-                AuthnContextClassRef: string;
-            };
-        };
-    }> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/auth/saml2/{provider}/logged-in-request',
-            path: {
-                'provider': provider,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                401: `Logged-in details retrieval failed`,
             },
         });
     }

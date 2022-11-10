@@ -32,7 +32,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
    * @param context
    * @returns
    */
-  async LoginRequest(context: Context): Promise<HttpResponse> {
+  async AuthenticationRequest(context: Context): Promise<HttpResponse> {
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent, guid: uuidv4() }); // throws
     const samlClient = await getSuomiFISAML2Client();
     const RelayState = await generateSaml2RelayState(parsedAppContext);
@@ -65,7 +65,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
       debug(profileAssertion);
 
       // Setup login state hash
-      const loggedInCode = await createSuomiFiLoggedInCode({
+      const loginCode = await createSuomiFiLoggedInCode({
         profileData: {
           profile: result.profile,
           context: {
@@ -78,7 +78,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
         expiresAt: expiresAt,
       });
 
-      const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loggedInCode, this.identityProviderIdent);
+      const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loginCode, this.identityProviderIdent);
 
       return {
         statusCode: 303,
@@ -110,15 +110,15 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
   }
 
   /**
-   * POST: transform loggedInCode to LoggedInResponse
+   * POST: transform loginCode to LoginResponse
    *
    * @param context
    * @returns
    */
-  async LoggedInRequest(context: Context): Promise<HttpResponse> {
+  async LoginRequest(context: Context): Promise<HttpResponse> {
     parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
-    const loggedInCode = context.request.requestBody.loggedInCode; // request body already validated by openapi-backend
-    const loggedInState = await extractSuomiFiLoggedInState(loggedInCode);
+    const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
+    const loggedInState = await extractSuomiFiLoggedInState(loginCode);
 
     return {
       statusCode: 200,

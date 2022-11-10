@@ -13,7 +13,7 @@ export default class AuthenticationGW {
   protocol: string;
 
   redirectUrls: {
-    LoginRequest: string;
+    AuthenticationRequest: string;
     LogoutRequest: string;
   };
 
@@ -36,7 +36,7 @@ export default class AuthenticationGW {
 
     // Setup the redirect urls
     this.redirectUrls = {
-      LoginRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/login-request`,
+      AuthenticationRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/authentication-request`,
       LogoutRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/logout-request`,
     };
   }
@@ -55,7 +55,7 @@ export default class AuthenticationGW {
    *
    */
   getLoginUrl(): string {
-    return `${this.redirectUrls.LoginRequest}?appContext=${this.#generateAppContext()}`;
+    return `${this.redirectUrls.AuthenticationRequest}?appContext=${this.#generateAppContext()}`;
   }
 
   /**
@@ -94,18 +94,18 @@ export default class AuthenticationGW {
    * @param accesToken
    * @returns
    */
-  async getLoggedInState(loggedInCode: string) {
+  async getLoggedInState(loginCode: string) {
     const { provider, protocol } = this.props;
-    const payload = { loggedInCode: loggedInCode, appContext: this.#generateAppContext() };
+    const payload = { loginCode: loginCode, appContext: this.#generateAppContext() };
 
     switch (protocol) {
       case "openId":
-        return this.client.openIdLoggedInRequest({
+        return this.client.openIdLoginRequest({
           provider: provider,
           requestBody: payload,
         });
       case "saml2":
-        return this.client.saml2LoggedInRequest({
+        return this.client.saml2LoginRequest({
           provider: provider,
           requestBody: payload,
         });

@@ -38,7 +38,7 @@ export interface AuthRequestHandler {
    * @param context
    * @returns
    */
-  LoginRequest(context: Context): Promise<HttpResponse>;
+  AuthenticationRequest(context: Context): Promise<HttpResponse>;
 
   /**
    * GET->REDIRECT: The route for handling the auth flow callback, redirecting back to the frontend app
@@ -49,12 +49,12 @@ export interface AuthRequestHandler {
   AuthenticateResponse(context: Context): Promise<HttpResponse>;
 
   /**
-   * POST: transform loggedInCode to LoggedInResponse
+   * POST: transform loginCode to LoginResponse
    *
    * @param context
    * @returns
    */
-  LoggedInRequest(context: Context): Promise<HttpResponse>;
+  LoginRequest(context: Context): Promise<HttpResponse>;
 
   /**
    * GET->REDIRECT: The route for handling the logout flow

@@ -31,7 +31,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    * @param context
    * @returns
    */
-  async LoginRequest(context: Context): Promise<HttpResponse> {
+  async AuthenticationRequest(context: Context): Promise<HttpResponse> {
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
 
     const CLIENT_ID = await Settings.getStageSecret("SINUNA_CLIENT_ID");
@@ -78,18 +78,18 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
   }
 
   /**
-   * POST: transform loggedInCode to LoggedInResponse
+   * POST: transform loginCode to LoginResponse
    *
    * @param context
    * @returns
    */
-  async LoggedInRequest(context: Context): Promise<HttpResponse> {
+  async LoginRequest(context: Context): Promise<HttpResponse> {
     parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
-    const loggedInCode = context.request.requestBody.loggedInCode; // request body already validated by openapi-backend
+    const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
 
     try {
       // Get the token
-      const tokens = await SinunaRequests.getTokensWithLoginCode(loggedInCode);
+      const tokens = await SinunaRequests.getTokensWithLoginCode(loginCode);
       // Decode id token
       const idTokenPayload = { email: ensureObject(decodeIdToken(tokens.idToken)?.decodedToken?.payload) };
       // Get user info

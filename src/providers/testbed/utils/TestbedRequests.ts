@@ -8,17 +8,17 @@ import TestbedSettings from "../Testbed.config";
 
 /**
  *
- * @param loggedInCode
+ * @param loginCode
  * @returns
  */
-export async function getTokensWithLoginCode(loggedInCode: string): Promise<{ accessToken: string; idToken: string; expiresAt: string }> {
+export async function getTokensWithLoginCode(loginCode: string): Promise<{ accessToken: string; idToken: string; expiresAt: string }> {
   const CLIENT_ID = await Settings.getSecret("TESTBED_CLIENT_ID");
   const CLIENT_SECRET = await Settings.getSecret("TESTBED_CLIENT_SECRET");
   const response = await axios.post(
     `https://login.testbed.fi/api/oauth/token`,
     new URLSearchParams({
       grant_type: "authorization_code",
-      code: loggedInCode,
+      code: loginCode,
       scope: TestbedSettings.scope,
       redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/authenticate-response"),
     }).toString(),

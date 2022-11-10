@@ -5,14 +5,14 @@ export default async function LoginEventListener(loginApp: LoginApp) {
 
   const affectsThisApp = urlParams.has("provider") && urlParams.get("provider").toLowerCase() === loginApp.getName().toLowerCase();
   if (!loginApp.AuthState.isLoggedIn()) {
-    if (affectsThisApp && urlParams.has("loggedInCode")) {
+    if (affectsThisApp && urlParams.has("loginCode")) {
       loginApp.log("LoginEventListener", "Logged-in code received, fetching auth state..");
       //
       // Handle login response
       //
-      const loggedInCode = urlParams.get("loggedInCode");
+      const loginCode = urlParams.get("loginCode");
       try {
-        const loggedInState = await loginApp.AuthService.fetchLoggedInState(loggedInCode);
+        const loggedInState = await loginApp.AuthService.fetchLoggedInState(loginCode);
         loginApp.AuthState.login(loggedInState); // Store state in local storage
         await loginApp.handleLoggedIn(); // Fetch user info
         loginApp.UIState.resetViewState("auth"); // reset view state

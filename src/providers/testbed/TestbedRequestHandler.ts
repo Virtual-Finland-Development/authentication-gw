@@ -30,7 +30,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
    * @param context
    * @returns
    */
-  async LoginRequest(context: Context): Promise<HttpResponse> {
+  async AuthenticationRequest(context: Context): Promise<HttpResponse> {
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
     const clientId = await Settings.getSecret("TESTBED_CLIENT_ID");
     const queryString = new URLSearchParams({
@@ -68,15 +68,15 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
         throw new NoticeException(String(context.request.query.error_description) || String(context.request.query.error));
       }
 
-      const loggedInCode = String(context.request.query.code);
+      const loginCode = String(context.request.query.code);
       const state = String(context.request.query.state);
       const parsedAppContext = parseAppContext(state, { provider: this.identityProviderIdent });
 
-      if (!loggedInCode) {
+      if (!loginCode) {
         throw new Error("Missing login code");
       }
 
-      const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loggedInCode, this.identityProviderIdent);
+      const redirectUrl = prepareLoginRedirectUrl(parsedAppContext.object.redirectUrl, loginCode, this.identityProviderIdent);
 
       return {
         statusCode: 303,
@@ -91,18 +91,18 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
   }
 
   /**
-   * POST: transform loggedInCode to LoggedInResponse
+   * POST: transform loginCode to LoginResponse
    *
    * @param context
    * @returns
    */
-  async LoggedInRequest(context: Context): Promise<HttpResponse> {
+  async LoginRequest(context: Context): Promise<HttpResponse> {
     parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
-    const loggedInCode = context.request.requestBody.loggedInCode; // request body already validated by openapi-backend
+    const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
 
     try {
       // Get the token
-      const tokens = await TestbedRequests.getTokensWithLoginCode(loggedInCode);
+      const tokens = await TestbedRequests.getTokensWithLoginCode(loginCode);
       // Decode id token
       const idTokenPayload = { email: ensureObject(decodeIdToken(tokens.idToken)?.decodedToken?.payload).email };
       // Get user info

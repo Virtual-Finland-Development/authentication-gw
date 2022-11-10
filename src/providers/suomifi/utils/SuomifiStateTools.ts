@@ -14,11 +14,11 @@ export async function createSuomiFiLoggedInCode(loggedInState: SuomiFiLoginState
 
 /**
  *
- * @param loggedInCode
+ * @param loginCode
  * @returns
  */
-export async function extractSuomiFiLoggedInState(loggedInCode: string): Promise<SuomiFiLoginState> {
-  return decryptObject(loggedInCode, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+export async function extractSuomiFiLoggedInState(loginCode: string): Promise<SuomiFiLoginState> {
+  return decryptObject(loginCode, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
 }
 
 /**

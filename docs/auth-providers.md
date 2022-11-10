@@ -6,10 +6,10 @@ The auth gw currently supports openid connect and saml2 -type authentication flo
 
 Sinuna is an Openid Connect -type authentication provider with the following endpoints:
 
+- AuthenticationRequest: `/auth/openid/sinuna/authentication-request`
+  - gets a `loginCode`.
 - LoginRequest: `/auth/openid/sinuna/login-request`
-  - gets a `loggedInCode`.
-- LoggedInRequest: `/auth/openid/sinuna/logged-in-request`
-  - uses the `loggedInCode` to get an access tokens `idToken` and `accessToken`.
+  - uses the `loginCode` to get an access tokens `idToken` and `accessToken`.
   - example response: `{"idToken":"<idToken>", "expiresAt": "2022-10-10T05:52:50.886Z", "profileData": {"email":"..."}}`
     - `idToken` is a JWT token that contains the user's identity information
     - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
@@ -31,10 +31,10 @@ The id token can be verified using the public key of the authentication provider
 
 SuomiFi is an SAML2 -type authentication provider with the following endpoints:
 
+- AuthenticationRequest: `/auth/saml2/suomifi/authentication-request`
+  - gets a `loginCode`
 - LoginRequest: `/auth/saml2/suomifi/login-request`
-  - gets a `loggedInCode`
-- LoggedInRequest: `/auth/saml2/suomifi/logged-in-request`
-  - uses the `loggedInCode` to get an access tokens `idToken` and `accessToken`.
+  - uses the `loginCode` to get an access tokens `idToken` and `accessToken`.
   - example response: `{"idToken":"<idToken>", "expiresAt": "2022-10-10T05:52:50.886Z", "profileData": {...}}}`
     - `idToken` is a JWT token that contains the user's identity information
     - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
@@ -57,10 +57,10 @@ The id token can be verified using the public key of the authentication provider
 
 Testbed is an Openid Connect -type authentication provider with the following endpoints:
 
+- AuthenticationRequest: `/auth/openid/testbed/authentication-request`
+  - gets a `loginCode`.
 - LoginRequest: `/auth/openid/testbed/login-request`
-  - gets a `loggedInCode`.
-- LoggedInRequest: `/auth/openid/testbed/logged-in-request`
-  - uses the `loggedInCode` to get an access tokens: `idToken` and `accessToken`
+  - uses the `loginCode` to get an access tokens: `idToken` and `accessToken`
   - example response: `{"idToken":"<idToken>", "expiresAt": "2022-10-10T05:52:50.886Z", "profileData": {...}}`
     - `idToken` is a JWT token that contains the user's identity information
     - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime

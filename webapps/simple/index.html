@@ -95,9 +95,9 @@
             }
 
             return {
+                AuthenticationRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/authentication-request`,
                 LoginRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/login-request`,
                 LogoutRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/logout-request`,
-                LoggedInRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/logged-in-request`,
                 AuthorizeRequest: `${authenticationGatewayHost}/authorize`,
             }
         }
@@ -136,14 +136,14 @@
 
             const affectsThisApp = urlParams.has("provider") && urlParams.get("provider").toLowerCase() === this.getName().toLowerCase();
             if (!this.AuthState.isLoggedIn()) {
-                if (affectsThisApp && urlParams.has("loggedInCode")) {
+                if (affectsThisApp && urlParams.has("loginCode")) {
                     this.log("LoginFlowEventsListener", "Login code received, fetching auth token..");
                     //
                     // Handle login response
                     //
-                    const loggedInCode = urlParams.get('loggedInCode');
+                    const loginCode = urlParams.get('loginCode');
                     try {
-                        const loggedInState = await this.AuthService.fetchLoggedInState(loggedInCode);
+                        const loggedInState = await this.AuthService.fetchLoggedInState(loginCode);
                         this.AuthState.login(loggedInState); // Store state in local storage
                         await this.AuthState.handleLoggedIn(); // Fetch user info
                         this.UIState.resetViewState(); // reset view state
@@ -190,18 +190,18 @@
     class AuthService extends LoginAppComponent {
         login() {
             this.log("AuthService", "logging in..");
-            this.UIState.transitToUrl(`${this.endpoints.LoginRequest}?appContext=${AppSettings.generateAppContext()}`);
+            this.UIState.transitToUrl(`${this.endpoints.AuthenticationRequest}?appContext=${AppSettings.generateAppContext()}`);
         }
-        async fetchLoggedInState(loggedInCode) {
+        async fetchLoggedInState(loginCode) {
 
-            const response = await fetch(`${this.endpoints.LoggedInRequest}`, {
+            const response = await fetch(`${this.endpoints.LoginRequest}`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    loggedInCode: loggedInCode,
+                    loginCode: loginCode,
                     appContext: AppSettings.generateAppContext(),
                 }),
             });
