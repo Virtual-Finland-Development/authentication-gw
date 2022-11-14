@@ -1,4 +1,4 @@
-name: Automaticly build, test and deploy the dev-stage
+name: "Dev: build, test and deploy"
 on:
   push:
     branches: ["main"]

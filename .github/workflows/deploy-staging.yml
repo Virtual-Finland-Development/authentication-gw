@@ -1,6 +1,7 @@
-name: Build, test and deploy the staging-stage
+name: "Staging: build, test and deploy"
 on:
   workflow_dispatch:
+    branches: ["main"]
 
 jobs:
   deploy-staging:
