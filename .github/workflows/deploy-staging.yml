@@ -1,0 +1,10 @@
+name: Build, test and deploy the staging-stage
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-test-deploy.yml@main
+    secrets: inherit
+    with:
+      environment: staging
