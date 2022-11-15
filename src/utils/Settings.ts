@@ -3,7 +3,7 @@ import { getSecretParameter } from "./libs/AWS";
 export default {
   async getSecret(key: string, defaultValue?: string): Promise<string> {
     // Skip aws parameter store on test and local environment
-    if (this.getEnv("NODE_ENV") === "test" || this.getEnv("STAGE") === "offline") {
+    if (this.getEnv("NODE_ENV") === "test" || this.getStage() === "offline") {
       return this.getEnv(key, defaultValue);
     }
 
@@ -17,8 +17,7 @@ export default {
     }
   },
   async getStageSecret(key: string, defaultValue?: string): Promise<string> {
-    const stage = this.getEnv("STAGE");
-    return this.getSecret(`${stage}_${key}`, defaultValue);
+    return this.getSecret(`${this.getStage()}_${key}`, defaultValue);
   },
   getEnv(key: string, defaultValue: string = ""): string {
     return this.getEnvironmentValue(key, defaultValue);
@@ -31,5 +30,8 @@ export default {
   },
   getAppContextFallbackURL(): string {
     return `${this.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL", "http://localhost:8000")}`;
+  },
+  getStage(): string {
+    return this.getEnv("STAGE");
   },
 };

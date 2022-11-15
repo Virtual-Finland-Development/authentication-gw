@@ -36,7 +36,7 @@ async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nameID: string
       algorithm: "RS256",
       expiresIn: expiresIn,
       issuer: Runtime.getAppUrl(),
-      keyid: "vfd:authgw:suomifi:jwt",
+      keyid: `vfd:authgw:${Settings.getStage()}:suomifi:jwt`,
     }),
     expiresAt: transformExpiresInToExpiresAt_ISOString(expiresIn),
   };
