@@ -93,8 +93,8 @@ export function encryptObject(data: any, secret: string, secretIV: string): stri
  * @param key
  * @returns
  */
-export function decryptObject(ecrypted_text: string, secret: string, secretIV: string): any {
-  const decrypted = decrypt(ecrypted_text, secret, secretIV);
+export function decryptObject(ecryptedText: string, secret: string, secretIV: string): any {
+  const decrypted = decrypt(ecryptedText, secret, secretIV);
   return JSON.parse(decrypted);
 }
 
@@ -117,12 +117,12 @@ export function encrypt(text: string, secret: string, secretIV: string): string 
 
 /**
  *
- * @param ecrypted_text
+ * @param ecryptedText
  * @param secret
  * @returns
  */
-export function decrypt(ecrypted_text: string, secret: string, secretIV: string): any {
-  const parsedData = resolveUrlEncodedBase64HashJSON(ecrypted_text);
+export function decrypt(ecryptedText: string, secret: string, secretIV: string): any {
+  const parsedData = resolveUrlEncodedBase64HashJSON(ecryptedText);
   const encIv = createHash("sha512").update(secretIV).digest("hex").substring(0, 16);
   const salt = parsedData.salt;
   const key = scryptSync(secret, salt, 32);
