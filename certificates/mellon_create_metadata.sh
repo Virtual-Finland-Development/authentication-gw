@@ -4,9 +4,10 @@ set -e
 
 PROG="$(basename "$0")"
 
-ENTITYID="virtual-finland-development"
-BASEURL="https://q88uo5prmh.execute-api.eu-north-1.amazonaws.com"
-PUBLIC_SITE_HOST="https://virtual-finland-development-auth-files.s3.eu-north-1.amazonaws.com"
+STAGE="dev"
+ENTITYID="virtual-finland-development-${STAGE}"
+BASEURL="https://a4j7hhtwlb.execute-api.eu-north-1.amazonaws.com"
+PUBLIC_SITE_HOST="https://virtual-finland-development-auth-files.s3.eu-north-1.amazonaws.com/${STAGE}"
 
 if ! echo "${BASEURL}" | grep -q '^https\?://'; then
     echo "$PROG: The URL must start with \"http://\" or \"https://\"." >&2
@@ -16,7 +17,7 @@ fi
 HOST="$(echo "${BASEURL}" | sed 's#^[a-z]*://\([^:/]*\).*#\1#')"
 BASEURL="$(echo "${BASEURL}" | sed 's#/$##')"
 
-LOGOUT_URL="${BASEURL}/auth/saml2/suomifi/logout"
+LOGOUT_URL="${BASEURL}/auth/saml2/suomifi/logout-response"
 LOGIN_CALLBACK_URL="${BASEURL}/auth/saml2/suomifi/authenticate-response"
 
 OUTFILE="$(echo "${ENTITYID}" | sed 's/[^0-9A-Za-z.]/_/g' | sed 's/__*/_/g')"
