@@ -67,7 +67,7 @@ jobs:
         with:
           args: --delete
         env:
-          AWS_S3_BUCKET: virtual-finland-development-auth-files
+          AWS_S3_BUCKET: virtual-finland-development-auth-files/${{ inputs.environment }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: eu-north-1
