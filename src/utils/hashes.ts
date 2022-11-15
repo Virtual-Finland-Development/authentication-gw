@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, createHmac, randomBytes, scryptSync } from "crypto";
+import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, scryptSync } from "crypto";
 
 /**
  * sha256 encryption helper
@@ -80,11 +80,11 @@ export function cleanPublicKeyForJWT(key: string): string {
  * @param key
  * @returns
  */
-export function encryptObject(data: any, secret: string): string {
+export function encryptObject(data: any, secret: string, secretIV: string): string {
   if (typeof data !== "string") {
     data = JSON.stringify(data);
   }
-  return encrypt(data, secret);
+  return encrypt(data, secret, secretIV);
 }
 
 /**
@@ -93,8 +93,8 @@ export function encryptObject(data: any, secret: string): string {
  * @param key
  * @returns
  */
-export function decryptObject(ecrypted_text: string, secret: string): any {
-  const decrypted = decrypt(ecrypted_text, secret);
+export function decryptObject(ecrypted_text: string, secret: string, secretIV: string): any {
+  const decrypted = decrypt(ecrypted_text, secret, secretIV);
   return JSON.parse(decrypted);
 }
 
@@ -104,15 +104,15 @@ export function decryptObject(ecrypted_text: string, secret: string): any {
  * @param secret
  * @returns
  */
-export function encrypt(text: string, secret: string): string {
-  const iv = randomBytes(16);
+export function encrypt(text: string, secret: string, secretIV: string): string {
+  const encIv = createHash("sha512").update(secretIV).digest("hex").substring(0, 16);
   const salt = randomBytes(16).toString("base64");
   const key = scryptSync(secret, salt, 32);
 
-  const cipher = createCipheriv("aes-256-cbc", Buffer.from(key), iv);
+  const cipher = createCipheriv("aes-256-cbc", Buffer.from(key), encIv);
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
-  return generateUrlEncodedBase64Hash({ iv: iv.toString("hex"), content: encrypted.toString("hex"), salt: salt });
+  return generateUrlEncodedBase64Hash({ content: encrypted.toString("hex"), salt: salt });
 }
 
 /**
@@ -121,14 +121,14 @@ export function encrypt(text: string, secret: string): string {
  * @param secret
  * @returns
  */
-export function decrypt(ecrypted_text: string, secret: string): any {
+export function decrypt(ecrypted_text: string, secret: string, secretIV: string): any {
   const parsedData = resolveUrlEncodedBase64HashJSON(ecrypted_text);
+  const encIv = createHash("sha512").update(secretIV).digest("hex").substring(0, 16);
   const salt = parsedData.salt;
   const key = scryptSync(secret, salt, 32);
 
-  const iv = Buffer.from(parsedData.iv, "hex");
   const encryptedText = Buffer.from(parsedData.content, "hex");
-  const decipher = createDecipheriv("aes-256-cbc", Buffer.from(key), iv);
+  const decipher = createDecipheriv("aes-256-cbc", Buffer.from(key), encIv);
   let decrypted = decipher.update(encryptedText);
   decrypted = Buffer.concat([decrypted, decipher.final()]);
   return decrypted.toString();

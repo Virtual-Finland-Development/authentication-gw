@@ -10,7 +10,7 @@ import { SuomiFiLoginState, SuomiFiProfile } from "./SuomifiTypes";
  * @returns
  */
 export async function createSuomiFiLoggedInCode(loggedInState: SuomiFiLoginState): Promise<string> {
-  return encryptObject(loggedInState, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+  return encryptObject(loggedInState, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"), await Settings.getSecret("AUTHENTICATION_GW_SECRET_IV"));
 }
 
 /**
@@ -19,7 +19,7 @@ export async function createSuomiFiLoggedInCode(loggedInState: SuomiFiLoginState
  * @returns
  */
 export async function extractSuomiFiLoggedInState(loginCode: string): Promise<SuomiFiLoginState> {
-  return decryptObject(loginCode, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+  return decryptObject(loginCode, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"), await Settings.getSecret("AUTHENTICATION_GW_SECRET_IV"));
 }
 
 /**
@@ -62,5 +62,5 @@ export async function resolveSuomiFiUserIdFromProfileData(profileData: SuomiFiPr
     throw new ValidationError("Could not resolve the user identifier from the Suomi.fi profile data");
   }
 
-  return encrypt(identifier, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+  return encrypt(identifier, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"), await Settings.getSecret("AUTHENTICATION_GW_SECRET_IV"));
 }

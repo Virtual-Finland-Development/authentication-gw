@@ -42,8 +42,9 @@ describe("Utils test", () => {
   test("Test hashes", () => {
     const value = "test";
     const secret = "testtesttesttesttesttesttestteasdsadasdasdasdasd";
-    const encrypted = encrypt(value, secret);
-    const decrypted = decrypt(encrypted, secret);
+    const secretIv = "testtesttesttest";
+    const encrypted = encrypt(value, secret, secretIv);
+    const decrypted = decrypt(encrypted, secret, secretIv);
     expect(decrypted).toEqual(value);
   });
 });
