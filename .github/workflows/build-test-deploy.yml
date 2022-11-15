@@ -21,6 +21,7 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs:
       endpoint: ${{ steps.pulumi.outputs.endpoint }}
+      moro: "TERE"
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
@@ -38,6 +39,7 @@ jobs:
         run: |
           npm run predeploy
       - name: Deploy with Pulumi
+        id: pulumi
         uses: pulumi/actions@v3
         with:
           work-dir: ./infra
@@ -59,6 +61,7 @@ jobs:
         run: |
           echo ${AUTH_PROVIDER_REDIRECT_BACK_HOST}
           echo ${{needs.build-test-deploy.outputs.endpoint}}
+          echo ${{needs.build-test-deploy.outputs.moro}}
           sed -i "s|authenticationGatewayHost: \".*\",|authenticationGatewayHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./webapps/svelte/src/AppSettings.ts
         env:
           AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{needs.build-test-deploy.outputs.endpoint}}
