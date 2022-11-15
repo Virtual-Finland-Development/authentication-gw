@@ -35,7 +35,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
   async LoginRequest(context: Context): Promise<HttpResponse> {
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
 
-    const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
+    const CLIENT_ID = await Settings.getStageSecret("SINUNA_CLIENT_ID");
     const SCOPE = SinunaSettings.scope;
     const STATE = SinunaStateAttributor.generate(parsedAppContext.object); // Throws if appContext is invalid
     const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/authenticate-response");
@@ -88,8 +88,8 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
     const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
 
     const SCOPE = SinunaSettings.scope;
-    const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
-    const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET");
+    const CLIENT_ID = await Settings.getStageSecret("SINUNA_CLIENT_ID");
+    const CLIENT_SECRET = await Settings.getStageSecret("SINUNA_CLIENT_SECRET");
     const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/authenticate-response");
     try {
       const response = await axios.post(

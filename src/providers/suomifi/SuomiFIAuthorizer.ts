@@ -18,7 +18,7 @@ async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string
   if (!parsedAppContext.object.guid) {
     throw new ValidationError("Missing guid from app context");
   }
-  return createSecretHash(parsedAppContext.object.guid, await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
+  return createSecretHash(parsedAppContext.object.guid, await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"));
 }
 
 /**
@@ -32,7 +32,7 @@ async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string
 async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nameID: string, nonce: string): Promise<{ idToken: string; expiresAt: string }> {
   const expiresIn = 60 * 60; // 1 hour
   return {
-    idToken: jwt.sign({ appContextHash: parsedAppContext.hash, nameID: nameID, nonce: nonce }, await Settings.getSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
+    idToken: jwt.sign({ appContextHash: parsedAppContext.hash, nameID: nameID, nonce: nonce }, await Settings.getStageSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
       algorithm: "RS256",
       expiresIn: expiresIn,
       issuer: Runtime.getAppUrl(),
@@ -92,7 +92,7 @@ export async function createSignedInTokens(
  */
 export async function getJKWSJsonConfiguration(): Promise<JWKS> {
   return {
-    keys: [JSON.parse(await Settings.getSecret("SUOMIFI_JWK"))],
+    keys: [JSON.parse(await Settings.getStageSecret("SUOMIFI_JWK"))],
   };
 }
 

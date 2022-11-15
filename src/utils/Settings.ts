@@ -16,6 +16,10 @@ export default {
       return defaultValue;
     }
   },
+  async getStageSecret(key: string, defaultValue?: string): Promise<string> {
+    const stage = this.getEnv("STAGE");
+    return this.getSecret(`${stage}_${key}`, defaultValue);
+  },
   getEnv(key: string, defaultValue: string = ""): string {
     return this.getEnvironmentValue(key, defaultValue);
   },

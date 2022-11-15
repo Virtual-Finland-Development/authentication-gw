@@ -17,7 +17,7 @@ export const SinunaStateAttributor = new (class SinunaStateAttributor {
    */
   async initialize() {
     if (!this.runtimeToken) {
-      this.runtimeToken = await Settings.getSecret("AUTHENTICATION_GW_RUNTIME_TOKEN", "sinuna");
+      this.runtimeToken = await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN", "sinuna");
     }
   }
 

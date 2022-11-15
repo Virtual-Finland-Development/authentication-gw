@@ -12,7 +12,7 @@ let suomiSaml: typeof SAML;
  */
 export const getSuomiFISAML2Client = async function (): Promise<typeof SAML> {
   if (!suomiSaml) {
-    const privateKey = await Settings.getSecret("SUOMIFI_PRIVATE_KEY");
+    const privateKey = await Settings.getStageSecret("SUOMIFI_PRIVATE_KEY");
     suomiSaml = new SAML({
       entryPoint: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SSO",
       callbackUrl: Runtime.getAppUrl("/auth/saml2/suomifi/authenticate-response"),
