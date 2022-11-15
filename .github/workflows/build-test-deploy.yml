@@ -19,6 +19,8 @@ jobs:
     name: Build, test and deploy ${{ inputs.environment }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    outputs:
+      endpoint: ${{ steps.pulumi.outputs.endpoint }}
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
@@ -56,10 +58,10 @@ jobs:
       - name: Fix svelte demo app index authgw-url
         run: |
           echo ${AUTH_PROVIDER_REDIRECT_BACK_HOST}
-          echo ${{needs.build-test-deploy.steps.pulumi.outputs.endpoint}}
+          echo ${{needs.build-test-deploy.outputs.endpoint}}
           sed -i "s|authenticationGatewayHost: \".*\",|authenticationGatewayHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./webapps/svelte/src/AppSettings.ts
         env:
-          AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{needs.build-test-deploy.steps.pulumi.outputs.endpoint}}
+          AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{needs.build-test-deploy.outputs.endpoint}}
       - name: Build the svelte app
         working-directory: ./webapps/svelte
         run: |
