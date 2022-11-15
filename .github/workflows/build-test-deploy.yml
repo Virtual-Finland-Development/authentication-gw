@@ -59,9 +59,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Fix svelte demo app index authgw-url
         run: |
-          echo ${AUTH_PROVIDER_REDIRECT_BACK_HOST}
-          echo ${{needs.build-test-deploy.outputs.endpoint}}
-          echo ${{needs.build-test-deploy.outputs.moro}}
           sed -i "s|authenticationGatewayHost: \".*\",|authenticationGatewayHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./webapps/svelte/src/AppSettings.ts
         env:
           AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{needs.build-test-deploy.outputs.endpoint}}
@@ -80,3 +77,11 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: eu-north-1
           SOURCE_DIR: "webapps/svelte/dist"
+      - name: Deploy the bucket root redirects to S3
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          AWS_S3_BUCKET: virtual-finland-development-auth-files
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: eu-north-1
+          SOURCE_DIR: "webapps/bucket-root"
