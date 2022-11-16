@@ -1,6 +1,16 @@
 import { AccessDeniedException } from "../../utils/exceptions";
 import { verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
+import TestbedConfig from "./Testbed.config";
+
+/**
+ *
+ * @param provider
+ * @returns
+ */
+export function isMatchingProvider(provider: string): boolean {
+  return provider === TestbedConfig.ident || provider === "https://login.testbed.fi";
+}
 
 /**
  *
@@ -8,7 +18,7 @@ import { debug } from "../../utils/logging";
  * @param context - which app source is requesting access
  * @see: https://ioxio.com/guides/verify-id-token-in-a-data-source
  */
-export default async function authorize(idToken: string, context?: string): Promise<void> {
+export async function authorize(idToken: string, context?: string): Promise<void> {
   try {
     // Verify token
     const verified = await verifyIdToken(idToken, { issuer: "https://login.testbed.fi", openIdConfigUrl: "https://login.testbed.fi/.well-known/openid-configuration" });

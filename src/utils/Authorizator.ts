@@ -1,21 +1,18 @@
-import SinunaConfig from "../providers/sinuna/Sinuna.config";
-import SinunaAuthorizer from "../providers/sinuna/SinunaAuthorizer";
-import SuomiFIConfig from "../providers/suomifi/SuomiFI.config";
-import SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
-import TestbedConfig from "../providers/testbed/Testbed.config";
-import TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
+import * as SinunaAuthorizer from "../providers/sinuna/SinunaAuthorizer";
+import * as SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
+import * as TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
 import { ValidationError } from "./exceptions";
 
 import { omitEmptyObjectKeys } from "./transformers";
-import { AuthorizeFunc } from "./types";
+import { Authorizer } from "./types";
 
-function getAuthorizator(authHeaders: { provider: string; [attr: string]: string }): AuthorizeFunc {
+function getAuthorizator(authHeaders: { provider: string; [attr: string]: string }): Authorizer {
   const provider = authHeaders.provider?.toLowerCase();
-  if (provider === SinunaConfig.ident.toLowerCase()) {
+  if (SinunaAuthorizer.isMatchingProvider(provider)) {
     return SinunaAuthorizer;
-  } else if (provider === SuomiFIConfig.ident.toLowerCase()) {
+  } else if (SuomiFIAuthorizer.isMatchingProvider(provider)) {
     return SuomiFIAuthorizer;
-  } else if (provider === TestbedConfig.ident.toLowerCase()) {
+  } else if (TestbedAuthorizer.isMatchingProvider(provider)) {
     return TestbedAuthorizer;
   } else {
     throw new ValidationError("Unknown auth provider");
@@ -39,6 +36,6 @@ export default {
     });
 
     const authorizator = getAuthorizator(authHeaders);
-    return await authorizator(authHeaders.authorization, authHeaders.context);
+    return await authorizator.authorize(authHeaders.authorization, authHeaders.context);
   },
 };
