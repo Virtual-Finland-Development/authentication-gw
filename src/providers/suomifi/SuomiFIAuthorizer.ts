@@ -35,7 +35,7 @@ async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nameID: string
     idToken: jwt.sign({ appContextHash: parsedAppContext.hash, nameID: nameID, nonce: nonce }, await Settings.getStageSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
       algorithm: "RS256",
       expiresIn: expiresIn,
-      issuer: Runtime.getAppUrl(),
+      issuer: "virtual-finland/authentication-gw/suomifi",
       keyid: `vfd:authgw:${Settings.getStage()}:suomifi:jwt`,
     }),
     expiresAt: transformExpiresInToExpiresAt_ISOString(expiresIn),
