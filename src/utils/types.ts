@@ -89,11 +89,18 @@ export interface AuthRequestHandler {
   AuthorizeRequest?(context: Context): Promise<HttpResponse>;
 }
 
-/**
- * POST: Then /authorize request implementation for the provider
- *
- * @param token
- * @param context
- * @throws AccessDeniedException - if access is denied
- */
-export type AuthorizeFunc = (token: string, context: string) => Promise<void>;
+export type Authorizer = {
+  /**
+   * POST: Then /authorize request implementation for the provider
+   *
+   * @param token
+   * @param context
+   * @throws AccessDeniedException - if access is denied
+   */
+  authorize: (token: string, context: string) => Promise<void>;
+
+  /**
+   * Matches the provider to the authorizer
+   */
+  isMatchingProvider: (provider: string) => boolean;
+};

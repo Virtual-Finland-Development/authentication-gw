@@ -13,6 +13,7 @@ import Settings from "../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
 import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import SuomiFIConfig from "./SuomiFI.config";
 
 async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string> {
   if (!parsedAppContext.object.guid) {
@@ -97,10 +98,19 @@ export async function getJKWSJsonConfiguration(): Promise<JWKS> {
 }
 
 /**
+ *
+ * @param provider
+ * @returns
+ */
+export function isMatchingProvider(provider: string): boolean {
+  return provider === SuomiFIConfig.ident || provider === "virtual-finland/authentication-gw/suomifi";
+}
+
+/**
  * @param idToken
  * @param context - which app source is requesting access
  */
-export default async function authorize(idToken: string, context: string): Promise<void> {
+export async function authorize(idToken: string, context: string): Promise<void> {
   try {
     // Verify token
     const verified = await verifyIdToken(idToken, { issuer: Runtime.getAppUrl(), jwks: await getJKWSJsonConfiguration() });
