@@ -8,7 +8,7 @@ import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, NoticeException, ValidationError } from "../../utils/exceptions";
 import { debug, log } from "../../utils/logging";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
-import { omitObjectKeysOtherThan, parseBase64XMLBody } from "../../utils/transformers";
+import { parseBase64XMLBody } from "../../utils/transformers";
 
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
@@ -67,7 +67,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
       // Setup login state hash
       const loginCode = await createSuomiFiLoggedInCode({
         profileData: {
-          profile: omitObjectKeysOtherThan(result.profile, ["nameID", "nameIDFormat", "issuer", "sessionIndex"]),
+          profile: result.profile,
           context: {
             AuthnContextClassRef: profileAssertion["Assertion"]["AuthnStatement"][0]["AuthnContext"][0]["AuthnContextClassRef"][0]["_"],
           },

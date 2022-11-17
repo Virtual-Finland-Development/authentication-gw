@@ -1,7 +1,8 @@
 import { ValidationError } from "../../../utils/exceptions";
-import { encrypt, generateUrlEncodedBase64Hash, resolveUrlEncodedBase64Hash } from "../../../utils/hashes";
+import { decrypt, decryptObject, encrypt, encryptObject, generateUrlEncodedBase64Hash, resolveUrlEncodedBase64Hash } from "../../../utils/hashes";
 import { decodeIdToken } from "../../../utils/JWK-Utils";
 import Settings from "../../../utils/Settings";
+import { omitObjectKeys } from "../../../utils/transformers";
 import { SuomiFiLoginState, SuomiFiProfile } from "./SuomifiTypes";
 
 /**
@@ -10,7 +11,20 @@ import { SuomiFiLoginState, SuomiFiProfile } from "./SuomifiTypes";
  * @returns
  */
 export async function createSuomiFiLoggedInCode(loggedInState: SuomiFiLoginState): Promise<string> {
-  return generateUrlEncodedBase64Hash(loggedInState);
+  return generateUrlEncodedBase64Hash({
+    ...loggedInState,
+    profileData: {
+      ...loggedInState.profileData,
+      profile: encryptObject(
+        omitObjectKeys(loggedInState.profileData.profile, ["nameID", "nameIDFormat", "issuer", "sessionIndex", "inResponseTo", "nameQualifier", "spNameQualifier", "attributes"]),
+        await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"),
+        await Settings.getStageSecret("AUTHENTICATION_GW_SECRET_IV")
+      ),
+      email: loggedInState.profileData.email
+        ? encrypt(loggedInState.profileData.email, await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"), await Settings.getStageSecret("AUTHENTICATION_GW_SECRET_IV"))
+        : "",
+    },
+  });
 }
 
 /**
@@ -19,7 +33,21 @@ export async function createSuomiFiLoggedInCode(loggedInState: SuomiFiLoginState
  * @returns
  */
 export async function extractSuomiFiLoggedInState(loginCode: string): Promise<SuomiFiLoginState> {
-  return JSON.parse(resolveUrlEncodedBase64Hash(loginCode));
+  const loggedInState = JSON.parse(resolveUrlEncodedBase64Hash(loginCode));
+  return {
+    ...loggedInState,
+    profileData: {
+      ...loggedInState.profileData,
+      profile: decryptObject(
+        loggedInState.profileData.profile,
+        await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"),
+        await Settings.getStageSecret("AUTHENTICATION_GW_SECRET_IV")
+      ),
+      email: loggedInState.profileData.email
+        ? decrypt(loggedInState.profileData.email, await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"), await Settings.getStageSecret("AUTHENTICATION_GW_SECRET_IV"))
+        : "",
+    },
+  };
 }
 
 /**
