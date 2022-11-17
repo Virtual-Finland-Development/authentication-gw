@@ -15,6 +15,7 @@ import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import { resolveSuomiFiUserIdFromProfileData } from "./utils/SuomifiStateTools";
 import { SuomiFiProfile } from "./utils/SuomifiTypes";
+import SuomiFIConfig from "./SuomiFI.config";
 
 /**
  *
@@ -46,8 +47,8 @@ async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nonce: string,
     idToken: jwt.sign(suomifiKeyPayload, await Settings.getStageSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
       algorithm: "RS256",
       expiresIn: expiresIn,
-      issuer: Runtime.getAppUrl(),
-      keyid: "vfd:authgw:suomifi:jwt",
+      issuer: "virtual-finland/authentication-gw/suomifi",
+      keyid: `vfd:authgw:${Settings.getStage()}:suomifi:jwt`,
     }),
     expiresAt: transformExpiresInToExpiresAt_ISOString(expiresIn),
     userId: userId,
@@ -108,10 +109,19 @@ export async function getJKWSJsonConfiguration(): Promise<JWKS> {
 }
 
 /**
+ *
+ * @param provider
+ * @returns
+ */
+export function isMatchingProvider(provider: string): boolean {
+  return provider === SuomiFIConfig.ident || provider === "virtual-finland/authentication-gw/suomifi";
+}
+
+/**
  * @param idToken
  * @param context - which app source is requesting access
  */
-export default async function authorize(idToken: string, context: string): Promise<void> {
+export async function authorize(idToken: string, context: string): Promise<void> {
   try {
     // Verify token
     const verified = await verifyIdToken(idToken, { issuer: Runtime.getAppUrl(), jwks: await getJKWSJsonConfiguration() });

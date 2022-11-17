@@ -20,7 +20,7 @@ openssl req -key ${STAGE}_suomifi_jwt_private.pem -new -x509 -days 3650 -subj "/
 
 echo "> Convert public key to JWK format"
 npm install -g pem-jwk
-ssh-keygen -e -m pkcs8 -f ${STAGE}_suomifi_jwt_private.pem | pem-jwk | jq '{kid: "vfd:authgw:suomifi:jwt", alg: "RS256", kty: .kty , use: "sig", n: .n , e: .e }' > ${STAGE}_suomifi_jwt.jwk
+ssh-keygen -e -m pkcs8 -f ${STAGE}_suomifi_jwt_private.pem | pem-jwk | jq '{kid: "vfd:authgw:'${STAGE}':suomifi:jwt", alg: "RS256", kty: .kty , use: "sig", n: .n , e: .e }' > ${STAGE}_suomifi_jwt.jwk
 
 echo "> Keys created"
 

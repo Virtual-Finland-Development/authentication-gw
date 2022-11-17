@@ -12,8 +12,8 @@ import { ensureObject } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import TestbedSettings from "./Testbed.config";
-import authorize from "./TestbedAuthorizer";
 import * as TestbedRequests from "./utils/TestbedRequests";
+import { authorize } from "./TestbedAuthorizer";
 
 /**
  * @see: https://ioxio.com/guides/use-login-portal-in-your-applications
