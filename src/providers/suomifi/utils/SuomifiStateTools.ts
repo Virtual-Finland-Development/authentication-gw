@@ -1,5 +1,5 @@
 import { ValidationError } from "../../../utils/exceptions";
-import { decryptObject, encrypt, encryptObject } from "../../../utils/hashes";
+import { encrypt, generateUrlEncodedBase64Hash, resolveUrlEncodedBase64Hash } from "../../../utils/hashes";
 import { decodeIdToken } from "../../../utils/JWK-Utils";
 import Settings from "../../../utils/Settings";
 import { SuomiFiLoginState, SuomiFiProfile } from "./SuomifiTypes";
@@ -10,7 +10,7 @@ import { SuomiFiLoginState, SuomiFiProfile } from "./SuomifiTypes";
  * @returns
  */
 export async function createSuomiFiLoggedInCode(loggedInState: SuomiFiLoginState): Promise<string> {
-  return encryptObject(loggedInState, await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"), await Settings.getStageSecret("AUTHENTICATION_GW_SECRET_IV"));
+  return generateUrlEncodedBase64Hash(loggedInState);
 }
 
 /**
@@ -19,7 +19,7 @@ export async function createSuomiFiLoggedInCode(loggedInState: SuomiFiLoginState
  * @returns
  */
 export async function extractSuomiFiLoggedInState(loginCode: string): Promise<SuomiFiLoginState> {
-  return decryptObject(loginCode, await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"), await Settings.getStageSecret("AUTHENTICATION_GW_SECRET_IV"));
+  return JSON.parse(resolveUrlEncodedBase64Hash(loginCode));
 }
 
 /**
