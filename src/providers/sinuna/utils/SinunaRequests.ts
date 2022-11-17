@@ -12,8 +12,9 @@ import SinunaSettings from "../Sinuna.config";
  * @returns
  */
 export async function getTokensWithLoginCode(loginCode: string): Promise<{ accessToken: string; idToken: string; expiresAt: string }> {
-  const CLIENT_ID = await Settings.getSecret("SINUNA_CLIENT_ID");
-  const CLIENT_SECRET = await Settings.getSecret("SINUNA_CLIENT_SECRET");
+  const CLIENT_ID = await Settings.getStageSecret("SINUNA_CLIENT_ID");
+  const CLIENT_SECRET = await Settings.getStageSecret("SINUNA_CLIENT_SECRET");
+
   const response = await axios.post(
     `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,
     new URLSearchParams({

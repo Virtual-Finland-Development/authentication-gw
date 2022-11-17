@@ -78,6 +78,8 @@ export function exceptionToObject(error: any): {
     }
   }
 
+  message = typeof message === "string" ? message : "Unknown error message";
+
   return {
     name: name,
     message: message,
