@@ -135,12 +135,14 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
     try {
       const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
       const LOGOUT_CALLBACK_REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/logout-response");
-      const LOGOUT_REQUEST_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${LOGOUT_CALLBACK_REDIRECT_URI}`;
+
+      // Sinuna logout flow is not supported yet
+      //const LOGOUT_REQUEST_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${LOGOUT_CALLBACK_REDIRECT_URI}`;
 
       return {
         statusCode: 303,
         headers: {
-          Location: LOGOUT_REQUEST_URL,
+          Location: LOGOUT_CALLBACK_REDIRECT_URI,
         },
         cookies: [prepareCookie("appContext", parsedAppContext.hash)],
       };
