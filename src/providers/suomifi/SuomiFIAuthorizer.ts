@@ -8,14 +8,15 @@ import { AccessDeniedException, ValidationError } from "../../utils/exceptions";
 import { createSecretHash, generateBase64Hash, resolveBase64Hash } from "../../utils/hashes";
 import { JWKS, verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
-import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
 import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import SuomiFIConfig from "./SuomiFI.config";
 import { resolveSuomiFiUserIdFromProfileData } from "./utils/SuomifiStateTools";
 import { SuomiFiProfile } from "./utils/SuomifiTypes";
-import SuomiFIConfig from "./SuomiFI.config";
+
+const SUOMIFI_ISSUER = "virtual-finland/authentication-gw/suomifi";
 
 /**
  *
@@ -47,7 +48,7 @@ async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nonce: string,
     idToken: jwt.sign(suomifiKeyPayload, await Settings.getStageSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
       algorithm: "RS256",
       expiresIn: expiresIn,
-      issuer: "virtual-finland/authentication-gw/suomifi",
+      issuer: SUOMIFI_ISSUER,
       keyid: `vfd:authgw:${Settings.getStage()}:suomifi:jwt`,
     }),
     expiresAt: transformExpiresInToExpiresAt_ISOString(expiresIn),
@@ -114,7 +115,7 @@ export async function getJKWSJsonConfiguration(): Promise<JWKS> {
  * @returns
  */
 export function isMatchingProvider(provider: string): boolean {
-  return provider === SuomiFIConfig.ident || provider === "virtual-finland/authentication-gw/suomifi";
+  return provider === SuomiFIConfig.ident || provider === SUOMIFI_ISSUER;
 }
 
 /**
@@ -124,7 +125,7 @@ export function isMatchingProvider(provider: string): boolean {
 export async function authorize(idToken: string, context: string): Promise<void> {
   try {
     // Verify token
-    const verified = await verifyIdToken(idToken, { issuer: Runtime.getAppUrl(), jwks: await getJKWSJsonConfiguration() });
+    const verified = await verifyIdToken(idToken, { issuer: SUOMIFI_ISSUER, jwks: await getJKWSJsonConfiguration() });
 
     // Validate rest of the fields
     const parsedAppContext = parseAppContext(verified.appContextHash); // Throws
