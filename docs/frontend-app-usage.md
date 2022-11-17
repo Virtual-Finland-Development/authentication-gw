@@ -46,15 +46,15 @@ export function generateAppContext(appContextObject: AppContextObject): string {
 }
 ```
 
-## LoginRequest
+## AuthenticationRequest
 
-Redirect user to the `/auth/openid/sinuna/login-request`-endpoint with the `appContext` token as a query parameter:
+Redirect user to the `/auth/openid/sinuna/authentication-request`-endpoint with the `appContext` token as a query parameter:
 
 ```js
-window.location.href = `https://${authEndpointHost}/auth/openid/sinuna/login-request?appContext=${appContext}`;
+window.location.href = `https://${authEndpointHost}/auth/openid/sinuna/authentication-request?appContext=${appContext}`;
 ```
 
-## LoginResponse
+## AuthenticationResponse
 
 After the auth process is done, the user is redirected to the `redirectUrl` predefined in the `appContext`-variable with a `loginCode` token as a query parameter.
 
@@ -69,16 +69,16 @@ If login fails / the attempt is cancelled etc, the user is redirected to the `re
 - `error`: the error message
 - `type`: message type, one of `danger`, `warning`, `info`
 - `provider`: authentication provider, eg. `sinuna`
-- `intent=LoginRequest`: intent of the request, with a login situation its always `LoginRequest`
+- `intent=AuthenticationRequest`: intent of the request, with a login situation its always `AuthenticationRequest`
 
-eg: `https://${frontendAppHost}/login-handler.html?error=Authentication+cancelled&type=info&provider=sinuna&intent=LoginRequest`
+eg: `https://${frontendAppHost}/login-handler.html?error=Authentication+cancelled&type=info&provider=sinuna&intent=AuthenticationRequest`
 
-## AuthTokenRequest
+## LoginRequest
 
-The received `loginCode` is a temporary code which is used in retrieving the actual auth tokens from the `/auth/openid/sinuna/auth-token-request`-endpoint.
+The received `loginCode` is a temporary code which is used in retrieving the actual login state from the `/auth/openid/sinuna/login-request`-endpoint.
 
 ```js
-const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/auth-token-request`, {
+const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/login-request`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -88,13 +88,13 @@ const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/aut
     appContext: appContext, // url-encoded base64 string
   }),
 });
-const { accessToken, idToken } = await response.json();
+const { idToken, profileData } = await response.json();
 ```
 
-The retrieved tokens:
+The retrieved data:
 
 - idToken: a JWT token that can be used to authenticate the user in the backend
-- accessToken: a hash that can be used to retrieve user information with the UserInfoRequest-call
+- profileData: a JSON object containing the user profile data
 
 Store the token in the browser's local storage.
 
@@ -122,28 +122,6 @@ fetch(`https://data-product-endpoint.example`, {
 ```
 
 If the endpoint need authorization and the request fails with a `401` status code, the token is expired and the user should be redirected to the login page.
-
-### UserInfoRequest
-
-In the frontend app the `accessToken` could be used like this:
-
-```js
-const response = await fetch(`https://${authEndpointHost}/auth/openid/sinuna/user-info-request`, {
-  method: "POST",
-  credentials: "include", // Make sure to include cookies
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    accessToken: accessToken,
-    appContext: appContext, // url-encoded base64 string
-  }),
-});
-
-const { email } = await response.json();
-```
-
-If the request fails with a `401` status code, the token is expired and the user should be redirected to the login page.
 
 ## LogoutRequest
 

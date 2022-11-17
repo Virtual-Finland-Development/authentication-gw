@@ -1,18 +1,17 @@
-import axios from "axios";
 import { Context } from "openapi-backend";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, NoticeException } from "../../utils/exceptions";
-import { generateBase64Hash } from "../../utils/hashes";
-import { debug, logAxiosException } from "../../utils/logging";
+import { decodeIdToken } from "../../utils/JWK-Utils";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import Runtime from "../../utils/Runtime";
 import Settings from "../../utils/Settings";
-import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
+import { ensureObject } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import SinunaSettings from "./Sinuna.config";
+import * as SinunaRequests from "./utils/SinunaRequests";
 import { parseSinunaAuthenticateResponse, SinunaStateAttributor } from "./utils/SinunaResponseParsers";
 
 /**
@@ -32,7 +31,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    * @param context
    * @returns
    */
-  async LoginRequest(context: Context): Promise<HttpResponse> {
+  async AuthenticationRequest(context: Context): Promise<HttpResponse> {
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
 
     const CLIENT_ID = await Settings.getStageSecret("SINUNA_CLIENT_ID");
@@ -65,6 +64,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
       const authenticateResponse = parseSinunaAuthenticateResponse(context.request.query);
       const appContextObj = authenticateResponse.appContextObj;
       const redirectUrl = prepareLoginRedirectUrl(appContextObj.redirectUrl, authenticateResponse.loginCode, this.identityProviderIdent);
+
       return {
         statusCode: 303,
         headers: {
@@ -78,50 +78,43 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
   }
 
   /**
-   *  POST: The route for the access token exchange: loginCode -> accessToken, idToken
+   * POST: transform loginCode to LoginResponse
    *
    * @param context
    * @returns
    */
-  async AuthTokenRequest(context: Context): Promise<HttpResponse> {
+  async LoginRequest(context: Context): Promise<HttpResponse> {
     parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
     const loginCode = context.request.requestBody.loginCode; // request body already validated by openapi-backend
 
-    const SCOPE = SinunaSettings.scope;
-    const CLIENT_ID = await Settings.getStageSecret("SINUNA_CLIENT_ID");
-    const CLIENT_SECRET = await Settings.getStageSecret("SINUNA_CLIENT_SECRET");
-    const REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/authenticate-response");
     try {
-      const response = await axios.post(
-        `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,
-        new URLSearchParams({
-          grant_type: "authorization_code",
-          code: loginCode,
-          scope: SCOPE,
-          redirect_uri: REDIRECT_URI,
-        }).toString(),
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: "Basic " + generateBase64Hash(`${CLIENT_ID}:${CLIENT_SECRET}`),
-          },
-        }
-      );
-
-      debug(response.data);
+      // Get the token
+      const tokens = await SinunaRequests.getTokensWithLoginCode(loginCode);
+      // Decode id token
+      const idTokenPayload = { email: ensureObject(decodeIdToken(tokens.idToken)?.decodedToken?.payload) };
+      // Get user info
+      const userInfo = await SinunaRequests.getUserInfoWithAccessToken(tokens.accessToken);
+      // Merge
+      const profile = {
+        ...idTokenPayload,
+        ...userInfo,
+      };
 
       return {
         statusCode: 200,
         headers: getJSONResponseHeaders(),
         body: JSON.stringify({
-          accessToken: response.data.access_token,
-          idToken: response.data.id_token,
-          expiresAt: transformExpiresInToExpiresAt_ISOString(response.data.expires_in),
+          idToken: tokens.idToken,
+          expiresAt: tokens.expiresAt,
+          profileData: {
+            userId: profile.inum,
+            email: profile.email,
+            profile: profile,
+          },
         }),
       };
     } catch (error) {
-      logAxiosException(error);
-      throw new AccessDeniedException(String(error));
+      throw new AccessDeniedException(error);
     }
   }
 
@@ -166,36 +159,5 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
       },
       cookies: [prepareCookie("appContext", "")],
     };
-  }
-
-  /**
-   *  POST: get user info with the access token
-   *
-   * @param context
-   * @returns
-   */
-  async UserInfoRequest(context: Context): Promise<HttpResponse> {
-    parseAppContext(context, { provider: this.identityProviderIdent }); // Valites app context
-
-    const accessToken = context.request.requestBody.accessToken;
-
-    try {
-      const response = await axios.get(`https://login.iam.qa.sinuna.fi/oxauth/restv1/userinfo`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      debug(response.data);
-
-      return {
-        statusCode: 200,
-        headers: getJSONResponseHeaders(),
-        body: JSON.stringify(response.data),
-      };
-    } catch (error) {
-      logAxiosException(error);
-      throw new AccessDeniedException(String(error));
-    }
   }
 })();

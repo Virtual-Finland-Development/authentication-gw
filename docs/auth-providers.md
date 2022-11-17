@@ -6,20 +6,17 @@ The auth gw currently supports openid connect and saml2 -type authentication flo
 
 Sinuna is an Openid Connect -type authentication provider with the following endpoints:
 
-- LoginRequest: `/auth/openid/sinuna/login-request`
+- AuthenticationRequest: `/auth/openid/sinuna/authentication-request`
   - gets a `loginCode`.
-- AuthTokenRequest: `/auth/openid/sinuna/auth-token-request`
+- LoginRequest: `/auth/openid/sinuna/login-request`
   - uses the `loginCode` to get an access tokens `idToken` and `accessToken`.
-  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresAt": "2022-10-10T05:52:50.886Z"}`
+  - example response: `{"idToken":"<idToken>", "expiresAt": "2022-10-10T05:52:50.886Z", "profileData": {"email":"..."}}`
     - `idToken` is a JWT token that contains the user's identity information
-    - `accessToken` is a permit to get the authentication provider specific data and details using the UserInfoRequest-endpoint
     - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
-- UserInfoRequest: `/auth/openid/sinuna/user-info-request`
-  - uses the `accessToken` to get user info
-  - example response: `{"inum": "bazbar1231231", "sub":"1234567890","email":"John@Doe"}`
-    - `inum`: is the user ID in the Sinuna system
-    - `email`: is the user email
-    - `sub` _(disrecard)_: is the sinuna service-account specific user ID
+    - `profileData` is a JSON object that contains the user's profile data
+      - example profileData: `{"userId": "bazbar1231231", "email":"John@Doe", "profile": {"inum": "bazbar1231231", "sub": "e2dasdxcasd"}}`
+        - `userId`: is the user ID in the Sinuna system
+        - `email`: is the user email
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
   - `X-authorization-provider: sinuna`
@@ -34,20 +31,18 @@ The id token can be verified using the public key of the authentication provider
 
 SuomiFi is an SAML2 -type authentication provider with the following endpoints:
 
-- LoginRequest: `/auth/saml2/suomifi/login-request`
+- AuthenticationRequest: `/auth/saml2/suomifi/authentication-request`
   - gets a `loginCode`
-- AuthTokenRequest: `/auth/saml2/suomifi/auth-token-request`
+- LoginRequest: `/auth/saml2/suomifi/login-request`
   - uses the `loginCode` to get an access tokens `idToken` and `accessToken`.
-  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresAt": "2022-10-10T05:52:50.886Z"}`
+  - example response: `{"idToken":"<idToken>", "expiresAt": "2022-10-10T05:52:50.886Z", "profileData": {...}}}`
     - `idToken` is a JWT token that contains the user's identity information
-    - `accessToken` is a permit to get the authentication provider specific data and details using the UserInfoRequest-endpoint
     - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
-- UserInfoRequest: `/auth/saml2/suomifi/user-info-request`
-  - uses the `accessToken` to get user info
-  - example response: `{"context": {"AuthnContextClassRef": "http://ftn.ficora.fi/2017/loa2"}, "profile": {"nameID": "a21sxxasxaxas323", "email":"John@Doe"}, "accessToken": jwt.233höpölöpöasd.32313cc}`
-    - `context.AuthnContextClassRef`: is the authentication level information
-    - `profile.nameID`: is the user ID in the SuomiFi system
-    - `profile.email`: is the user email (if available)
+    - `profileData` is a JSON object that contains the user's profile data
+      - example profileData: `{"userId": "a21sxxasxaxas323", "email": "John@Doe", "context": {"AuthnContextClassRef": "http://ftn.ficora.fi/2017/loa2"}, "profile": {"nameID": "a21sxxasxaxas323", "email":"John@Doe"}}`
+        - `userId`: is the user ID in the SuomiFi system
+        - `email`: is the user email (if available)
+        - `context.AuthnContextClassRef`: the authentication level reference
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
   - `X-authorization-provider: suomifi`
@@ -62,19 +57,17 @@ The id token can be verified using the public key of the authentication provider
 
 Testbed is an Openid Connect -type authentication provider with the following endpoints:
 
-- LoginRequest: `/auth/openid/testbed/login-request`
+- AuthenticationRequest: `/auth/openid/testbed/authentication-request`
   - gets a `loginCode`.
-- AuthTokenRequest: `/auth/openid/testbed/auth-token-request`
+- LoginRequest: `/auth/openid/testbed/login-request`
   - uses the `loginCode` to get an access tokens: `idToken` and `accessToken`
-  - example response: `{"idToken":"<idToken>","accessToken":"<accessToken>", "expiresAt": "2022-10-10T05:52:50.886Z"}`
+  - example response: `{"idToken":"<idToken>", "expiresAt": "2022-10-10T05:52:50.886Z", "profileData": {...}}`
     - `idToken` is a JWT token that contains the user's identity information
-    - `accessToken` is a permit to get the authentication provider specific data and details using the UserInfoRequest-endpoint
     - `expiresAt` is an ISO-8601 timestamp string that specifies the token expirity datetime
-- UserInfoRequest: `/auth/openid/testbed/user-info-request`
-  - uses the `accessToken` to get user info
-  - example response: `{"sub":"1234567890","name":"1234567890"}`
-    - `sub`: is the user ID in the Testbed system
-    - `name` _(disrecard)_: is the user name, but not currently available
+    - `profileData` is a JSON object that contains the user's profile data
+      - example profileData: `{"userId": "1234567890", "email":"John@Doe", "profile": "sub":"1234567890","name":"1234567890"}`
+        - `userId`: is the user ID in the Testbed system
+        - `email`: is the user testbed-email
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
   - `X-authorization-provider: testbed`

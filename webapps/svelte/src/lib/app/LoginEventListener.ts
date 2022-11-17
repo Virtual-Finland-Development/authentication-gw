@@ -6,18 +6,18 @@ export default async function LoginEventListener(loginApp: LoginApp) {
   const affectsThisApp = urlParams.has("provider") && urlParams.get("provider").toLowerCase() === loginApp.getName().toLowerCase();
   if (!loginApp.AuthState.isLoggedIn()) {
     if (affectsThisApp && urlParams.has("loginCode")) {
-      loginApp.log("LoginEventListener", "Login code received, fetching auth token..");
+      loginApp.log("LoginEventListener", "Logged-in code received, fetching auth state..");
       //
       // Handle login response
       //
       const loginCode = urlParams.get("loginCode");
       try {
-        const tokens = await loginApp.AuthService.fetchAuthTokens(loginCode);
-        loginApp.AuthState.login(tokens); // Store token in local storage
+        const loggedInState = await loginApp.AuthService.fetchLoggedInState(loginCode);
+        loginApp.AuthState.login(loggedInState); // Store state in local storage
         await loginApp.handleLoggedIn(); // Fetch user info
         loginApp.UIState.resetViewState("auth"); // reset view state
       } catch (error) {
-        loginApp.log("LoginEventListener", "Failed to fetch auth token", error);
+        loginApp.log("LoginEventListener", "Failed to fetch auth state", error);
       }
     } else {
       loginApp.UIState.handleCurrentState(); // Init UI

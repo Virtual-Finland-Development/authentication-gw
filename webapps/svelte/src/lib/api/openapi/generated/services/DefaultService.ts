@@ -23,16 +23,13 @@ export class DefaultService {
     }
 
     /**
-     * @returns void
+     * @returns string Swagger API documentation
      * @throws ApiError
      */
-    public swagger(): CancelablePromise<void> {
+    public swagger(): CancelablePromise<string> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/swagger',
-            errors: {
-                303: `Redirect to the API documentation`,
-            },
+            url: '/docs',
         });
     }
 
@@ -128,7 +125,7 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public openIdLoginRequest({
+    public openIdAuthenticationRequest({
         provider,
         appContext,
     }: {
@@ -143,7 +140,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/auth/openid/{provider}/login-request',
+            url: '/auth/openid/{provider}/authentication-request',
             path: {
                 'provider': provider,
             },
@@ -169,6 +166,8 @@ export class DefaultService {
         sessionState,
         sid,
         nonce,
+        error,
+        errorDescription,
     }: {
         /**
          * Auth provider ident
@@ -177,16 +176,18 @@ export class DefaultService {
         /**
          * Login code
          */
-        code: string,
+        code?: string,
         /**
          * Login state string
          */
-        state: string,
+        state?: string,
         acrValues?: string,
         scope?: string,
         sessionState?: string,
         sid?: string,
         nonce?: string,
+        error?: string,
+        errorDescription?: string,
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
@@ -202,6 +203,8 @@ export class DefaultService {
                 'session_state': sessionState,
                 'sid': sid,
                 'nonce': nonce,
+                'error': error,
+                'error_description': errorDescription,
             },
             errors: {
                 303: `Authentication providers callback url, redirect back to the app context, provide loginCode and provider -variables as query params`,
@@ -280,10 +283,10 @@ export class DefaultService {
     }
 
     /**
-     * @returns any Auth token
+     * @returns any Logged In Response
      * @throws ApiError
      */
-    public openIdAuthTokenRequest({
+    public openIdLoginRequest({
         provider,
         requestBody,
     }: {
@@ -299,61 +302,27 @@ export class DefaultService {
             appContext: string;
         },
     }): CancelablePromise<{
-        accessToken: string;
         idToken: string;
         /**
          * an ISO-8601 timestamp string that specifies the token expirity datetime
          */
         expiresAt: string;
+        profileData: {
+            sub: string;
+            inum?: string;
+            email?: string;
+        };
     }> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/auth/openid/{provider}/auth-token-request',
+            url: '/auth/openid/{provider}/login-request',
             path: {
                 'provider': provider,
             },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                401: `Access token retrieval failed`,
-            },
-        });
-    }
-
-    /**
-     * @returns any User info object
-     * @throws ApiError
-     */
-    public openIdUserInfoRequest({
-        provider,
-        requestBody,
-    }: {
-        /**
-         * Auth provider ident
-         */
-        provider: string,
-        /**
-         * Retrieve user info from the auth provider service
-         */
-        requestBody: {
-            accessToken: string;
-            appContext: string;
-        },
-    }): CancelablePromise<{
-        sub: string;
-        inum?: string;
-        email?: string;
-    }> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/auth/openid/{provider}/user-info-request',
-            path: {
-                'provider': provider,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                401: `Login invalid or expired`,
+                401: `Logged In details retrieval failed`,
             },
         });
     }
@@ -362,7 +331,7 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public saml2LoginRequest({
+    public saml2AuthenticationRequest({
         provider,
         appContext,
     }: {
@@ -377,7 +346,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/auth/saml2/{provider}/login-request',
+            url: '/auth/saml2/{provider}/authentication-request',
             path: {
                 'provider': provider,
             },
@@ -410,6 +379,55 @@ export class DefaultService {
             },
             errors: {
                 303: `Authentication providers callback url, redirect back to the app context`,
+            },
+        });
+    }
+
+    /**
+     * @returns any Logged In Response
+     * @throws ApiError
+     */
+    public saml2LoginRequest({
+        provider,
+        requestBody,
+    }: {
+        /**
+         * Auth provider ident
+         */
+        provider: string,
+        /**
+         * Retrieve the authentication token from the auth provider service
+         */
+        requestBody: {
+            loginCode: string;
+            appContext: string;
+        },
+    }): CancelablePromise<{
+        idToken: string;
+        /**
+         * an ISO-8601 timestamp string that specifies the token expirity datetime
+         */
+        expiresAt: string;
+        profileData: {
+            profile: {
+                nameID: string;
+                email: string;
+            };
+            context: {
+                AuthnContextClassRef: string;
+            };
+        };
+    }> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/auth/saml2/{provider}/login-request',
+            path: {
+                'provider': provider,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Logged-in details retrieval failed`,
             },
         });
     }
@@ -498,89 +516,6 @@ export class DefaultService {
             },
             errors: {
                 303: `Authentication providers callback url, redirect back to the app context`,
-            },
-        });
-    }
-
-    /**
-     * @returns any Auth token
-     * @throws ApiError
-     */
-    public saml2AuthTokenRequest({
-        provider,
-        requestBody,
-    }: {
-        /**
-         * Auth provider ident
-         */
-        provider: string,
-        /**
-         * Retrieve the authentication token from the auth provider service
-         */
-        requestBody: {
-            loginCode: string;
-            appContext: string;
-        },
-    }): CancelablePromise<{
-        accessToken: string;
-        idToken: string;
-        /**
-         * an ISO-8601 timestamp string that specifies the token expirity datetime
-         */
-        expiresAt: string;
-    }> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/auth/saml2/{provider}/auth-token-request',
-            path: {
-                'provider': provider,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                401: `Access token retrieval failed`,
-            },
-        });
-    }
-
-    /**
-     * @returns any User info object
-     * @throws ApiError
-     */
-    public saml2UserInfoRequest({
-        provider,
-        requestBody,
-    }: {
-        /**
-         * Auth provider ident
-         */
-        provider: string,
-        /**
-         * Retrieve user info from the auth provider service
-         */
-        requestBody: {
-            accessToken: string;
-            appContext: string;
-        },
-    }): CancelablePromise<{
-        profile: {
-            nameID: string;
-            email: string;
-        };
-        context: {
-            AuthnContextClassRef: string;
-        };
-    }> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/auth/saml2/{provider}/user-info-request',
-            path: {
-                'provider': provider,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                401: `Login invalid or expired`,
             },
         });
     }

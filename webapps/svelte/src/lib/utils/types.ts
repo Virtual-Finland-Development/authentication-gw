@@ -1,4 +1,4 @@
-export type AuthTokens = {
-  accessToken: string;
+export type AuthState = {
   idToken: string;
+  profileData: any;
 };

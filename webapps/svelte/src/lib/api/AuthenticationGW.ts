@@ -13,7 +13,7 @@ export default class AuthenticationGW {
   protocol: string;
 
   redirectUrls: {
-    LoginRequest: string;
+    AuthenticationRequest: string;
     LogoutRequest: string;
   };
 
@@ -36,7 +36,7 @@ export default class AuthenticationGW {
 
     // Setup the redirect urls
     this.redirectUrls = {
-      LoginRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/login-request`,
+      AuthenticationRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/authentication-request`,
       LogoutRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/logout-request`,
     };
   }
@@ -55,7 +55,7 @@ export default class AuthenticationGW {
    *
    */
   getLoginUrl(): string {
-    return `${this.redirectUrls.LoginRequest}?appContext=${this.#generateAppContext()}`;
+    return `${this.redirectUrls.AuthenticationRequest}?appContext=${this.#generateAppContext()}`;
   }
 
   /**
@@ -94,43 +94,18 @@ export default class AuthenticationGW {
    * @param accesToken
    * @returns
    */
-  async getAuthTokens(loginCode: string) {
+  async getLoggedInState(loginCode: string) {
     const { provider, protocol } = this.props;
     const payload = { loginCode: loginCode, appContext: this.#generateAppContext() };
 
     switch (protocol) {
       case "openId":
-        return this.client.openIdAuthTokenRequest({
+        return this.client.openIdLoginRequest({
           provider: provider,
           requestBody: payload,
         });
       case "saml2":
-        return this.client.saml2AuthTokenRequest({
-          provider: provider,
-          requestBody: payload,
-        });
-      default:
-        throw new Error(`Invalid protocol: ${protocol}`);
-    }
-  }
-
-  /**
-   *
-   * @param accesToken
-   * @returns
-   */
-  async getUserInfo(accessToken: string) {
-    const { provider, protocol } = this.props;
-    const payload = { accessToken: accessToken, appContext: this.#generateAppContext() };
-
-    switch (protocol) {
-      case "openId":
-        return this.client.openIdUserInfoRequest({
-          provider: provider,
-          requestBody: payload,
-        });
-      case "saml2":
-        return this.client.saml2UserInfoRequest({
+        return this.client.saml2LoginRequest({
           provider: provider,
           requestBody: payload,
         });

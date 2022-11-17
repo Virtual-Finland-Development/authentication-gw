@@ -88,6 +88,18 @@ export function exceptionToObject(error: any): {
 
 /**
  *
+ * @param value
+ * @returns
+ */
+export function ensureObject(value: any): any {
+  if (isObject(value)) {
+    return value;
+  }
+  return {};
+}
+
+/**
+ *
  * @param url
  * @param param
  * @param value

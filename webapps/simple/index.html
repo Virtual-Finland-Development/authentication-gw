@@ -95,10 +95,9 @@
             }
 
             return {
+                AuthenticationRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/authentication-request`,
                 LoginRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/login-request`,
                 LogoutRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/logout-request`,
-                UserInfoRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/user-info-request`,
-                AuthTokenRequest: `${authenticationGatewayHost}/auth/${protocol}/${provider}/auth-token-request`,
                 AuthorizeRequest: `${authenticationGatewayHost}/authorize`,
             }
         }
@@ -144,8 +143,8 @@
                     //
                     const loginCode = urlParams.get('loginCode');
                     try {
-                        const tokens = await this.AuthService.fetchAuthTokens(loginCode);
-                        this.AuthState.login(tokens); // Store token in local storage
+                        const loggedInState = await this.AuthService.fetchLoggedInState(loginCode);
+                        this.AuthState.login(loggedInState); // Store state in local storage
                         await this.AuthState.handleLoggedIn(); // Fetch user info
                         this.UIState.resetViewState(); // reset view state
                     } catch (error) {
@@ -191,11 +190,11 @@
     class AuthService extends LoginAppComponent {
         login() {
             this.log("AuthService", "logging in..");
-            this.UIState.transitToUrl(`${this.endpoints.LoginRequest}?appContext=${AppSettings.generateAppContext()}`);
+            this.UIState.transitToUrl(`${this.endpoints.AuthenticationRequest}?appContext=${AppSettings.generateAppContext()}`);
         }
-        async fetchAuthTokens(loginCode) {
+        async fetchLoggedInState(loginCode) {
 
-            const response = await fetch(`${this.endpoints.AuthTokenRequest}`, {
+            const response = await fetch(`${this.endpoints.LoginRequest}`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
@@ -208,31 +207,11 @@
             });
 
             const data = await response.json();
-            return { accessToken: data.accessToken, idToken: data.idToken }
-        }
-        async fetchUserInfo(tokens) {
-            const response = await fetch(`${this.endpoints.UserInfoRequest}`, {
-                method: "POST",
-                credentials: 'include',
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    accessToken: tokens.accessToken,
-                    appContext: AppSettings.generateAppContext(),
-                }),
-            });
-
-            if (response.status !== 200) {
-                const errorMessage = response.status === 401 ? "Unauthorized" : "Failed to fetch user info";
-                throw new Error(errorMessage);
-            }
-
-            return await response.json()
+            return { accessToken: data.accessToken, idToken: data.idToken, profileData: data.profileData };
         }
         async authorize() {
             this.log("AuthService", "authorizing..");
-            const { idToken } = this.AuthState.getAuthTokens();
+            const { idToken } = this.AuthState.getAuthState();
 
             const response = await fetch(`${this.endpoints.AuthorizeRequest}`, {
                 method: "POST",
@@ -252,7 +231,7 @@
         }
         logout() {
             this.log("AuthService", "logging out..");
-            const { idToken } = this.AuthState.getAuthTokens();
+            const { idToken } = this.AuthState.getAuthState();
 
             const urlParams = new URLSearchParams({
                 appContext: AppSettings.generateAppContext(),
@@ -298,12 +277,12 @@
             localStorage.removeItem(this.storeKey);
         }
         isLoggedIn() {
-            return this.getAuthTokens() !== null;
+            return this.getAuthState() !== null;
         }
         isLoading() {
             return this.isInTransition || (this.isLoggedIn() && this.user.email === null);
         }
-        getAuthTokens() {
+        getAuthState() {
             try {
                 return JSON.parse(localStorage.getItem(this.storeKey));
             } catch (error) { }
@@ -311,24 +290,13 @@
         }
         async handleLoggedIn() {
             try {
-                const tokens = this.getAuthTokens();
-                const userInfo = await this.AuthService.fetchUserInfo(tokens);
-                this.user = this.getHandledUserInfo(userInfo);
+                const authState = this.getAuthState();
+                this.user = authState.profileData;
             } catch (error) {
                 // Auth invalidated
                 this.log("AuthState", "login invalidated");
                 this.logout();
                 this.UIState.resetViewState(); // reset view state
-            }
-        }
-        getHandledUserInfo(userInfo) {
-            if (this.authProtocol === "saml2") {
-                return {
-                    email: userInfo?.profile?.email,
-                }
-            }
-            return {
-                email: userInfo.email,
             }
         }
     }

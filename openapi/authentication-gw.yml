@@ -131,9 +131,9 @@ paths:
                   message:
                     type: string
                     default: "Unverified"
-  "/auth/openid/{provider}/login-request":
+  "/auth/openid/{provider}/authentication-request":
     get:
-      operationId: OpenIdLoginRequest
+      operationId: OpenIdAuthenticationRequest
       parameters:
         - in: path
           description: "Auth provider ident"
@@ -275,9 +275,9 @@ paths:
               description: App context URL
               schema:
                 type: string
-  "/auth/openid/{provider}/auth-token-request":
+  "/auth/openid/{provider}/login-request":
     post:
-      operationId: OpenIdAuthTokenRequest
+      operationId: OpenIdLoginRequest
       parameters:
         - in: path
           description: "Auth provider ident"
@@ -300,15 +300,13 @@ paths:
                   type: string
       responses:
         "200":
-          description: Auth token
+          description: Logged In Response
           content:
             application/json:
               schema:
                 type: object
-                required: ["accessToken", "idToken", "expiresAt"]
+                required: ["idToken", "expiresAt", "profileData"]
                 properties:
-                  accessToken:
-                    type: string
                   idToken:
                     type: string
                     example: "1233ab213.1233abec213.1233abecd213"
@@ -317,8 +315,23 @@ paths:
                     format: date-time
                     example: "2022-01-30T08:30:00.123Z"
                     description: an ISO-8601 timestamp string that specifies the token expirity datetime
+                  profileData:
+                    type: object
+                    required: ["userId"]
+                    properties:
+                      userId:
+                        type: string
+                      email:
+                        type: string
+                      profile:
+                        type: object
+                        properties:
+                          sub:
+                            type: string
+                          inum:
+                            type: string
         "401":
-          description: "Access token retrieval failed"
+          description: "Logged In details retrieval failed"
           content:
             application/json:
               schema:
@@ -327,57 +340,9 @@ paths:
                 properties:
                   message:
                     type: string
-  "/auth/openid/{provider}/user-info-request":
-    post:
-      operationId: OpenIdUserInfoRequest
-      parameters:
-        - in: path
-          description: "Auth provider ident"
-          name: provider
-          schema:
-            type: string
-          required: true
-      requestBody:
-        description: Retrieve user info from the auth provider service
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: ["accessToken", "appContext"]
-              properties:
-                accessToken:
-                  type: string
-                appContext:
-                  type: string
-      responses:
-        "200":
-          description: User info object
-          content:
-            application/json:
-              schema:
-                type: object
-                required: ["sub"]
-                properties:
-                  sub:
-                    type: string
-                  inum:
-                    type: string
-                  email:
-                    type: string
-        "401":
-          description: "Login invalid or expired"
-          content:
-            application/json:
-              schema:
-                type: object
-                required: ["message"]
-                properties:
-                  message:
-                    type: string
-  "/auth/saml2/{provider}/login-request":
+  "/auth/saml2/{provider}/authentication-request":
     get:
-      operationId: Saml2LoginRequest
+      operationId: Saml2AuthenticationRequest
       parameters:
         - in: path
           description: "Auth provider ident"
@@ -417,6 +382,78 @@ paths:
               description: App context URL
               schema:
                 type: string
+  "/auth/saml2/{provider}/login-request":
+    post:
+      operationId: Saml2LoginRequest
+      parameters:
+        - in: path
+          description: "Auth provider ident"
+          name: provider
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Retrieve the authentication token from the auth provider service
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["loginCode", "appContext"]
+              properties:
+                loginCode:
+                  type: string
+                appContext:
+                  type: string
+      responses:
+        "200":
+          description: Logged In Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["idToken", "expiresAt", "profileData"]
+                properties:
+                  idToken:
+                    type: string
+                    example: "1233ab213.1233abec213.1233abecd213"
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    example: "2022-01-30T08:30:00.123Z"
+                    description: an ISO-8601 timestamp string that specifies the token expirity datetime
+                  profileData:
+                    type: object
+                    required: ["userId", "profile", "context"]
+                    properties:
+                      userId:
+                        type: string
+                      email:
+                        type: string
+                      profile:
+                        type: object
+                        required: ["nameID"]
+                        properties:
+                          nameID:
+                            type: string
+                          email:
+                            type: string
+                      context:
+                        type: object
+                        required: ["AuthnContextClassRef"]
+                        properties:
+                          AuthnContextClassRef:
+                            type: string
+        "401":
+          description: "Logged-in details retrieval failed"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["message"]
+                properties:
+                  message:
+                    type: string
   "/auth/saml2/{provider}/logout-request":
     get:
       operationId: Saml2LogoutRequest
@@ -492,114 +529,6 @@ paths:
                 type: string
   "/auth/saml2/{provider}/logout":
     $ref: "#/paths/~1auth~1saml2~1{provider}~1logout-response"
-  "/auth/saml2/{provider}/auth-token-request":
-    post:
-      operationId: Saml2AuthTokenRequest
-      parameters:
-        - in: path
-          description: "Auth provider ident"
-          name: provider
-          schema:
-            type: string
-          required: true
-      requestBody:
-        description: Retrieve the authentication token from the auth provider service
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: ["loginCode", "appContext"]
-              properties:
-                loginCode:
-                  type: string
-                appContext:
-                  type: string
-      responses:
-        "200":
-          description: Auth token
-          content:
-            application/json:
-              schema:
-                type: object
-                required: ["accessToken", "idToken", "expiresAt"]
-                properties:
-                  accessToken:
-                    type: string
-                  idToken:
-                    type: string
-                    example: "1233ab213.1233abec213.1233abecd213"
-                  expiresAt:
-                    type: string
-                    format: date-time
-                    example: "2022-01-30T08:30:00.123Z"
-                    description: an ISO-8601 timestamp string that specifies the token expirity datetime
-        "401":
-          description: "Access token retrieval failed"
-          content:
-            application/json:
-              schema:
-                type: object
-                required: ["message"]
-                properties:
-                  message:
-                    type: string
-  "/auth/saml2/{provider}/user-info-request":
-    post:
-      operationId: Saml2UserInfoRequest
-      parameters:
-        - in: path
-          description: "Auth provider ident"
-          name: provider
-          schema:
-            type: string
-          required: true
-      requestBody:
-        description: Retrieve user info from the auth provider service
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: ["accessToken", "appContext"]
-              properties:
-                accessToken:
-                  type: string
-                appContext:
-                  type: string
-      responses:
-        "200":
-          description: User info object
-          content:
-            application/json:
-              schema:
-                type: object
-                required: ["profile", "context"]
-                properties:
-                  profile:
-                    type: object
-                    required: ["nameID", "email"]
-                    properties:
-                      nameID:
-                        type: string
-                      email:
-                        type: string
-                  context:
-                    type: object
-                    required: ["AuthnContextClassRef"]
-                    properties:
-                      AuthnContextClassRef:
-                        type: string
-        "401":
-          description: "Login invalid or expired"
-          content:
-            application/json:
-              schema:
-                type: object
-                required: ["message"]
-                properties:
-                  message:
-                    type: string
   "/auth/saml2/{provider}/.well-known/jwks.json":
     get:
       operationId: Saml2WellKnownJWKSRequest
