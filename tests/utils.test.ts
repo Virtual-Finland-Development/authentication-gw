@@ -2,7 +2,7 @@ import { describe, expect, test } from "@jest/globals";
 import { SinunaStateAttributor } from "../src/providers/sinuna/utils/SinunaResponseParsers";
 import { ValidationError } from "../src/utils/exceptions";
 import { decrypt, encrypt } from "../src/utils/hashes";
-import { ensureUrlQueryParam, omitEmptyObjectKeys } from "../src/utils/transformers";
+import { ensureUrlQueryParam, omitEmptyObjectKeys, omitObjectKeysOtherThan } from "../src/utils/transformers";
 
 describe("Utils test", () => {
   test("Test ensureUrlQueryParam", () => {
@@ -37,6 +37,10 @@ describe("Utils test", () => {
         })
       )
     ).toEqual(["a", "c"]);
+  });
+
+  test("Test omitObjectKeysOtherThan", () => {
+    expect(Object.keys(omitObjectKeysOtherThan({ a: "a", b: "b", c: "c" }, ["a", "c"]))).toEqual(["a", "c"]);
   });
 
   test("Test hashes", () => {

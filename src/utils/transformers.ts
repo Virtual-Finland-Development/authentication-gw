@@ -190,3 +190,13 @@ export function transformExpiresInToExpiresAt_ISOString(expiresIn: number): stri
   const expiresAt = Math.floor(Date.now() / 1000) + expiresIn;
   return new Date(expiresAt * 1000).toISOString();
 }
+
+/**
+ *
+ * @param obj
+ * @param keys
+ * @returns
+ */
+export function omitObjectKeysOtherThan(obj: any, keys: string[]): any {
+  return Object.fromEntries(Object.entries(obj).filter(([key]) => keys.includes(key)));
+}
