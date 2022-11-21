@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@jest/globals";
 import { SinunaStateAttributor } from "../src/providers/sinuna/utils/SinunaResponseParsers";
 import { ValidationError } from "../src/utils/exceptions";
-import { decrypt, encrypt } from "../src/utils/hashes";
+import { createSecretHash, decrypt, encrypt } from "../src/utils/hashes";
 import { ensureUrlQueryParam, omitEmptyObjectKeys, omitObjectKeysOtherThan } from "../src/utils/transformers";
 
 describe("Utils test", () => {
@@ -50,5 +50,8 @@ describe("Utils test", () => {
     const encrypted = encrypt(value, secret, secretIv);
     const decrypted = decrypt(encrypted, secret, secretIv);
     expect(decrypted).toEqual(value);
+
+    const hash = createSecretHash(value, secret, "sha512");
+    expect(hash).toEqual(createSecretHash(value, secret, "sha512"));
   });
 });

@@ -7,11 +7,11 @@ import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, 
  * @param key
  * @returns
  */
-export function createSecretHash(data: any, key: string): string {
+export function createSecretHash(data: any, key: string, algorithm: "sha256" | "sha512" = "sha256"): string {
   if (typeof data !== "string") {
     data = JSON.stringify(data);
   }
-  return createHmac("sha256", key).update(data).digest("hex");
+  return createHmac(algorithm, key).update(data).digest("hex");
 }
 
 /**

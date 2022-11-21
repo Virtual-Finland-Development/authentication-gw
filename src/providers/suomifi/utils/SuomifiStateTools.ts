@@ -1,5 +1,5 @@
 import { ValidationError } from "../../../utils/exceptions";
-import { decrypt, decryptObject, encrypt, encryptObject, generateUrlEncodedBase64Hash, resolveUrlEncodedBase64Hash } from "../../../utils/hashes";
+import { createSecretHash, decrypt, decryptObject, encrypt, encryptObject, generateUrlEncodedBase64Hash, resolveUrlEncodedBase64Hash } from "../../../utils/hashes";
 import { decodeIdToken } from "../../../utils/JWK-Utils";
 import Settings from "../../../utils/Settings";
 import { omitObjectKeys } from "../../../utils/transformers";
@@ -90,5 +90,5 @@ export async function resolveSuomiFiUserIdFromProfileData(profileData: SuomiFiPr
     throw new ValidationError("Could not resolve the user identifier from the Suomi.fi profile data");
   }
 
-  return encrypt(identifier, await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"), await Settings.getStageSecret("AUTHENTICATION_GW_SECRET_IV"));
+  return createSecretHash(identifier, await Settings.getStageSecret("AUTHENTICATION_GW_RUNTIME_TOKEN"), "sha512");
 }
