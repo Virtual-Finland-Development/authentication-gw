@@ -56,8 +56,12 @@ export async function extractSuomiFiLoggedInState(loginCode: string): Promise<Su
  * @returns
  */
 export function parseSuomiFiBasicProfileFromIdToken(idToken: string): SuomiFiProfile {
-  const { decodedToken } = decodeIdToken(idToken);
-  const { nameID, nameIDFormat, issuer, sessionIndex } = decodedToken as any;
+  const response = decodeIdToken(idToken);
+  if (!response.decodedToken) {
+    throw new ValidationError("Bad id_token");
+  }
+  const payload = response.decodedToken.payload;
+  const { nameID, nameIDFormat, issuer, sessionIndex } = payload as any;
   return { nameID, nameIDFormat, issuer, sessionIndex };
 }
 

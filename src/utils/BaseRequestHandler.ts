@@ -53,7 +53,7 @@ export abstract class BaseRequestHandler {
    * @param error
    * @returns
    */
-  async getLogoutRequestFailedResponse(context: Context, error: any): Promise<HttpResponse> {
+  async getLogoutRequestFailedResponse(context: Context | string, error: any): Promise<HttpResponse> {
     debug(error);
 
     let errorMessage = "Logout failed";
