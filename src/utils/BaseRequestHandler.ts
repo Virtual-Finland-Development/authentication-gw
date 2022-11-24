@@ -51,9 +51,10 @@ export abstract class BaseRequestHandler {
    *
    * @param context
    * @param error
+   * @param errorTypeOverride - override error type
    * @returns
    */
-  async getLogoutRequestFailedResponse(context: Context | string, error: any): Promise<HttpResponse> {
+  async getLogoutRequestFailedResponse(context: Context | string, error: any, errorTypeOverride?: NotifyErrorType): Promise<HttpResponse> {
     debug(error);
 
     let errorMessage = "Logout failed";
@@ -65,6 +66,10 @@ export abstract class BaseRequestHandler {
     } else if (error instanceof AccessDeniedException) {
       errorMessage = error.message;
       errorType = "warning";
+    }
+
+    if (typeof errorTypeOverride !== "undefined") {
+      errorType = errorTypeOverride;
     }
 
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent }); // throws

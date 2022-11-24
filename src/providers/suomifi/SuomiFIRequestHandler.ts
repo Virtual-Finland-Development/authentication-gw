@@ -177,7 +177,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
       await samlClient.validateRedirectAsync(body, originalQuery); // throws
     } catch (error) {
       log("LogoutResponse", error);
-      return this.getLogoutRequestFailedResponse(parsedAppContext.hash, error);
+      return this.getLogoutRequestFailedResponse(parsedAppContext.hash, error, "warning");
     }
 
     return {
