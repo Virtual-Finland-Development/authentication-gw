@@ -53,8 +53,17 @@ export class DefaultService {
         xAuthorizationProvider,
         xAuthorizationContext,
     }: {
-        authorization?: string,
-        xAuthorizationProvider?: string,
+        /**
+         * id_token as a bearer header
+         */
+        authorization: string,
+        /**
+         * Authentication provider ident, or id_token issuer field
+         */
+        xAuthorizationProvider: string,
+        /**
+         * Optional usage context
+         */
         xAuthorizationContext?: string,
     }): CancelablePromise<{
         message?: string;
@@ -308,9 +317,12 @@ export class DefaultService {
          */
         expiresAt: string;
         profileData: {
-            sub: string;
-            inum?: string;
+            userId: string;
             email?: string;
+            profile?: {
+                sub?: string;
+                inum?: string;
+            };
         };
     }> {
         return this.httpRequest.request({
@@ -409,9 +421,11 @@ export class DefaultService {
          */
         expiresAt: string;
         profileData: {
+            userId: string;
+            email?: string;
             profile: {
                 nameID: string;
-                email: string;
+                email?: string;
             };
             context: {
                 AuthnContextClassRef: string;

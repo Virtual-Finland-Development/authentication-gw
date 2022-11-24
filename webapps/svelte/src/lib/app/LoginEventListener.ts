@@ -36,7 +36,7 @@ export default async function LoginEventListener(loginApp: LoginApp) {
     //
     // Handle logged-in state
     //
-    await loginApp.handleLoggedIn(); // Validate login
+    await loginApp.handleLoggedIn(true); // Validate login
     loginApp.UIState.handleCurrentState(); // Update UI
   }
 }

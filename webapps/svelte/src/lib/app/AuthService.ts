@@ -20,10 +20,21 @@ export default class AuthService extends LoginAppComponent {
     this.log("AuthService", "fetching logged in state..");
     return this.authApi.getLoggedInState(loginCode);
   }
-  async authorize() {
-    this.log("AuthService", "authorizing..");
-    const authFields = this.AuthState.getAuthFields();
-    this.authApi.authorize(authFields?.idToken);
+  async authorize(validate: boolean = false) {
+    try {
+      this.log("AuthService", "authorizing..");
+      const authFields = this.AuthState.getAuthFields();
+      const response = await this.authApi.authorize(authFields?.idToken);
+      if (!validate) {
+        window.alert(response.message);
+      }
+    } catch (error) {
+      if (!validate) {
+        window.alert(error);
+      } else {
+        throw error;
+      }
+    }
   }
   logout() {
     this.log("AuthService", "loggin out..");

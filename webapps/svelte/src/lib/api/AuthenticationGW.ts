@@ -77,16 +77,12 @@ export default class AuthenticationGW {
    */
   async authorize(idToken: string) {
     const { provider } = this.props;
-    try {
-      const response = await this.client.authorizeRequest({
-        authorization: `Bearer ${idToken}`,
-        xAuthorizationProvider: provider,
-        xAuthorizationContext: "demo app",
-      });
-      window.alert(response.message);
-    } catch (error) {
-      window.alert(error);
-    }
+    const response = await this.client.authorizeRequest({
+      authorization: `Bearer ${idToken}`,
+      xAuthorizationProvider: provider,
+      xAuthorizationContext: "demo app",
+    });
+    return response;
   }
 
   /**
