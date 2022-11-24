@@ -7,7 +7,7 @@ import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, NoticeException, ValidationError } from "../../utils/exceptions";
 import { debug, log } from "../../utils/logging";
-import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutErrorRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { parseBase64XMLBody } from "../../utils/transformers";
 
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
@@ -171,19 +171,20 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
     const body = context.request.query;
     const originalQuery = new URLSearchParams(body).toString();
     const parsedAppContext = parseAppContext(String(body.RelayState), { provider: this.identityProviderIdent }); // throws
+    let logoutRedirectUrl = parsedAppContext.object.redirectUrl;
 
     const samlClient = await getSuomiFISAML2Client();
     try {
       await samlClient.validateRedirectAsync(body, originalQuery); // throws
     } catch (error) {
       log("LogoutResponse", error);
-      return this.getLogoutRequestFailedResponse(parsedAppContext.hash, error, "warning");
+      logoutRedirectUrl = prepareLogoutErrorRedirectUrl(logoutRedirectUrl, { error: "Logout session could not be ended", type: "info", provider: this.identityProviderIdent });
     }
 
     return {
       statusCode: 303,
       headers: {
-        Location: prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent),
+        Location: prepareLogoutRedirectUrl(logoutRedirectUrl, this.identityProviderIdent),
       },
     };
   }

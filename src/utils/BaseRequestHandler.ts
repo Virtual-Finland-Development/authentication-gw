@@ -1,7 +1,7 @@
 import { Context } from "openapi-backend";
 import { AccessDeniedException, NoticeException } from "./exceptions";
 import { debug } from "./logging";
-import { prepareCookie, prepareErrorRedirectUrl } from "./route-utils";
+import { prepareCookie, prepareLoginErrorRedirectUrl, prepareLogoutErrorRedirectUrl } from "./route-utils";
 import { HttpResponse, NotifyErrorType } from "./types";
 import { parseAppContext } from "./validators";
 
@@ -30,10 +30,9 @@ export abstract class BaseRequestHandler {
     }
 
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent }); // throws
-    const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
+    const redirectUrl = prepareLoginErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
       error: errorMessage,
       provider: this.identityProviderIdent,
-      intent: "LoginRequest",
       type: errorType,
     });
 
@@ -73,10 +72,9 @@ export abstract class BaseRequestHandler {
     }
 
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent }); // throws
-    const redirectUrl = prepareErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
+    const redirectUrl = prepareLogoutErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
       error: errorMessage,
       provider: this.identityProviderIdent,
-      intent: "LogoutRequest",
       type: errorType,
     });
 

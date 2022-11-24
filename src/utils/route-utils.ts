@@ -56,6 +56,36 @@ export function prepareErrorRedirectUrl(redirectUrl: string, message: { error: s
 
 /**
  *
+ * @param redirectUrl
+ * @param message
+ * @returns
+ */
+export function prepareLoginErrorRedirectUrl(redirectUrl: string, message: { error: string; provider: string; type: NotifyErrorType }): string {
+  return prepareErrorRedirectUrl(redirectUrl, {
+    error: message.error,
+    provider: message.provider,
+    intent: "LoginRequest",
+    type: message.type,
+  });
+}
+
+/**
+ *
+ * @param redirectUrl
+ * @param message
+ * @returns
+ */
+export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: { error: string; provider: string; type: NotifyErrorType }): string {
+  return prepareErrorRedirectUrl(redirectUrl, {
+    error: message.error,
+    provider: message.provider,
+    intent: "LogoutRequest",
+    type: message.type,
+  });
+}
+
+/**
+ *
  * @param name
  * @param value
  * @returns
