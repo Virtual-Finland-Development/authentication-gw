@@ -79,12 +79,16 @@ export default class AuthState extends LoginAppComponent {
   /**
    *
    */
-  async handleLoggedIn(): Promise<boolean> {
+  async handleLoggedIn(validate?: boolean): Promise<boolean> {
     let isLoggedIn = false;
     try {
       const authFields = this.getAuthFields();
       if (!authFields.profileData) {
         throw new Error("No profile data");
+      }
+
+      if (validate) {
+        await this.app.AuthService.authorize(true); // throws error if not authorized
       }
 
       this.user = authFields.profileData;

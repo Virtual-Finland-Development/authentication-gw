@@ -76,8 +76,8 @@ export default class LoginApp {
   /**
    *
    */
-  async handleLoggedIn() {
-    const success = await this.AuthState.handleLoggedIn(); // Validate login
+  async handleLoggedIn(validate?: boolean) {
+    const success = await this.AuthState.handleLoggedIn(validate); // Validate login
     if (success && this.ifHasFeature("consents")) {
       await this.ConsentState.handleLoggedIn();
     }

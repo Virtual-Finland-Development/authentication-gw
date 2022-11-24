@@ -170,13 +170,15 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
   async LogoutResponse(context: Context): Promise<HttpResponse> {
     const body = context.request.query;
     const originalQuery = new URLSearchParams(body).toString();
+    const parsedAppContext = parseAppContext(String(body.RelayState), { provider: this.identityProviderIdent }); // throws
+
     const samlClient = await getSuomiFISAML2Client();
     try {
       await samlClient.validateRedirectAsync(body, originalQuery); // throws
     } catch (error) {
-      log("Error", "LogoutResponse", error);
+      log("LogoutResponse", error);
+      return this.getLogoutRequestFailedResponse(parsedAppContext.hash, error);
     }
-    const parsedAppContext = parseAppContext(String(body.RelayState), { provider: this.identityProviderIdent }); // throws
 
     return {
       statusCode: 303,
