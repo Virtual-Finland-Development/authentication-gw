@@ -47,12 +47,6 @@ paths:
           schema:
             type: string
         - in: header
-          name: X-Authorization-Provider
-          required: true
-          description: "Authentication provider ident, or id_token issuer field"
-          schema:
-            type: string
-        - in: header
           name: X-Authorization-Context
           required: false
           description: "Optional usage context"

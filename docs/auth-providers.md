@@ -19,7 +19,6 @@ Sinuna is an Openid Connect -type authentication provider with the following end
         - `email`: is the user email
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
-  - `X-authorization-provider: sinuna`
 - LogoutRequest: `/auth/openid/sinuna/logout-request`
   - ends the sinuna login session
 
@@ -45,7 +44,6 @@ SuomiFi is an SAML2 -type authentication provider with the following endpoints:
         - `context.AuthnContextClassRef`: the authentication level reference
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
-  - `X-authorization-provider: suomifi`
 - LogoutRequest: `/auth/saml2/suomifi/logout-request`
   - ends the suomifi login session
 
@@ -70,7 +68,6 @@ Testbed is an Openid Connect -type authentication provider with the following en
         - `email`: is the user testbed-email
 - Data requests to external APIs that need to be authorized:
   - `Authorization: Bearer <idToken>`
-  - `X-authorization-provider: testbed`
 - LogoutRequest: `/auth/openid/testbed/logout-request`
   - uses the `idToken` to end the testbed login session
 

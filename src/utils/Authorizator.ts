@@ -1,13 +1,36 @@
 import * as SinunaAuthorizer from "../providers/sinuna/SinunaAuthorizer";
 import * as SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
 import * as TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
-import { ValidationError } from "./exceptions";
+import { AccessDeniedException } from "./exceptions";
+import { decodeIdToken } from "./JWK-Utils";
 
 import { omitEmptyObjectKeys } from "./transformers";
 import { Authorizer } from "./types";
 
-function getAuthorizator(authHeaders: { provider: string; [attr: string]: string }): Authorizer {
-  const provider = authHeaders.provider?.toLowerCase();
+/**
+ * Resolve authorization provider from authorization header
+ *
+ * @param authorization
+ * @returns
+ */
+function resolveAuthProvider(authorization: string): string {
+  try {
+    const result = decodeIdToken(authorization);
+    if (typeof result.decodedToken?.payload === "object" && typeof result.decodedToken.payload?.iss === "string") {
+      return result.decodedToken.payload.iss;
+    }
+  } catch (error) {}
+  throw new AccessDeniedException("Invalid authorization header");
+}
+
+/**
+ * Resolve the authorization handler
+ *
+ * @param authHeaders
+ * @returns
+ */
+function getAuthorizator(authHeaders: { authorization: string; [attr: string]: string }): Authorizer {
+  const provider = resolveAuthProvider(authHeaders.authorization);
   if (SinunaAuthorizer.isMatchingProvider(provider)) {
     return SinunaAuthorizer;
   } else if (SuomiFIAuthorizer.isMatchingProvider(provider)) {
@@ -15,7 +38,7 @@ function getAuthorizator(authHeaders: { provider: string; [attr: string]: string
   } else if (TestbedAuthorizer.isMatchingProvider(provider)) {
     return TestbedAuthorizer;
   } else {
-    throw new ValidationError("Unknown auth provider");
+    throw new AccessDeniedException("Unknown authorization provider");
   }
 }
 
@@ -28,10 +51,9 @@ export default {
    * @param authData
    * @returns
    */
-  async authorize(authorization: string | string[], authorizationProvider: string | string[], authorizationContext: string | string[]): Promise<void> {
+  async authorize(authorization: string | string[], authorizationContext: string | string[]): Promise<void> {
     const authHeaders = omitEmptyObjectKeys({
       authorization: String(authorization),
-      provider: String(authorizationProvider),
       context: String(authorizationContext),
     });
 

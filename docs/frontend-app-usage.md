@@ -106,7 +106,7 @@ localStorage.setItem(`idToken_sinuna`, idToken);
 
 ## Using the auth token
 
-Requests to the protected external backend services are accompanied with the `idToken` as a bearer token in the `Authorization` header, accomppanied with a provider name in the `X-authorization-provider` header.
+Requests to the protected external backend services are accompanied with the `idToken` as a bearer token in the `Authorization` header.
 
 eg:
 
@@ -116,7 +116,6 @@ fetch(`https://data-product-endpoint.example`, {
   headers: {
     "Content-Type": "application/json",
     Authorization: `Bearer ${idToken}`,
-    "X-authorization-provider": "sinuna",
   },
 });
 ```

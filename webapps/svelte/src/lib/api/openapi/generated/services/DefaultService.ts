@@ -50,17 +50,12 @@ export class DefaultService {
      */
     public authorizeRequest({
         authorization,
-        xAuthorizationProvider,
         xAuthorizationContext,
     }: {
         /**
          * id_token as a bearer header
          */
         authorization: string,
-        /**
-         * Authentication provider ident, or id_token issuer field
-         */
-        xAuthorizationProvider: string,
         /**
          * Optional usage context
          */
@@ -73,7 +68,6 @@ export class DefaultService {
             url: '/authorize',
             headers: {
                 'Authorization': authorization,
-                'X-Authorization-Provider': xAuthorizationProvider,
                 'X-Authorization-Context': xAuthorizationContext,
             },
             errors: {

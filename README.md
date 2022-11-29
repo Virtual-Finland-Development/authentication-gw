@@ -36,7 +36,6 @@ const response = await fetch(`${authentication_gw_host}/authorize`, {
   headers: {
     "Content-Type": "application/json",
     Authorization: `Bearer <idToken>`,
-    "X-authorization-provider": "sinuna",
     "X-Authorization-Context": "demo productizer app",
   },
 });
