@@ -138,6 +138,14 @@ function createLambdaFunction(
     layers: [configuration.nodeModulesLayer.arn],
     timeout: 15,
     memorySize: 1024,
+    publish: true, // needed for provisioned concurrency
+  });
+
+  // Setup fixed provisioned concurrency
+  new aws.lambda.ProvisionedConcurrencyConfig(`${configuration.name}-provisionedConcurrency-${configuration.environment}`, {
+    functionName: lamdaFunction.name,
+    qualifier: lamdaFunction.version,
+    provisionedConcurrentExecutions: 1,
   });
 
   // Create permission
