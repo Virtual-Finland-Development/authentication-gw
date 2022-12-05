@@ -8,6 +8,7 @@ export type LambdaApiGatewayV2Stack = {
   role: aws.iam.Role;
   apiGateway: aws.apigatewayv2.Api;
   tags: { [name: string]: string };
+  config: StackConfig;
 };
 
 type LambdaFunctionConfig = {
@@ -45,6 +46,7 @@ export function createStack(apiGatewayName: string, configuration: StackConfig):
     apiGateway: apiGw,
     role: role,
     tags: { Name: configuration.name, Environment: configuration.stage, Project: configuration.project },
+    config: configuration,
   };
 }
 
@@ -143,7 +145,7 @@ function createLambdaFunction(
 
   // Set up scheduled provisioned concurrency
   const resourceId = pulumi.interpolate`function:${lamdaFunction.name}:${lamdaFunction.version}`;
-  const provisionTarget = new aws.appautoscaling.Target(`${configuration.name}-provisionedConcurrency-target-${configuration.environment}`, {
+  const provisionTarget = new aws.appautoscaling.Target(`${configuration.name}-provisionedConcurrency-target-${stack.config.stage}`, {
     resourceId,
     serviceNamespace: "lambda",
     scalableDimension: "lambda:function:ProvisionedConcurrency",
@@ -153,7 +155,7 @@ function createLambdaFunction(
 
   // By day from 6am to 4pm UTC
   new aws.appautoscaling.ScheduledAction(
-    `${configuration.name}-provisionedConcurrency-by-day-${configuration.environment}`,
+    `${configuration.name}-provisionedConcurrency-by-day-${stack.config.stage}`,
     {
       resourceId,
       serviceNamespace: "lambda",
@@ -162,14 +164,14 @@ function createLambdaFunction(
         minCapacity: 1,
         maxCapacity: 10,
       },
-      schedule: `cron("0 6 * * ? *")`,
+      schedule: "cron(0 6 * * ? *)",
     },
     { dependsOn: [provisionTarget] }
   );
 
   // By night from 4pm to 6am UTC
   new aws.appautoscaling.ScheduledAction(
-    `${configuration.name}-provisionedConcurrency-by-night-${configuration.environment}`,
+    `${configuration.name}-provisionedConcurrency-by-night-${stack.config.stage}`,
     {
       resourceId,
       serviceNamespace: "lambda",
@@ -178,7 +180,7 @@ function createLambdaFunction(
         minCapacity: 0,
         maxCapacity: 5,
       },
-      schedule: `cron("0 16 * * ? *")`,
+      schedule: "cron(0 16 * * ? *)",
     },
     { dependsOn: [provisionTarget] }
   );
