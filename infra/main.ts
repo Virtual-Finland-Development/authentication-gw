@@ -9,7 +9,7 @@ const configuration: StackConfig = {
   name: "Authenticator",
   stage: pulumi.getStack(),
   project: "Virtual Finland",
-  pulumiOrganization: pulumi.getOrganization(),
+  pulumiOrganization: "virtualfinland",
 };
 
 /**

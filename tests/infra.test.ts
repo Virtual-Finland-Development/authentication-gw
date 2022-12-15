@@ -26,7 +26,7 @@ describe("Api Gateway V2 Stack", () => {
   // Prep test
   beforeAll(async function () {
     // It's important to import the program _after_ the mocks are defined.
-    stack = createStack("api-gw-test", { name: "Authenticator", stage: "test", project: "Virtual Finland" });
+    stack = createStack("api-gw-test", { name: "Authenticator", stage: "test", project: "Virtual Finland", pulumiOrganization: "virtualfinland" });
   });
 
   describe("Api Gateway V2", () => {
