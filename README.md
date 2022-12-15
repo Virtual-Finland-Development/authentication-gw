@@ -68,7 +68,9 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 
 ## Usage
 
-- Swagger docs: http://localhost:3000/docs/
+- OpenAPI documentation: [./openapi/authentication-gw.yml](./openapi/authentication-gw.yml)
+
+  - served with swagger at http://localhost:3000/docs/ when running locally
 
 - Documentation for using the service in frontend apps: [./docs/frontend-app-usage.md](docs/frontend-app-usage.md)
 
