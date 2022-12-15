@@ -16,9 +16,9 @@ export default class ConsentAPI {
       const response = await axios.post(`${AppSettings.testbedAPIHost}/testbed/reverse-proxy`, {
         method: "POST",
         url: `https://consent.testbed.fi/Consent/Request`,
-        data: {
+        body: JSON.stringify({
           dataSource: consentId,
-        },
+        }),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
@@ -63,7 +63,7 @@ export default class ConsentAPI {
     const response = await axios.post(`${AppSettings.testbedAPIHost}/testbed/reverse-proxy`, {
       method: "POST",
       url: dataSourceUrl,
-      data: inputData,
+      body: JSON.stringify(inputData),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
