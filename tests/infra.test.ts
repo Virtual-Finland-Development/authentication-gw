@@ -35,21 +35,3 @@ describe("Api Gateway V2 Stack", () => {
     });
   });
 });
-
-describe("Pulumi Infrastucture", () => {
-  let infra: typeof import("../infra/main");
-
-  // Pulumi testing mode setup
-  beforeAll(pulumiTestModeEngager);
-
-  // Prep test
-  beforeAll(async function () {
-    infra = await import("../infra/main");
-  });
-
-  describe("Endpoint URL", () => {
-    test("Should be defined", async () => {
-      expect(infra.endpoint).toBeDefined();
-    });
-  });
-});
