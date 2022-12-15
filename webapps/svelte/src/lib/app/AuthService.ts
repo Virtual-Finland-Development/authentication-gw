@@ -39,6 +39,9 @@ export default class AuthService extends LoginAppComponent {
   logout() {
     this.log("AuthService", "loggin out..");
     const authFields = this.AuthState.getAuthFields();
-    this.UIState.transitToUrl(this.authApi.getLogoutUrl(authFields?.idToken), "auth");
+    const idToken = authFields?.idToken;
+
+    this.AuthState.logout(); // clear auth state early
+    this.UIState.transitToUrl(this.authApi.getLogoutUrl(idToken), "auth");
   }
 }
