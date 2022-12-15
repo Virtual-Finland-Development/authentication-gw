@@ -77,31 +77,6 @@ export class DefaultService {
     }
 
     /**
-     * @returns any Response data
-     * @throws ApiError
-     */
-    public testbedReverseProxy({
-        requestBody,
-    }: {
-        /**
-         * Request contents
-         */
-        requestBody: {
-            method: string;
-            url: string;
-            data?: any;
-            headers?: any;
-        },
-    }): CancelablePromise<any> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/testbed-reverse-proxy',
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-
-    /**
      * @returns any Verified message
      * @throws ApiError
      */

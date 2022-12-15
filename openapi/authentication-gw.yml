@@ -73,29 +73,6 @@ paths:
                   message:
                     type: string
                     default: "Access Denied"
-  "/testbed-reverse-proxy":
-    post:
-      operationId: TestbedReverseProxy
-      requestBody:
-        description: Request contents
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: ["method", "url"]
-              properties:
-                method:
-                  type: string
-                url:
-                  type: string
-                data:
-                  type: object
-                headers:
-                  type: object
-      responses:
-        "200":
-          description: Response data
   "/consent/testbed/verify":
     post:
       operationId: TestbedConsentVerify
