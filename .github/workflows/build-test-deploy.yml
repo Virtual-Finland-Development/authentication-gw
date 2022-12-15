@@ -21,7 +21,7 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs:
       endpoint: ${{ steps.pulumi.outputs.endpoint }}
-      moro: "TERE"
+      testbedApiEndpoint: "${{ steps.pulumi.outputs.testbedApiEndpoint }}"
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
