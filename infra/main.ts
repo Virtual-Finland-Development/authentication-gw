@@ -9,6 +9,7 @@ const configuration: StackConfig = {
   name: "Authenticator",
   stage: pulumi.getStack(),
   project: "Virtual Finland",
+  pulumiOrganization: pulumi.getOrganization(),
 };
 
 /**
@@ -53,5 +54,5 @@ const appRoutes = [
 export const endpoint = createApiEndpoint(stack, appRoutes);
 
 // Export testbed api dependency endpoint url (for the demo webapp)
-const testbedApiStackReference = new pulumi.StackReference(`virtualfinland/testbed-api/${configuration.stage}`);
-export const testbedApiEndpoint = testbedApiStackReference.getOutput("url");
+const testbedApiStackRef = new pulumi.StackReference(`${configuration.pulumiOrganization}/testbed-api/${configuration.stage}`);
+export const testbedApiEndpoint = testbedApiStackRef.getOutput("url");

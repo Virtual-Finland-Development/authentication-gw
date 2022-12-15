@@ -29,6 +29,7 @@ export type StackConfig = {
   name: string;
   stage: string;
   project: string;
+  pulumiOrganization: string;
 };
 
 /* ---------------Public------------------- */
