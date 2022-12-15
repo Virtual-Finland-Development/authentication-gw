@@ -57,11 +57,13 @@ jobs:
     needs: build-test-deploy
     steps:
       - uses: actions/checkout@v3
-      - name: Fix svelte demo app index authgw-url
+      - name: Set svelte demo app endpoint URLs
         run: |
           sed -i "s|authenticationGatewayHost: \".*\",|authenticationGatewayHost: \"${AUTH_PROVIDER_REDIRECT_BACK_HOST}\",|g" ./webapps/svelte/src/AppSettings.ts
+          sed -i "s|testbedAPIHost: \".*\",|testbedAPIHost: \"${TESTBED_API_HOST}\",|g" ./webapps/svelte/src/AppSettings.ts
         env:
           AUTH_PROVIDER_REDIRECT_BACK_HOST: ${{needs.build-test-deploy.outputs.endpoint}}
+          TESTBED_API_HOST: ${{needs.build-test-deploy.outputs.testbedApiEndpoint}}
       - name: Build the svelte app
         working-directory: ./webapps/svelte
         run: |

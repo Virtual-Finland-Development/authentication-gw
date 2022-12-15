@@ -51,3 +51,7 @@ const appRoutes = [
 
 // Export the Api gateway endpoint
 export const endpoint = createApiEndpoint(stack, appRoutes);
+
+// Export testbed api dependency endpoint url (for the demo webapp)
+const testbedApiStackReference = new pulumi.StackReference(`virtualfinland/testbed-api/${configuration.stage}`);
+export const testbedApiEndpoint = testbedApiStackReference.getOutput("url");
