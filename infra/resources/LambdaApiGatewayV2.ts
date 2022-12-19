@@ -141,50 +141,7 @@ function createLambdaFunction(
     layers: [configuration.nodeModulesLayer.arn],
     timeout: 15,
     memorySize: 1024,
-    publish: true, // needed for provisioned concurrency
   });
-
-  // Set up scheduled provisioned concurrency
-  const resourceId = pulumi.interpolate`function:${lamdaFunction.name}:${lamdaFunction.version}`;
-  const provisionTarget = new aws.appautoscaling.Target(`${configuration.name}-provisionedConcurrency-target-${stack.config.stage}`, {
-    resourceId,
-    serviceNamespace: "lambda",
-    scalableDimension: "lambda:function:ProvisionedConcurrency",
-    minCapacity: 1,
-    maxCapacity: 10,
-  });
-
-  // By day from 6am to 4pm UTC
-  new aws.appautoscaling.ScheduledAction(
-    `${configuration.name}-provisionedConcurrency-by-day-${stack.config.stage}`,
-    {
-      resourceId,
-      serviceNamespace: "lambda",
-      scalableDimension: "lambda:function:ProvisionedConcurrency",
-      scalableTargetAction: {
-        minCapacity: 1,
-        maxCapacity: 10,
-      },
-      schedule: "cron(0 6 * * ? *)",
-    },
-    { dependsOn: [provisionTarget] }
-  );
-
-  // By night from 4pm to 6am UTC
-  new aws.appautoscaling.ScheduledAction(
-    `${configuration.name}-provisionedConcurrency-by-night-${stack.config.stage}`,
-    {
-      resourceId,
-      serviceNamespace: "lambda",
-      scalableDimension: "lambda:function:ProvisionedConcurrency",
-      scalableTargetAction: {
-        minCapacity: 0,
-        maxCapacity: 5,
-      },
-      schedule: "cron(0 16 * * ? *)",
-    },
-    { dependsOn: [provisionTarget] }
-  );
 
   // Create permission
   new aws.lambda.Permission(
