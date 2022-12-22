@@ -51,6 +51,12 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           APP_CONTEXT_REDIRECT_FALLBACK_URL: ${{ secrets.APP_CONTEXT_REDIRECT_FALLBACK_URL }}
+      - name: Tag the deployment
+        uses: daily-co/create-tag-action@v1.0
+        with:
+          app-name: authentication-gw
+          environment: ${{ inputs.environment }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
   deploy-web:
     name: Update demo app
     runs-on: ubuntu-latest
