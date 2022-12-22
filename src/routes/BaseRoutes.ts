@@ -13,7 +13,7 @@ export default {
   root: async (context: Context) => {
     // Check for bad login flow redirects
     if (ifString(context.request.cookies?.appContext)) {
-      log("Bad login flow redirect..");
+      log("Handle bad login flow redirect");
       try {
         const parsedAppContext = parseAppContext(context);
         const redirectUrl = prepareLogoutErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
