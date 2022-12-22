@@ -45,10 +45,10 @@ export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: str
  * @param providerIdent
  * @returns
  */
-export function prepareErrorRedirectUrl(redirectUrl: string, message: { error: string; provider: string; intent: string; type: NotifyErrorType }): string {
+export function prepareErrorRedirectUrl(redirectUrl: string, message: { error: string; provider?: string; intent: string; type: NotifyErrorType }): string {
   return ensureUrlQueryParams(redirectUrl, [
     { param: "error", value: message.error },
-    { param: "provider", value: message.provider },
+    { param: "provider", value: message.provider || "unknown" },
     { param: "intent", value: message.intent },
     { param: "type", value: message.type },
   ]);
@@ -60,7 +60,7 @@ export function prepareErrorRedirectUrl(redirectUrl: string, message: { error: s
  * @param message
  * @returns
  */
-export function prepareLoginErrorRedirectUrl(redirectUrl: string, message: { error: string; provider: string; type: NotifyErrorType }): string {
+export function prepareLoginErrorRedirectUrl(redirectUrl: string, message: { error: string; provider?: string; type: NotifyErrorType }): string {
   return prepareErrorRedirectUrl(redirectUrl, {
     error: message.error,
     provider: message.provider,
@@ -75,7 +75,7 @@ export function prepareLoginErrorRedirectUrl(redirectUrl: string, message: { err
  * @param message
  * @returns
  */
-export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: { error: string; provider: string; type: NotifyErrorType }): string {
+export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: { error: string; provider?: string; type: NotifyErrorType }): string {
   return prepareErrorRedirectUrl(redirectUrl, {
     error: message.error,
     provider: message.provider,
@@ -91,7 +91,7 @@ export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: { er
  * @returns
  */
 export function prepareCookie(name: string, value: string): string {
-  return `${name}=${value}; SameSite=None; Secure; HttpOnly`;
+  return `${name}=${value}; Path=/; SameSite=None; Secure; HttpOnly`;
 }
 
 /**
