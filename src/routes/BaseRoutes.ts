@@ -1,39 +1,11 @@
-import { debug } from "console";
 import { Context } from "openapi-backend";
 import Authorizator from "../utils/Authorizator";
 import { getJSONResponseHeaders } from "../utils/default-headers";
-import { log } from "../utils/logging";
-import { prepareCookie, prepareLogoutErrorRedirectUrl } from "../utils/route-utils";
-import { ifString } from "../utils/transformers";
 import { HttpResponse } from "../utils/types";
-import { parseAppContext } from "../utils/validators";
 
 export default {
   // Base handlers
-  root: async (context: Context) => {
-    // Check for bad login flow redirects
-    if (ifString(context.request.cookies?.appContext)) {
-      log("Handle bad login flow redirect");
-      try {
-        const parsedAppContext = parseAppContext(context);
-        const redirectUrl = prepareLogoutErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
-          error: "Cancelled",
-          provider: parsedAppContext.object.provider,
-          type: "info",
-        });
-
-        return {
-          statusCode: 303,
-          headers: {
-            Location: redirectUrl,
-          },
-          cookies: [prepareCookie("appContext", "")],
-        };
-      } catch (error) {
-        debug(error);
-      }
-    }
-
+  root: async (_context: Context) => {
     return {
       statusCode: 307,
       headers: {

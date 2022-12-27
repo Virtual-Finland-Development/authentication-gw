@@ -91,7 +91,7 @@ export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: { er
  * @returns
  */
 export function prepareCookie(name: string, value: string): string {
-  return `${name}=${value}; Path=/; SameSite=None; Secure; HttpOnly`;
+  return `${name}=${value}; SameSite=None; Secure; HttpOnly`;
 }
 
 /**
