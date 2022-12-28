@@ -52,7 +52,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           APP_CONTEXT_REDIRECT_FALLBACK_URL: ${{ secrets.APP_CONTEXT_REDIRECT_FALLBACK_URL }}
       - name: Tag the deployment
-        uses: Virtual-Finland/automatic-release-action@v1.0
+        uses: Virtual-Finland-Development/automatic-release-action@v1.0
         with:
           environment: ${{ inputs.environment }}
   deploy-web:
