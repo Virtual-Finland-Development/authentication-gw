@@ -55,6 +55,7 @@ jobs:
         uses: Virtual-Finland-Development/automatic-release-action@v1.0
         with:
           environment: ${{ inputs.environment }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
   deploy-web:
     name: Update demo app
     runs-on: ubuntu-latest
