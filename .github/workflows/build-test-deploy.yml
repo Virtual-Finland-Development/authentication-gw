@@ -56,7 +56,7 @@ jobs:
         with:
           environment: ${{ inputs.environment }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: ${{ inputs.environment != 'staging' }}
+          disabled: ${{ inputs.environment != 'staging' }}
   deploy-web:
     name: Update demo app
     runs-on: ubuntu-latest
