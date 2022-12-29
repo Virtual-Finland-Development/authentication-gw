@@ -5,11 +5,15 @@ on:
 
 jobs:
   deploy-staging:
-    uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-test-deploy.yml@main
-    secrets: inherit
-    with:
-      environment: staging
-    - name: Tag the deployment
+    name: "Staging: build, test and deploy"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build, test and deploy
+        uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-test-deploy.yml@main
+        secrets: inherit
+        with:
+          environment: staging
+      - name: Tag the deployment
         uses: Virtual-Finland-Development/automatic-release-action@v1.0
         with:
           environment: staging
