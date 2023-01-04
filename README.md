@@ -49,6 +49,13 @@ if (response.status !== 200) {
 
 The development setup can be set up using vscode devcontainers or with local tools
 
+### Prerequisites
+
+Needs AWS credentials for some features to work:
+
+- Environment variables:
+  - `AWS_PROFILE`: defaults to `virtualfinland`
+
 ### Run with vscode devcontainer
 
 Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/remote/containers
