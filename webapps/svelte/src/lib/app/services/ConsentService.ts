@@ -1,5 +1,5 @@
-import ConsentAPI, { ConsentSituation } from "../api/ConsentAPI";
-import LoginAppComponent from "./LoginAppComponent";
+import ConsentAPI, { ConsentSituation } from "../../api/ConsentAPI";
+import LoginAppComponent from "../LoginAppComponent";
 
 const CONSENT_ID = "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"; // @TODO: what is the context
 
@@ -19,17 +19,15 @@ export default class ConsentService extends LoginAppComponent {
   /**
    * Prepares consent situation
    */
-  async initializeConsentService(handleGrantedConsent: boolean = false): Promise<ConsentSituation> {
+  async initializeConsentService(): Promise<void> {
     this.log("ConsentService", `Preparing consent situation for ${CONSENT_ID}..`);
     const authFields = this.AuthState.getAuthFields();
     this.#consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, authFields?.idToken);
 
-    if (handleGrantedConsent && this.#consentSituation.status === "consentGranted") {
+    if (this.#consentSituation.status === "consentGranted") {
       this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
       this.app.ConsentState.setConsentTokenFor(CONSENT_ID, this.#consentSituation.consentToken);
     }
-
-    return this.#consentSituation;
   }
 
   /**

@@ -9,7 +9,4 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
-export { TestbedConsentGrantedResponse } from './models/TestbedConsentGrantedResponse';
-export { TestbedVerificationRequiredResponse } from './models/TestbedVerificationRequiredResponse';
-
 export { DefaultService } from './services/DefaultService';

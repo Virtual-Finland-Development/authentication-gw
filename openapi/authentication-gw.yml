@@ -134,6 +134,7 @@ paths:
               schema:
                 anyOf:
                   - type: object
+                    required: [status, redirectUrl]
                     properties:
                       status:
                         type: string
@@ -142,6 +143,7 @@ paths:
                         type: string
                         example: "/consent/testbed/request"
                   - type: object
+                    required: [status, consentToken]
                     properties:
                       status:
                         type: string

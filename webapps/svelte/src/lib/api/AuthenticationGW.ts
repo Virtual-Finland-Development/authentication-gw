@@ -17,12 +17,12 @@ export default class AuthenticationGW {
     LogoutRequest: string;
   };
 
-  constructor(props: AuthenticationGWProps) {
-    this.props = props;
+  constructor(props?: AuthenticationGWProps) {
+    this.props = props || ({} as AuthenticationGWProps);
 
     const { provider, protocol } = this.props;
-    this.provider = provider.toLowerCase();
-    this.protocol = protocol.toLowerCase();
+    this.provider = provider?.toLowerCase();
+    this.protocol = protocol?.toLowerCase();
 
     if (!this.props.logoutRedirectUrl) {
       this.props.logoutRedirectUrl = this.props.redirectUrl;
@@ -46,7 +46,7 @@ export default class AuthenticationGW {
    * @param redirectUrl
    * @returns
    */
-  #generateAppContext(redirectUrl?: string): string {
+  generateAppContext(redirectUrl?: string): string {
     // App context generator
     return encodeURIComponent(btoa(JSON.stringify({ appName: this.props.appName, redirectUrl: redirectUrl || this.props.redirectUrl })));
   }
@@ -55,7 +55,7 @@ export default class AuthenticationGW {
    *
    */
   getLoginUrl(): string {
-    return `${this.redirectUrls.AuthenticationRequest}?appContext=${this.#generateAppContext()}`;
+    return `${this.redirectUrls.AuthenticationRequest}?appContext=${this.generateAppContext()}`;
   }
 
   /**
@@ -64,7 +64,7 @@ export default class AuthenticationGW {
    */
   getLogoutUrl(idToken: string): string {
     const urlParams = new URLSearchParams({
-      appContext: this.#generateAppContext(),
+      appContext: this.generateAppContext(),
       idToken: idToken,
     });
 
@@ -76,10 +76,8 @@ export default class AuthenticationGW {
    * @param idToken
    */
   async authorize(idToken: string) {
-    const { provider } = this.props;
     const response = await this.client.authorizeRequest({
       authorization: `Bearer ${idToken}`,
-      xAuthorizationProvider: provider,
       xAuthorizationContext: "demo app",
     });
     return response;
@@ -92,7 +90,7 @@ export default class AuthenticationGW {
    */
   async getLoggedInState(loginCode: string) {
     const { provider, protocol } = this.props;
-    const payload = { loginCode: loginCode, appContext: this.#generateAppContext() };
+    const payload = { loginCode: loginCode, appContext: this.generateAppContext() };
 
     switch (protocol) {
       case "openId":

@@ -1,9 +1,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TestbedConsentGrantedResponse } from '../models/TestbedConsentGrantedResponse';
-import type { TestbedVerificationRequiredResponse } from '../models/TestbedVerificationRequiredResponse';
-
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 
@@ -103,7 +100,51 @@ export class DefaultService {
     }
 
     /**
-     * @returns any Testbed consent API response
+     * @returns any Redirect to the testbed consent service, or back to the app context
+     * @throws ApiError
+     */
+    public testbedConsentCheck({
+        authorization,
+        appContext,
+        dataSource,
+    }: {
+        /**
+         * id_token as a bearer header
+         */
+        authorization: string,
+        /**
+         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
+         */
+        appContext: string,
+        /**
+         * Testbed data source url
+         */
+        dataSource: string,
+    }): CancelablePromise<({
+        status: string;
+        redirectUrl: string;
+    } | {
+        status: string;
+        consentToken: string;
+    })> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/consent/testbed/request',
+            headers: {
+                'Authorization': authorization,
+            },
+            query: {
+                'appContext': appContext,
+                'dataSource': dataSource,
+            },
+            errors: {
+                401: `Access denied message`,
+            },
+        });
+    }
+
+    /**
+     * @returns void
      * @throws ApiError
      */
     public testbedConsentRequest({
@@ -122,10 +163,10 @@ export class DefaultService {
         /**
          * Testbed data source url
          */
-        dataSource: string,
-    }): CancelablePromise<(TestbedVerificationRequiredResponse | TestbedConsentGrantedResponse)> {
+        dataSource?: string,
+    }): CancelablePromise<void> {
         return this.httpRequest.request({
-            method: 'POST',
+            method: 'GET',
             url: '/consent/testbed/request',
             headers: {
                 'Authorization': authorization,
@@ -135,6 +176,7 @@ export class DefaultService {
                 'dataSource': dataSource,
             },
             errors: {
+                303: `Redirect to the testbed consent service, or back to the app context`,
                 401: `Access denied message`,
             },
         });

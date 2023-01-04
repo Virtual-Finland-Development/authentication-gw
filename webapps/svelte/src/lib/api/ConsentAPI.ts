@@ -1,8 +1,9 @@
 import axios from "axios";
 import AppSettings from "../../AppSettings";
+import AuthenticationGW from "./AuthenticationGW";
 export type ConsentSituation = { status: string; consentToken?: string; redirectUrl?: string };
 
-export default class ConsentAPI {
+export default class ConsentAPI extends AuthenticationGW {
   /**
    *
    * @param dataSource
@@ -10,46 +11,19 @@ export default class ConsentAPI {
    * @param returnUrl
    * @returns
    */
-  async getConsentSituation(dataSource: string, idToken: string, returnUrl?: string): Promise<ConsentSituation> {
-    // Request the consent: https://ioxio.com/guides/how-to-build-an-application#request-consent
+  async getConsentSituation(dataSource: string, idToken: string, returnUrl?: string) {
     try {
-      const response = await axios.post(`${AppSettings.testbedAPIHost}/testbed/reverse-proxy`, {
-        method: "POST",
-        url: `https://consent.testbed.fi/Consent/Request`,
-        body: JSON.stringify({
-          dataSource: dataSource,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
+      return await this.client.testbedConsentCheck({
+        authorization: `Bearer ${idToken}`,
+        appContext: this.generateAppContext(returnUrl),
+        dataSource: dataSource,
       });
-
-      if (response.data.type === "verifyUserConsent") {
-        if (typeof returnUrl !== "string") {
-          returnUrl = window.location.href;
-        }
-        const redirectUrl = `${response.data.verifyUrl}?${new URLSearchParams({
-          returnUrl: returnUrl,
-        }).toString()}`;
-
-        return {
-          status: "verifyUserConsent",
-          redirectUrl: redirectUrl,
-        };
-      } else if (response.data.type === "consentGranted") {
-        return {
-          status: "consentGranted",
-          consentToken: response.data.consentToken,
-        };
-      }
-      throw new Error("Unexpected response");
     } catch (error) {
-      console.log("/Consent/Request error:", error);
+      console.log("ConsentAPI.getConsentSituation", error);
+      return {
+        status: "failed",
+      };
     }
-    return {
-      status: "failed",
-    };
   }
 
   /**

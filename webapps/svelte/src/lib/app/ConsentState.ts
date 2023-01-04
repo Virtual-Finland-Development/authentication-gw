@@ -79,6 +79,6 @@ export default class ConsentState extends LoginAppComponent {
    *
    */
   async handleLoggedIn() {
-    await this.app.ConsentService.initializeConsentService(true);
+    await this.app.ConsentService.initializeConsentService();
   }
 }
