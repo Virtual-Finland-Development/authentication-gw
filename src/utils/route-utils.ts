@@ -6,7 +6,7 @@ import TestbedRequestHandler from "../providers/testbed/TestbedRequestHandler";
 
 import { AccessDeniedException, ValidationError } from "../utils/exceptions";
 import { debug, log } from "../utils/logging";
-import { ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
+import { ensureArray, ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
 import { getJSONResponseHeaders } from "./default-headers";
 import { AuthRequestHandler, HttpResponse, NotifyErrorType } from "./types";
 import { parseAppContext } from "./validators";
@@ -17,8 +17,8 @@ import { parseAppContext } from "./validators";
  * @param providerIdent
  * @returns
  */
-export function prepareRedirectUrl(redirectUrl: string, providerIdent: string): string {
-  return ensureUrlQueryParams(redirectUrl, [{ param: "provider", value: providerIdent }]);
+export function prepareRedirectUrl(redirectUrl: string, providerIdent: string, params?: Array<{ key: string; value: any }>): string {
+  return ensureUrlQueryParams(redirectUrl, [{ key: "provider", value: providerIdent }, ...ensureArray(params)]);
 }
 
 /**
@@ -30,8 +30,8 @@ export function prepareRedirectUrl(redirectUrl: string, providerIdent: string): 
  */
 export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, providerIdent: string): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { param: "loginCode", value: loginCode },
-    { param: "provider", value: providerIdent },
+    { key: "loginCode", value: loginCode },
+    { key: "provider", value: providerIdent },
   ]);
 }
 
@@ -43,8 +43,8 @@ export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, 
  */
 export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: string): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { param: "logout", value: "success" },
-    { param: "provider", value: providerIdent },
+    { key: "logout", value: "success" },
+    { key: "provider", value: providerIdent },
   ]);
 }
 
@@ -57,10 +57,10 @@ export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: str
  */
 export function prepareErrorRedirectUrl(redirectUrl: string, message: { error: string; provider?: string; intent: string; type: NotifyErrorType }): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { param: "error", value: message.error },
-    { param: "provider", value: message.provider || "unknown" },
-    { param: "intent", value: message.intent },
-    { param: "type", value: message.type },
+    { key: "error", value: message.error },
+    { key: "provider", value: message.provider || "unknown" },
+    { key: "intent", value: message.intent },
+    { key: "type", value: message.type },
   ]);
 }
 

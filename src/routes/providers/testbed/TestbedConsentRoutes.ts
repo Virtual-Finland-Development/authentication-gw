@@ -39,7 +39,7 @@ export async function TestbedConsentCheck(context: Context): Promise<HttpRespons
       statusCode: 200,
       headers: getJSONResponseHeaders(),
       body: JSON.stringify({
-        status: consentStatus.status,
+        consentStatus: consentStatus.status,
         redirectUrl: Runtime.getAppUrl("/consent/testbed/request"),
       }),
     };
@@ -48,7 +48,7 @@ export async function TestbedConsentCheck(context: Context): Promise<HttpRespons
       statusCode: 200,
       headers: getJSONResponseHeaders(),
       body: JSON.stringify({
-        status: consentStatus.status,
+        consentStatus: consentStatus.status,
         consentToken: consentStatus.data.consentToken,
       }),
     };
@@ -78,7 +78,10 @@ export async function TestbedConsentRequest(context: Context): Promise<HttpRespo
     return {
       statusCode: 303,
       headers: {
-        Location: prepareRedirectUrl(parsedAppContext.object.redirectUrl, TestbedConfig.ident),
+        Location: prepareRedirectUrl(parsedAppContext.object.redirectUrl, TestbedConfig.ident, [
+          { key: "consentStatus", value: "consentGranted" },
+          { key: "consentToken", value: consentStatus.data.consentToken },
+        ]),
       },
       cookies: [prepareCookie("appContext")],
     };

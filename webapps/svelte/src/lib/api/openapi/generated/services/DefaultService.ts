@@ -121,10 +121,10 @@ export class DefaultService {
          */
         dataSource: string,
     }): CancelablePromise<({
-        status: string;
+        consentStatus: string;
         redirectUrl: string;
     } | {
-        status: string;
+        consentStatus: string;
         consentToken: string;
     })> {
         return this.httpRequest.request({

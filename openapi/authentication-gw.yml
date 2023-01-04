@@ -134,18 +134,18 @@ paths:
               schema:
                 anyOf:
                   - type: object
-                    required: [status, redirectUrl]
+                    required: [consentStatus, redirectUrl]
                     properties:
-                      status:
+                      consentStatus:
                         type: string
                         example: "verifyUserConsent"
                       redirectUrl:
                         type: string
                         example: "/consent/testbed/request"
                   - type: object
-                    required: [status, consentToken]
+                    required: [consentStatus, consentToken]
                     properties:
-                      status:
+                      consentStatus:
                         type: string
                         example: "consentGranted"
                       consentToken:

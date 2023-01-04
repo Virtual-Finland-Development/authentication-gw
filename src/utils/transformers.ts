@@ -102,14 +102,26 @@ export function ensureObject(value: any): any {
 
 /**
  *
+ * @param value
+ * @returns
+ */
+export function ensureArray(value: any): any[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  return [];
+}
+
+/**
+ *
  * @param url
  * @param param
  * @param value
  * @returns
  */
-export function ensureUrlQueryParam(url: string, param: string, value: string): string {
+export function ensureUrlQueryParam(url: string, key: string, value: string): string {
   const urlObj = new URL(url);
-  urlObj.searchParams.set(param, value);
+  urlObj.searchParams.set(key, value);
   return urlObj.toString();
 }
 
@@ -119,9 +131,9 @@ export function ensureUrlQueryParam(url: string, param: string, value: string): 
  * @param params
  * @returns
  */
-export function ensureUrlQueryParams(url: string, params: Array<{ param: string; value: string }>): string {
+export function ensureUrlQueryParams(url: string, params: Array<{ key: string; value: string }>): string {
   for (const group of params) {
-    url = ensureUrlQueryParam(url, group.param, group.value);
+    url = ensureUrlQueryParam(url, group.key, group.value);
   }
   return url;
 }

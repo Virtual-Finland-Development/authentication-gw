@@ -1,7 +1,7 @@
 import axios from "axios";
 import AppSettings from "../../AppSettings";
 import AuthenticationGW from "./AuthenticationGW";
-export type ConsentSituation = { status: string; consentToken?: string; redirectUrl?: string };
+export type ConsentSituation = { consentStatus: string; consentToken?: string; redirectUrl?: string };
 
 export default class ConsentAPI extends AuthenticationGW {
   /**
@@ -21,7 +21,7 @@ export default class ConsentAPI extends AuthenticationGW {
     } catch (error) {
       console.log("ConsentAPI.getConsentSituation", error);
       return {
-        status: "failed",
+        consentStatus: "failed",
       };
     }
   }

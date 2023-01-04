@@ -24,7 +24,7 @@ export default class ConsentService extends LoginAppComponent {
     const authFields = this.AuthState.getAuthFields();
     this.#consentSituation = await this.consentApi.getConsentSituation(CONSENT_ID, authFields?.idToken);
 
-    if (this.#consentSituation.status === "consentGranted") {
+    if (this.#consentSituation.consentStatus === "consentGranted") {
       this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
       this.app.ConsentState.setConsentTokenFor(CONSENT_ID, this.#consentSituation.consentToken);
     }
@@ -40,9 +40,9 @@ export default class ConsentService extends LoginAppComponent {
       throw new Error("Consent service state not initialized");
     }
 
-    if (this.#consentSituation.status === "verifyUserConsent") {
+    if (this.#consentSituation.consentStatus === "verifyUserConsent") {
       this.UIState.transitToUrl(this.#consentSituation.redirectUrl, "consent");
-    } else if (this.#consentSituation.status === "consentGranted") {
+    } else if (this.#consentSituation.consentStatus === "consentGranted") {
       this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
       this.app.ConsentState.setConsentTokenFor(CONSENT_ID, this.#consentSituation.consentToken);
       this.app.UIState.resetViewState("consent", true); // reset view state
