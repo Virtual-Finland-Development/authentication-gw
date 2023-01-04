@@ -1,0 +1,14 @@
+{
+    admin off
+    email lassi.piironen@sleek.works
+}
+
+virtualfinland-authgw.localhost {
+    tls internal
+    reverse_proxy authgw:3000
+}
+
+virtualfinland-authgw-demo.localhost {
+    tls internal
+    reverse_proxy demoApp:5000
+}

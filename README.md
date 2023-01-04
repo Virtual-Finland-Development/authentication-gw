@@ -61,6 +61,16 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 
 - `docker compose up`
 
+API served at:
+
+- http://localhost:3000/
+- https://virtualfinland-authgw.localhost/
+
+Demo app served at:
+
+- http://localhost:5000/
+- https://virtualfinland-authgw-demo.localhost/
+
 ### Run with local tools
 
 - `npm install`
@@ -94,3 +104,8 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 - [OpenAPI Backend](https://github.com/anttiviljami/openapi-backend)
 - [OpenAPI 3.0](https://swagger.io/specification/)
 - [Swagger UI](https://github.com/sylwit/aws-serverless-swagger-ui)
+
+### Development tools
+
+- [Caddy docker](https://hub.docker.com/_/caddy)
+- [Devcontainers](https://code.visualstudio.com/docs/remote/containers)

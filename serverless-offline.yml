@@ -13,6 +13,7 @@ custom:
 provider:
   name: "offline"
   stage: offline
+  timeout: 15
 
 functions:
   api-app:
@@ -23,3 +24,4 @@ functions:
           path: /{proxy+}
     environment:
       STAGE: "offline"
+      AWS_PROFILE: ${env:AWS_PROFILE, 'virtualfinland'}

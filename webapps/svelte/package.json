@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "start": "npm run dev",
-    "dev": "vite",
+    "dev": "vite --port 5000 --host",
     "build": "vite build",
     "preview": "vite preview",
-    "predev": "npm run generate-authgw-openapi",
-    "prebuild": "npm run generate-authgw-openapi",
+    "_predev": "npm run generate-authgw-openapi",
+    "_prebuild": "npm run generate-authgw-openapi",
     "generate-authgw-openapi": "ts-node ./src/lib/api/openapi/generate-authgw-openapi.ts"
   },
   "devDependencies": {
