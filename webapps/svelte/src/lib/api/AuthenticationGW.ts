@@ -18,7 +18,7 @@ export default class AuthenticationGW {
   };
 
   constructor(props?: AuthenticationGWProps) {
-    this.props = props || ({} as AuthenticationGWProps);
+    this.props = props || ({ appName: "default", redirectUrl: window.location.origin + window.location.pathname } as AuthenticationGWProps);
 
     const { provider, protocol } = this.props;
     this.provider = provider?.toLowerCase();
@@ -28,16 +28,18 @@ export default class AuthenticationGW {
       this.props.logoutRedirectUrl = this.props.redirectUrl;
     }
 
+    const baseURL = AppSettings.getAuthenticationGatewayHost();
+
     // Create the openapi client
     this.client = new AuthGWClient({
-      BASE: AppSettings.authenticationGatewayHost,
+      BASE: baseURL,
       WITH_CREDENTIALS: true,
     }).default;
 
     // Setup the redirect urls
     this.redirectUrls = {
-      AuthenticationRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/authentication-request`,
-      LogoutRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/logout-request`,
+      AuthenticationRequest: `${baseURL}/auth/${this.protocol}/${this.provider}/authentication-request`,
+      LogoutRequest: `${baseURL}/auth/${this.protocol}/${this.provider}/logout-request`,
     };
   }
 

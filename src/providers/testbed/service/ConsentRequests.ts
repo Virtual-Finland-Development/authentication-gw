@@ -25,7 +25,7 @@ export async function engageTestbedConsentRequest(context: Context): Promise<ISi
   const parsedAppContext = parseAppContext(context, { provider: TestbedConfig.ident, meta: { dataSource: context.request.requestBody?.dataSource } });
   const authorization = context.request.headers.authorization;
   if (!authorization) throw new AccessDeniedException("Missing authorization header");
-  const dataSource = parsedAppContext.object.meta?.dataSource || context.request.requestBody.dataSource;
+  const dataSource = parsedAppContext.object.meta?.dataSource || context.request.requestBody?.dataSource || context.request.query?.dataSource;
   if (!dataSource) throw new ValidationError("Missing dataSource in request body or app context meta");
 
   const response = await axios.post("https://consent.testbed.fi/Consent/Request", {

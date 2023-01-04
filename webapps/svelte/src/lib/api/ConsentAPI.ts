@@ -34,7 +34,7 @@ export default class ConsentAPI extends AuthenticationGW {
    */
   async testConsentIdRequest(dataSourceUrl: string, inputData: any, consentToken: string, idToken: string): Promise<any> {
     // Test with a request: https://ioxio.com/guides/how-to-build-an-application#using-the-consent-token
-    const response = await axios.post(`${AppSettings.testbedAPIHost}/testbed/reverse-proxy`, {
+    const response = await axios.post(`${AppSettings.getTestbedAPIHost()}/testbed/reverse-proxy`, {
       method: "POST",
       url: dataSourceUrl,
       body: JSON.stringify(inputData),
@@ -56,7 +56,7 @@ export default class ConsentAPI extends AuthenticationGW {
    */
   async verifyConsentToken(consentToken: string): Promise<any> {
     // Verify the consent token: https://ioxio.com/guides/verify-consent-in-a-data-source
-    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/consent/testbed/verify`, null, {
+    const response = await axios.post(`${AppSettings.getAuthenticationGatewayHost()}/consent/testbed/verify`, null, {
       headers: {
         "X-Consent-Token": consentToken,
       },

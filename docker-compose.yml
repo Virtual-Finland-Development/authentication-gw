@@ -12,6 +12,7 @@ services:
     environment:
       - AWS_PROFILE=${AWS_PROFILE:-virtualfinland}
       - AWS_REGION=${AWS_REGION:-eu-north-1}
+      - AUTHGW_ENDPOINT_URL_OVERRIDE=https://virtualfinland-authgw.localhost
     volumes:
       - ./:/app
       - $HOME/.aws:/home/node/.aws:ro
@@ -40,9 +41,10 @@ services:
     command: sh -c "npm install && npm run start"
     working_dir: /app
     environment:
-      - AUTHGW_API_HOST="https://virtualfinland-authgw.localhost"
+      - VITE_AUTHGW_API_URL=https://virtualfinland-authgw.localhost
     volumes:
       - ./webapps/svelte/:/app
+      - ./openapi/authentication-gw.yml:/app/public/authentication-gw.yml
     ports:
       - 5000:5000
 volumes:

@@ -8,9 +8,10 @@
     "dev": "vite --port 5000 --host",
     "build": "vite build",
     "preview": "vite preview",
-    "_predev": "npm run generate-authgw-openapi",
-    "_prebuild": "npm run generate-authgw-openapi",
-    "generate-authgw-openapi": "ts-node ./src/lib/api/openapi/generate-authgw-openapi.ts"
+    "predev": "npm run generate-authgw-openapi",
+    "prebuild": "npm run generate-authgw-openapi",
+    "copy-authgw-openapi": "cp ../../openapi/authentication-gw.yml ./public/authentication-gw.yml 2>/dev/null || true",
+    "generate-authgw-openapi": "npm run copy-authgw-openapi && ts-node ./src/lib/api/openapi/generate-authgw-openapi.ts"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.2",
