@@ -25,3 +25,4 @@ functions:
     environment:
       STAGE: "offline"
       AWS_PROFILE: ${env:AWS_PROFILE, 'virtualfinland'}
+      AWS_REGION: ${env:AWS_REGION, 'eu-north-1'}
