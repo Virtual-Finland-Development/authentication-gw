@@ -71,12 +71,14 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 API served at:
 
 - http://localhost:3000/
-- https://virtualfinland-authgw.localhost/ (untrusted certificate)
+- https://virtualfinland-authgw.localhost/ (\*self-signed certificate)
 
 Demo app served at:
 
 - http://localhost:5000/
-- https://virtualfinland-authgw-demo.localhost/ (untrusted certificate)
+- https://virtualfinland-authgw-demo.localhost/ (\*self-signed certificate)
+
+\* The self-signed certificate is blocked by the browser by default. You can add the certificate to the browser's trusted certificates by accepting it with the browsers warning dialog or by @TODO: missing documentation.
 
 ### Run with local tools
 
