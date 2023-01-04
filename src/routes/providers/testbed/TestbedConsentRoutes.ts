@@ -1,11 +1,11 @@
 import { Context } from "openapi-backend";
-import { engageTestbedConsentRequest } from "../providers/testbed/service/ConsentRequests";
-import TestbedConfig from "../providers/testbed/Testbed.config";
-import { verifyConsent } from "../providers/testbed/TestbedAuthorizer";
-import { getJSONResponseHeaders } from "../utils/default-headers";
-import { prepareCookie, prepareRedirectUrl } from "../utils/route-utils";
-import Runtime from "../utils/Runtime";
-import { HttpResponse } from "../utils/types";
+import { engageTestbedConsentRequest } from "../../../providers/testbed/service/ConsentRequests";
+import TestbedConfig from "../../../providers/testbed/Testbed.config";
+import { verifyConsent } from "../../../providers/testbed/TestbedAuthorizer";
+import { getJSONResponseHeaders } from "../../../utils/default-headers";
+import { prepareCookie, prepareRedirectUrl } from "../../../utils/route-utils";
+import Runtime from "../../../utils/Runtime";
+import { HttpResponse } from "../../../utils/types";
 
 /**
  *  POST: verify request consent
