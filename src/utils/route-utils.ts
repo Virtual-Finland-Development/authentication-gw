@@ -14,6 +14,16 @@ import { parseAppContext } from "./validators";
 /**
  *
  * @param redirectUrl
+ * @param providerIdent
+ * @returns
+ */
+export function prepareRedirectUrl(redirectUrl: string, providerIdent: string): string {
+  return ensureUrlQueryParams(redirectUrl, [{ param: "provider", value: providerIdent }]);
+}
+
+/**
+ *
+ * @param redirectUrl
  * @param loginCode
  * @param providerIdent
  * @returns
@@ -90,7 +100,7 @@ export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: { er
  * @param value
  * @returns
  */
-export function prepareCookie(name: string, value: string): string {
+export function prepareCookie(name: string, value: string = ""): string {
   return `${name}=${value}; SameSite=None; Secure; HttpOnly`;
 }
 

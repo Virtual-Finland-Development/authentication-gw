@@ -11,8 +11,8 @@ import Settings from "../../utils/Settings";
 import { ensureObject } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import * as TestbedRequests from "./service/TestbedRequests";
 import TestbedSettings from "./Testbed.config";
-import * as TestbedRequests from "./utils/TestbedRequests";
 import { authorize } from "./TestbedAuthorizer";
 
 /**

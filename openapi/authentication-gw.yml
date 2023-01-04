@@ -102,6 +102,104 @@ paths:
                   message:
                     type: string
                     default: "Unverified"
+  "/consent/testbed/request":
+    post:
+      operationId: TestbedConsentCheck
+      parameters:
+        - in: header
+          name: Authorization
+          description: "id_token as a bearer header"
+          example: "Bearer asd23123czxc.a3123asdasd.zxczxc"
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: appContext
+          schema:
+            type: string
+          required: true
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
+        - in: query
+          name: dataSource
+          schema:
+            type: string
+          required: true
+          description: "Testbed data source url"
+          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+      responses:
+        "200":
+          description: Redirect to the testbed consent service, or back to the app context
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        example: "verifyUserConsent"
+                      redirectUrl:
+                        type: string
+                        example: "/consent/testbed/request"
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        example: "consentGranted"
+                      consentToken:
+                        type: string
+                        example: "asdad2.awasdasd.123123"
+        "401":
+          description: Access denied message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access Denied"
+    get:
+      operationId: TestbedConsentRequest
+      parameters:
+        - in: header
+          name: Authorization
+          description: "id_token as a bearer header"
+          example: "Bearer asd23123czxc.a3123asdasd.zxczxc"
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: appContext
+          schema:
+            type: string
+          required: true
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
+        - in: query
+          name: dataSource
+          schema:
+            type: string
+          required: false
+          description: "Testbed data source url"
+          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+      responses:
+        "303":
+          description: Redirect to the testbed consent service, or back to the app context
+          headers:
+            location:
+              description: Redirection url
+              schema:
+                type: string
+        "401":
+          description: Access denied message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access Denied"
   "/auth/openid/{provider}/authentication-request":
     get:
       operationId: OpenIdAuthenticationRequest

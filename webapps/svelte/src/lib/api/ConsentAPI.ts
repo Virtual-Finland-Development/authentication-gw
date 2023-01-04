@@ -5,19 +5,19 @@ export type ConsentSituation = { status: string; consentToken?: string; redirect
 export default class ConsentAPI {
   /**
    *
-   * @param consentId
+   * @param dataSource
    * @param idToken
    * @param returnUrl
    * @returns
    */
-  async getConsentSituation(consentId: string, idToken: string, returnUrl?: string): Promise<ConsentSituation> {
+  async getConsentSituation(dataSource: string, idToken: string, returnUrl?: string): Promise<ConsentSituation> {
     // Request the consent: https://ioxio.com/guides/how-to-build-an-application#request-consent
     try {
       const response = await axios.post(`${AppSettings.testbedAPIHost}/testbed/reverse-proxy`, {
         method: "POST",
         url: `https://consent.testbed.fi/Consent/Request`,
         body: JSON.stringify({
-          dataSource: consentId,
+          dataSource: dataSource,
         }),
         headers: {
           "Content-Type": "application/json",

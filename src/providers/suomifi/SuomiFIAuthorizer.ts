@@ -12,9 +12,9 @@ import Settings from "../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
 import { ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import { resolveSuomiFiUserIdFromProfileData } from "./service/SuomifiStateTools";
+import { SuomiFiProfile } from "./service/SuomifiTypes";
 import SuomiFIConfig from "./SuomiFI.config";
-import { resolveSuomiFiUserIdFromProfileData } from "./utils/SuomifiStateTools";
-import { SuomiFiProfile } from "./utils/SuomifiTypes";
 
 const SUOMIFI_ISSUER = "virtual-finland/authentication-gw/suomifi";
 

@@ -1,6 +1,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { TestbedConsentGrantedResponse } from '../models/TestbedConsentGrantedResponse';
+import type { TestbedVerificationRequiredResponse } from '../models/TestbedVerificationRequiredResponse';
+
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 
@@ -95,6 +98,44 @@ export class DefaultService {
             },
             errors: {
                 401: `Unverified message`,
+            },
+        });
+    }
+
+    /**
+     * @returns any Testbed consent API response
+     * @throws ApiError
+     */
+    public testbedConsentRequest({
+        authorization,
+        appContext,
+        dataSource,
+    }: {
+        /**
+         * id_token as a bearer header
+         */
+        authorization: string,
+        /**
+         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
+         */
+        appContext: string,
+        /**
+         * Testbed data source url
+         */
+        dataSource: string,
+    }): CancelablePromise<(TestbedVerificationRequiredResponse | TestbedConsentGrantedResponse)> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/consent/testbed/request',
+            headers: {
+                'Authorization': authorization,
+            },
+            query: {
+                'appContext': appContext,
+                'dataSource': dataSource,
+            },
+            errors: {
+                401: `Access denied message`,
             },
         });
     }

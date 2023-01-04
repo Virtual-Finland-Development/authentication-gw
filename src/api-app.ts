@@ -4,7 +4,7 @@ import OpenAPIBackend from "openapi-backend";
 import BaseRoutes from "./routes/BaseRoutes";
 import OpenIdAuthRoutes from "./routes/OpenidAuthRoutes";
 import Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
-import TestbedSpecialRoutes from "./routes/TestbedSpecialRoutes";
+import * as TestbedSpecialRoutes from "./routes/TestbedSpecialRoutes";
 
 import { getCORSHeaders } from "./utils/default-headers";
 import { debug, log } from "./utils/logging";
@@ -19,6 +19,9 @@ const api = new OpenAPIBackend({
     formats: {
       "date-time": (data: string) => {
         return !isNaN(Date.parse(data));
+      },
+      uri: (data: string) => {
+        return data.includes("://");
       },
     },
   },
