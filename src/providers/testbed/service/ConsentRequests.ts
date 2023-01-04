@@ -28,15 +28,25 @@ export async function engageTestbedConsentRequest(context: Context): Promise<ISi
   const dataSource = parsedAppContext.object.meta?.dataSource || context.request.requestBody?.dataSource || context.request.query?.dataSource;
   if (!dataSource) throw new ValidationError("Missing dataSource in request body or app context meta");
 
-  const response = await axios.post("https://consent.testbed.fi/Consent/Request", {
-    body: JSON.stringify({
-      dataSource: dataSource,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: authorization,
-    },
-  });
+  const response = await axios
+    .post("https://consent.testbed.fi/Consent/Request", {
+      body: JSON.stringify({
+        dataSource: dataSource,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authorization,
+      },
+    })
+    .catch((error) => {
+      if (error.response) {
+        if (error.response.status === 403) {
+          throw new AccessDeniedException("Access denied");
+        }
+        throw new Error(error.response.data);
+      }
+      throw error;
+    });
 
   if (response.data.type === "verifyUserConsent") {
     const returnUrl = Runtime.getAppUrl("/consent/testbed/request");

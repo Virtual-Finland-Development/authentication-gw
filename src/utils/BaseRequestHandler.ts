@@ -9,6 +9,11 @@ export abstract class BaseRequestHandler {
   abstract identityProviderIdent: string;
 
   /**
+   *
+   */
+  async initialize(): Promise<void> {}
+
+  /**
    * Shared error handler for AuthenticateResponse errs
    *
    * @param context

@@ -21,9 +21,6 @@ import { authorize } from "./TestbedAuthorizer";
  */
 export default new (class TestbedRequestHandler extends BaseRequestHandler implements AuthRequestHandler {
   identityProviderIdent = TestbedSettings.ident;
-
-  async initialize(): Promise<void> {}
-
   /**
    * GET->REDIRECT: The route for handling the auth flow initiating process
    *

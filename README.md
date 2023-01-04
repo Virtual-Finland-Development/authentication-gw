@@ -64,12 +64,12 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 API served at:
 
 - http://localhost:3000/
-- https://virtualfinland-authgw.localhost/
+- https://virtualfinland-authgw.localhost/ (untrusted certificate)
 
 Demo app served at:
 
 - http://localhost:5000/
-- https://virtualfinland-authgw-demo.localhost/
+- https://virtualfinland-authgw-demo.localhost/ (untrusted certificate)
 
 ### Run with local tools
 

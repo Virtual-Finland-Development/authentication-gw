@@ -129,7 +129,7 @@ export class DefaultService {
     })> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/consent/testbed/request',
+            url: '/consent/testbed/check',
             headers: {
                 'Authorization': authorization,
             },

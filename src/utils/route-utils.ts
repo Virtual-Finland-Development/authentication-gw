@@ -193,15 +193,21 @@ export function getAuthProviderRequestHandler(context: Context, defaultProvider?
  * @param defaultAuthProviderIdent
  * @returns
  */
-export function generateRequestHandlers(operationNames: Array<string>, operationPrefix: string, defaultAuthProviderIdent?: string): any {
+export function generateRouteRequestHandlers(operationNames: Array<string>, operationPrefix: string, defaultAuthProviderIdent?: string, requestsHandler?: any): any {
   return operationNames.reduce((operations: Record<string, (context: Context) => Promise<HttpResponse>>, operationName: string) => {
-    operations[`${operationPrefix}${operationName}`] = async (context: Context) => {
-      const handler: any = getAuthProviderRequestHandler(context, defaultAuthProviderIdent); // @TODO: fix this any by defining the operationName type
-      await handler.initialize();
-      const response = await handler[operationName](context);
-      debug("Response", response);
-      return response;
-    };
+    operations[`${operationPrefix}${operationName}`] = generateRequestHandlerOperation(operationName, defaultAuthProviderIdent, requestsHandler);
     return operations;
   }, {});
+}
+
+export function generateRequestHandlerOperation(operationName: string, defaultAuthProviderIdent?: string, requestsHandler?: any): (context: Context) => Promise<HttpResponse> {
+  return async (context: Context) => {
+    if (!requestsHandler) {
+      requestsHandler = getAuthProviderRequestHandler(context, defaultAuthProviderIdent);
+    }
+    await requestsHandler.initialize();
+    const response = await requestsHandler[operationName](context);
+    debug("Response", response);
+    return response;
+  };
 }
