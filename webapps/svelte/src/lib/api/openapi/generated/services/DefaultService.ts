@@ -106,21 +106,25 @@ export class DefaultService {
      */
     public testbedConsentCheck({
         authorization,
-        appContext,
-        dataSource,
+        requestBody,
     }: {
         /**
          * id_token as a bearer header
          */
         authorization: string,
         /**
-         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
+         * Retrieve the authentication token from the auth provider service
          */
-        appContext: string,
-        /**
-         * Testbed data source url
-         */
-        dataSource: string,
+        requestBody: {
+            /**
+             * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
+             */
+            appContext: string;
+            /**
+             * Testbed data source url
+             */
+            dataSource: string;
+        },
     }): CancelablePromise<({
         consentStatus: string;
         redirectUrl: string;
@@ -134,10 +138,8 @@ export class DefaultService {
             headers: {
                 'Authorization': authorization,
             },
-            query: {
-                'appContext': appContext,
-                'dataSource': dataSource,
-            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 401: `Access denied message`,
             },

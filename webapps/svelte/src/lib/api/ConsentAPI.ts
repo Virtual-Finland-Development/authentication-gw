@@ -15,8 +15,10 @@ export default class ConsentAPI extends AuthenticationGW {
     try {
       return await this.client.testbedConsentCheck({
         authorization: `Bearer ${idToken}`,
-        appContext: this.generateAppContext(returnUrl),
-        dataSource: dataSource,
+        requestBody: {
+          appContext: this.generateAppContext(returnUrl),
+          dataSource: dataSource,
+        },
       });
     } catch (error) {
       console.log("ConsentAPI.getConsentSituation", error);

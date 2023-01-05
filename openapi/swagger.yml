@@ -114,19 +114,22 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
-          name: appContext
-          schema:
-            type: string
-          required: true
-          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
-        - in: query
-          name: dataSource
-          schema:
-            type: string
-          required: true
-          description: "Testbed data source url"
-          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+      requestBody:
+        description: Retrieve the authentication token from the auth provider service
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dataSource, appContext]
+              properties:
+                appContext:
+                  type: string
+                  description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
+                dataSource:
+                  type: string
+                  description: "Testbed data source url"
+                  example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
       responses:
         "200":
           description: Redirect to the testbed consent service, or back to the app context
