@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "predev": "npm run generate-authgw-openapi",
     "prebuild": "npm run generate-authgw-openapi",
-    "copy-authgw-openapi": "cp ../../openapi/authentication-gw.yml ./public/authentication-gw.yml 2>/dev/null || true",
+    "copy-authgw-openapi": "cp ../../openapi/swagger.yml ./public/swagger.yml 2>/dev/null || true",
     "generate-authgw-openapi": "npm run copy-authgw-openapi && ts-node ./src/lib/api/openapi/generate-authgw-openapi.ts"
   },
   "devDependencies": {

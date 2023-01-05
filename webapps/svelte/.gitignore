@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Specials
-public/authentication-gw.yml
+public/swagger.yml

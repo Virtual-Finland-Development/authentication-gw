@@ -36,7 +36,7 @@ const appRoutes = [
     route: { name: "api-app", method: "ANY", path: "/{proxy+}" },
     lambdaFunction: {
       name: "authentication-gw-dev-api-app",
-      handler: "api-app.handler",
+      handler: "app.handler",
       code: new pulumi.asset.AssetArchive({
         ".": new pulumi.asset.FileArchive("../dist"),
         "./openapi": new pulumi.asset.FileArchive("../openapi"),

@@ -14,7 +14,7 @@ const { promises: fs } = require("fs");
 
 // Setup the OpenAPI backend
 const api = new OpenAPIBackend({
-  definition: "./openapi/authentication-gw.yml",
+  definition: "./openapi/swagger.yml",
   ajvOpts: {
     formats: {
       "date-time": (data: string) => {
@@ -92,10 +92,10 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
  * @returns
  */
 async function handleSwaggerDocsRequest(event: APIGatewayProxyEventV2) {
-  if (event.rawPath === "/docs/openapi/authentication-gw.yml") {
+  if (event.rawPath === "/docs/openapi/swagger.yml") {
     return {
       statusCode: 200,
-      body: await fs.readFile("./openapi/authentication-gw.yml", "utf8"),
+      body: await fs.readFile("./openapi/swagger.yml", "utf8"),
       headers: {
         "Content-Type": "text/yaml",
       },

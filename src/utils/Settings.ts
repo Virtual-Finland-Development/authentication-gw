@@ -20,7 +20,7 @@ export default {
     return this.getSecret(`${this.getStage()}_${key}`, defaultValue);
   },
   hasEnv(key: string): boolean {
-    return typeof process.env[key] !== "undefined";
+    return typeof process.env[key] !== "undefined" || process.env[key] !== "";
   },
   getEnv(key: string, defaultValue: string = ""): string {
     return this.getEnvironmentValue(key, defaultValue);

@@ -87,7 +87,7 @@ Demo app served at:
 
 ## Usage
 
-- OpenAPI documentation: [./openapi/authentication-gw.yml](./openapi/authentication-gw.yml)
+- OpenAPI documentation: [./openapi/swagger.yml](./openapi/swagger.yml)
 
   - served with swagger at http://localhost:3000/docs/ when running locally
 
