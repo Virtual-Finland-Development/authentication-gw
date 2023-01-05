@@ -73,7 +73,7 @@ paths:
                   message:
                     type: string
                     default: "Access Denied"
-  "/consent/testbed/verify":
+  "/consents/testbed/consent-verify":
     post:
       operationId: TestbedConsentVerify
       parameters:
@@ -102,9 +102,10 @@ paths:
                   message:
                     type: string
                     default: "Unverified"
-  "/consent/testbed/check":
+  "/consents/testbed/consent-check":
     post:
       operationId: TestbedConsentCheck
+      description: Check the testbed consent status for a dataSource
       parameters:
         - in: header
           name: Authorization
@@ -161,15 +162,16 @@ paths:
                   message:
                     type: string
                     example: "Access Denied"
-  "/consent/testbed/request":
+  "/consents/testbed/consent-request":
     get:
       operationId: TestbedConsentRequest
+      description: "Transition to the testbed consent page"
       parameters:
         - in: header
           name: Authorization
           description: "id_token as a bearer header"
           example: "Bearer asd23123czxc.a3123asdasd.zxczxc"
-          required: true
+          required: false
           schema:
             type: string
         - in: query
@@ -185,6 +187,13 @@ paths:
           required: false
           description: "Testbed data source url"
           example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+        - in: query
+          name: idToken
+          schema:
+            type: string
+          required: false
+          description: id_token
+          example: asd23123czxc.a3123asdasd.zxczxc
       responses:
         "303":
           description: Redirect to the testbed consent service, or back to the app context
@@ -203,6 +212,27 @@ paths:
                   message:
                     type: string
                     example: "Access Denied"
+  "/consents/testbed/consent-response":
+    get:
+      operationId: TestbedConsentResponse
+      description: "Transition from the testbed consent page back to the app context"
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [success, fail]
+          required: true
+          description: Consent status
+          example: success
+      responses:
+        "303":
+          description: Redirect back to the app context
+          headers:
+            location:
+              description: Redirection url
+              schema:
+                type: string
   "/auth/openid/{provider}/authentication-request":
     get:
       operationId: OpenIdAuthenticationRequest

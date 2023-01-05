@@ -31,7 +31,7 @@ export default class ConsentService extends LoginAppComponent {
   }
 
   /**
-   * Consent flow initiator
+   * Consent flow btn click
    */
   async consentify() {
     this.log("ConsentService", `Resolving the consent for ${CONSENT_ID}..`);
@@ -41,7 +41,7 @@ export default class ConsentService extends LoginAppComponent {
     }
 
     if (this.#consentSituation.consentStatus === "verifyUserConsent") {
-      this.UIState.transitToUrl(this.#consentSituation.redirectUrl, "consent");
+      this.UIState.transitToUrl(this.#consentSituation.redirectUrl, "consent"); // Go to the consent page
     } else if (this.#consentSituation.consentStatus === "consentGranted") {
       this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
       this.app.ConsentState.setConsentTokenFor(CONSENT_ID, this.#consentSituation.consentToken);
@@ -84,7 +84,7 @@ export default class ConsentService extends LoginAppComponent {
       this.log("ConsentService", `Verifying consent id: ${consentId}..`);
       const consentToken = this.app.ConsentState.getConsentTokenFor(consentId);
       const response = await this.consentApi.verifyConsentToken(consentToken);
-      window.alert(`Received good validation: ${JSON.stringify(response.data, null, 2)}`);
+      window.alert(`Received good validation: ${JSON.stringify(response, null, 2)}`);
     } catch (error) {
       window.alert(`Received a request error: ${JSON.stringify(error, null, 2)}`);
     }

@@ -55,13 +55,8 @@ export default class ConsentAPI extends AuthenticationGW {
    * @returns
    */
   async verifyConsentToken(consentToken: string): Promise<any> {
-    // Verify the consent token: https://ioxio.com/guides/verify-consent-in-a-data-source
-    const response = await axios.post(`${AppSettings.getAuthenticationGatewayHost()}/consent/testbed/verify`, null, {
-      headers: {
-        "X-Consent-Token": consentToken,
-      },
+    return await this.client.testbedConsentVerify({
+      xConsentToken: consentToken,
     });
-
-    return response;
   }
 }
