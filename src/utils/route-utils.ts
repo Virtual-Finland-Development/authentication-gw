@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { Context } from "openapi-backend";
 
 import SinunaRequestHandler from "../providers/sinuna/SinunaRequestHandler";
@@ -120,6 +121,8 @@ export function InternalServerErrorHandler(error: any) {
     statusCode = 422;
   } else if (error instanceof AccessDeniedException) {
     statusCode = 401;
+  } else if (error instanceof AxiosError) {
+    statusCode = error.response?.status || 500;
   }
 
   return {

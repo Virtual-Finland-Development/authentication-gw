@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { resolveBase64Hash } from "./hashes";
 
 /**
@@ -67,6 +68,9 @@ export function exceptionToObject(error: any): {
     name = error.name;
     message = error.message;
     stack = error.stack;
+    if (error instanceof AxiosError) {
+      message = `External API: ${message}`;
+    }
   } else {
     if (isObject(error) && typeof error.message === "string") {
       message = error.message;

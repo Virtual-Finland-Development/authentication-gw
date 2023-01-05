@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { Context } from "openapi-backend";
 import { AccessDeniedException, NoticeException } from "./exceptions";
 import { debug } from "./logging";
@@ -31,6 +32,9 @@ export abstract class BaseRequestHandler {
       errorType = "info";
     } else if (error instanceof AccessDeniedException) {
       errorMessage = error.message;
+      errorType = "warning";
+    } else if (error instanceof AxiosError) {
+      errorMessage = `External API: ${error.message}`;
       errorType = "warning";
     }
 
