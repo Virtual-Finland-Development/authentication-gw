@@ -65,7 +65,6 @@ Read more about setup of AWS credentials here: [AWS: Configuration and credentia
 Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/remote/containers
 
 - Open the project folder as devcontainer
-- Browse the API-docs at http://localhost:3000/
   - In the container, the default `postStartCommand` is set to `npm run start` which should publish the endpoint
 
 ### Run with docker compose
@@ -74,13 +73,13 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 
 API served at:
 
-- http://localhost:3000/
 - https://virtualfinland-authgw.localhost/ (\*self-signed certificate)
+- http://localhost:3000/
 
 Demo app served at:
 
-- http://localhost:5000/
 - https://virtualfinland-authgw-demo.localhost/ (\*self-signed certificate)
+- http://localhost:5000/
 
 \* The self-signed certificate is blocked by the browser by default. You can add the certificate to the browser's trusted certificates by accepting it with the browsers warning dialog or by @TODO: missing documentation.
 
