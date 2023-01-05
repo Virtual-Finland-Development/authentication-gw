@@ -15,7 +15,7 @@ services:
       - AUTHGW_ENDPOINT_URL_OVERRIDE=https://virtualfinland-authgw.localhost
     volumes:
       - ./:/app
-      - $HOME/.aws:/home/node/.aws:ro
+      - $HOME/.aws/credentials:/home/node/.aws/credentials:ro
     ports:
       - 3000:3000
     stdin_open: true
