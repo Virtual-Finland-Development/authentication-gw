@@ -17,7 +17,7 @@ services:
       - ./:/app
       - $HOME/.aws/credentials:/home/node/.aws/credentials:ro
     ports:
-      - 3000:3000
+      - 4078:4078
     stdin_open: true
     tty: true
   ###

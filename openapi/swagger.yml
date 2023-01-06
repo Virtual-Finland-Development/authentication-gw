@@ -138,7 +138,7 @@ paths:
               schema:
                 anyOf:
                   - type: object
-                    required: [consentStatus, redirectUrl]
+                    required: [consentStatus, redirectUrl, dataSource]
                     properties:
                       consentStatus:
                         type: string
@@ -146,8 +146,11 @@ paths:
                       redirectUrl:
                         type: string
                         example: "/consent/testbed/request"
+                      dataSource:
+                        type: string
+                        example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
                   - type: object
-                    required: [consentStatus, consentToken]
+                    required: [consentStatus, consentToken, dataSource]
                     properties:
                       consentStatus:
                         type: string
@@ -155,6 +158,9 @@ paths:
                       consentToken:
                         type: string
                         example: "asdad2.awasdasd.123123"
+                      dataSource:
+                        type: string
+                        example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
         "401":
           description: Access denied message
           content:

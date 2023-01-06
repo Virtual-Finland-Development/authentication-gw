@@ -60,6 +60,7 @@ export default new (class TestbedConsentsHandler extends BaseRequestHandler {
         body: JSON.stringify({
           consentStatus: consentStatus.status,
           consentToken: consentStatus.data.consentToken,
+          dataSource: consentStatus.dataSource,
         }),
       };
     }
@@ -93,6 +94,7 @@ export default new (class TestbedConsentsHandler extends BaseRequestHandler {
             Location: prepareRedirectUrl(parsedAppContext.object.redirectUrl, TestbedConfig.ident, [
               { key: "consentStatus", value: "consentGranted" },
               { key: "consentToken", value: consentStatus.data.consentToken },
+              { key: "dataSource", value: consentStatus.dataSource },
             ]),
           },
           cookies: [prepareCookie("appContext")],
@@ -123,6 +125,7 @@ export default new (class TestbedConsentsHandler extends BaseRequestHandler {
               Location: prepareRedirectUrl(parsedAppContext.object.redirectUrl, TestbedConfig.ident, [
                 { key: "consentStatus", value: "consentGranted" },
                 { key: "consentToken", value: consentStatus.data.consentToken },
+                { key: "dataSource", value: consentStatus.dataSource },
               ]),
             },
             cookies: [prepareCookie("appContext")],

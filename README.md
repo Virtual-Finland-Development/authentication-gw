@@ -74,7 +74,7 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 API served at:
 
 - https://virtualfinland-authgw.localhost/ (\*self-signed certificate)
-- http://localhost:3000/
+- http://localhost:4078/
 
 Demo app served at:
 
@@ -92,7 +92,7 @@ Demo app served at:
 
 - OpenAPI documentation: [./openapi/swagger.yml](./openapi/swagger.yml)
 
-  - served with swagger at http://localhost:3000/docs/ when running locally
+  - served with swagger at http://localhost:4078/docs/ when running locally
 
 - Documentation for using the service in frontend apps: [./docs/frontend-app-usage.md](docs/frontend-app-usage.md)
 
