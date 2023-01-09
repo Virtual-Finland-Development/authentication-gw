@@ -49,7 +49,27 @@ export default new (class TestbedConsentsHandler extends BaseRequestHandler {
     const dataSources = context.request.requestBody.dataSources;
     const consentResponses = [];
     for (const dataSource of dataSources) {
-      const consentStatus = await fetchConsentStatus(dataSource.uri, idToken);
+      let consentStatus = {
+        status: "",
+        data: {} as any,
+        idToken: idToken,
+        dataSourceUri: dataSource.uri,
+      };
+
+      if (dataSource.consentToken) {
+        try {
+          await verifyConsent(dataSource.consentToken);
+          consentStatus.status = "consentGranted";
+          consentStatus.data.consentToken = dataSource.consentToken;
+        } catch (error) {
+          consentStatus.status = "verifyUserConsent";
+        }
+      } else {
+        const consentSituationData = await fetchConsentStatus(dataSource.uri, idToken);
+        consentStatus.status = consentSituationData.status;
+        consentStatus.data = consentSituationData.data;
+      }
+
       if (consentStatus.status === "verifyUserConsent") {
         consentResponses.push({
           consentStatus: consentStatus.status,
