@@ -7,6 +7,6 @@ export type ConsentDataSource = {
     /**
      * Consent token for the data source
      */
-    consentToken?: string;
+    consentToken?: string | null;
 };
 

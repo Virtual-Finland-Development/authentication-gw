@@ -668,4 +668,5 @@ components:
           example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
         consentToken:
           type: string
+          nullable: true
           description: "Consent token for the data source"
