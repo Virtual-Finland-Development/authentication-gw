@@ -13,13 +13,19 @@ export default class ConsentAPI extends AuthenticationGW {
    */
   async getConsentSituation(dataSource: string, idToken: string, returnUrl?: string) {
     try {
-      return await this.client.testbedConsentCheck({
+      const response = await this.client.testbedConsentCheck({
         authorization: `Bearer ${idToken}`,
         requestBody: {
           appContext: this.generateAppContext(returnUrl),
-          dataSource: dataSource,
+          dataSources: [{ uri: dataSource }],
         },
       });
+
+      const sitation = response.find((situation) => situation.dataSource === dataSource);
+      if (!sitation) {
+        throw new Error("Unexpected response: missing data source from the response");
+      }
+      return sitation;
     } catch (error) {
       console.log("ConsentAPI.getConsentSituation", error);
       return {

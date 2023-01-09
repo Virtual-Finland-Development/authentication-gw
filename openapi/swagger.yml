@@ -121,46 +121,50 @@ paths:
           application/json:
             schema:
               type: object
-              required: [dataSource, appContext]
+              required: [dataSources, appContext]
               properties:
                 appContext:
                   type: string
                   description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
-                dataSource:
-                  type: string
-                  description: "Testbed data source url"
-                  example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+                dataSources:
+                  type: array
+                  description: "Testbed data sources"
+                  items:
+                    $ref: "#/components/schemas/ConsentDataSource"
       responses:
         "200":
           description: Redirect to the testbed consent service, or back to the app context
           content:
             application/json:
               schema:
-                anyOf:
-                  - type: object
-                    required: [consentStatus, redirectUrl, dataSource]
-                    properties:
-                      consentStatus:
-                        type: string
-                        example: "verifyUserConsent"
-                      redirectUrl:
-                        type: string
-                        example: "/consent/testbed/request"
-                      dataSource:
-                        type: string
-                        example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
-                  - type: object
-                    required: [consentStatus, consentToken, dataSource]
-                    properties:
-                      consentStatus:
-                        type: string
-                        example: "consentGranted"
-                      consentToken:
-                        type: string
-                        example: "asdad2.awasdasd.123123"
-                      dataSource:
-                        type: string
-                        example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+                type: array
+                description: "Array of consent status objects"
+                items:
+                  anyOf:
+                    - type: object
+                      required: [consentStatus, dataSource, redirectUrl]
+                      properties:
+                        consentStatus:
+                          type: string
+                          example: "verifyUserConsent"
+                        redirectUrl:
+                          type: string
+                          example: "/consent/testbed/request"
+                        dataSource:
+                          type: string
+                          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+                    - type: object
+                      required: [consentStatus, dataSource, consentToken]
+                      properties:
+                        consentStatus:
+                          type: string
+                          example: "consentGranted"
+                        consentToken:
+                          type: string
+                          example: "asdad2.awasdasd.123123"
+                        dataSource:
+                          type: string
+                          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
         "401":
           description: Access denied message
           content:
@@ -653,3 +657,15 @@ paths:
       responses:
         "200":
           description: .well-known/jwks.json
+components:
+  schemas:
+    ConsentDataSource:
+      type: object
+      required: ["uri"]
+      properties:
+        uri:
+          type: string
+          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+        consentToken:
+          type: string
+          description: "Consent token for the data source"

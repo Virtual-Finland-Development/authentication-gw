@@ -1,6 +1,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ConsentDataSource } from '../models/ConsentDataSource';
+
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 
@@ -121,17 +123,19 @@ export class DefaultService {
              */
             appContext: string;
             /**
-             * Testbed data source url
+             * Testbed data sources
              */
-            dataSource: string;
+            dataSources: Array<ConsentDataSource>;
         },
-    }): CancelablePromise<({
+    }): CancelablePromise<Array<({
         consentStatus: string;
         redirectUrl: string;
+        dataSource: string;
     } | {
         consentStatus: string;
         consentToken: string;
-    })> {
+        dataSource: string;
+    })>> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/consents/testbed/consent-check',

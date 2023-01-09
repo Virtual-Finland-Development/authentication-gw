@@ -2,11 +2,13 @@ import { Context } from "openapi-backend";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { NoticeException } from "../../utils/exceptions";
+import { parseAuthorizationFromContext } from "../../utils/JWK-Utils";
 import { prepareCookie, prepareRedirectUrl } from "../../utils/route-utils";
 import Runtime from "../../utils/Runtime";
 import { ensureUrlQueryParams } from "../../utils/transformers";
 import { HttpResponse } from "../../utils/types";
-import { engageTestbedConsentRequest } from "./service/ConsentRequests";
+import { parseAppContext } from "../../utils/validators";
+import { fetchConsentStatus } from "./service/ConsentRequests";
 import TestbedConfig from "./Testbed.config";
 import { verifyConsent } from "./TestbedAuthorizer";
 
@@ -39,32 +41,39 @@ export default new (class TestbedConsentsHandler extends BaseRequestHandler {
    * @param context
    */
   async TestbedConsentCheck(context: Context): Promise<HttpResponse> {
-    const consentStatus = await engageTestbedConsentRequest(context);
-    if (consentStatus.status === "verifyUserConsent") {
-      return {
-        statusCode: 200,
-        headers: getJSONResponseHeaders(),
-        body: JSON.stringify({
+    const parsedAppContext = parseAppContext(context, {
+      provider: TestbedConfig.ident,
+    });
+    const idToken = parseAuthorizationFromContext(context);
+
+    const dataSources = context.request.requestBody.dataSources;
+    const consentResponses = [];
+    for (const dataSource of dataSources) {
+      const consentStatus = await fetchConsentStatus(dataSource.uri, idToken);
+      if (consentStatus.status === "verifyUserConsent") {
+        consentResponses.push({
           consentStatus: consentStatus.status,
+          dataSource: consentStatus.dataSourceUri,
           redirectUrl: ensureUrlQueryParams(Runtime.getAppUrl("/consents/testbed/consent-request"), [
-            { key: "appContext", value: consentStatus.parsedAppContext.hash }, // Or maybe provide these at the frontend?
+            { key: "appContext", value: parsedAppContext.hash }, // Or maybe provide these at the frontend?
             { key: "idToken", value: consentStatus.idToken },
-            { key: "dataSource", value: consentStatus.dataSource },
+            { key: "dataSource", value: consentStatus.dataSourceUri },
           ]),
-        }),
-      };
-    } else if (consentStatus.status === "consentGranted") {
-      return {
-        statusCode: 200,
-        headers: getJSONResponseHeaders(),
-        body: JSON.stringify({
+        });
+      } else if (consentStatus.status === "consentGranted") {
+        consentResponses.push({
           consentStatus: consentStatus.status,
+          dataSource: consentStatus.dataSourceUri,
           consentToken: consentStatus.data.consentToken,
-          dataSource: consentStatus.dataSource,
-        }),
-      };
+        });
+      }
     }
-    throw new Error("Unexpected response");
+
+    return {
+      statusCode: 200,
+      headers: getJSONResponseHeaders(),
+      body: JSON.stringify(consentResponses),
+    };
   }
 
   /**
@@ -75,8 +84,17 @@ export default new (class TestbedConsentsHandler extends BaseRequestHandler {
    */
   async TestbedConsentRequest(context: Context): Promise<HttpResponse> {
     try {
-      const consentStatus = await engageTestbedConsentRequest(context);
-      const parsedAppContext = consentStatus.parsedAppContext;
+      const idToken = String(context.request.query.idToken);
+      const dataSourceUri = String(context.request.query.dataSource);
+      const parsedAppContext = parseAppContext(context, {
+        provider: TestbedConfig.ident,
+        meta: {
+          dataSource: dataSourceUri,
+          idToken: idToken,
+        },
+      });
+
+      const consentStatus = await fetchConsentStatus(dataSourceUri, idToken);
       if (consentStatus.status === "verifyUserConsent") {
         // Transit to the testbed consent page
         return {
@@ -85,19 +103,6 @@ export default new (class TestbedConsentsHandler extends BaseRequestHandler {
             Location: consentStatus.data.redirectUrl,
           },
           cookies: [prepareCookie("appContext", parsedAppContext.hash)],
-        };
-      } else if (consentStatus.status === "consentGranted") {
-        // Transit back to the app
-        return {
-          statusCode: 303,
-          headers: {
-            Location: prepareRedirectUrl(parsedAppContext.object.redirectUrl, TestbedConfig.ident, [
-              { key: "consentStatus", value: "consentGranted" },
-              { key: "consentToken", value: consentStatus.data.consentToken },
-              { key: "dataSource", value: consentStatus.dataSource },
-            ]),
-          },
-          cookies: [prepareCookie("appContext")],
         };
       }
       throw new Error("Unexpected response");
@@ -114,10 +119,17 @@ export default new (class TestbedConsentsHandler extends BaseRequestHandler {
    */
   async TestbedConsentResponse(context: Context): Promise<HttpResponse> {
     try {
+      const parsedAppContext = parseAppContext(context);
+      const idToken = parsedAppContext.object.meta?.idToken;
+      const dataSourceUri = parsedAppContext.object.meta?.dataSource;
+
+      if (!idToken || !dataSourceUri) {
+        throw new Error("Missing idToken or dataSourceUri");
+      }
+
       const responseStatusFlag = String(context.request.query.status);
       if (responseStatusFlag === "success") {
-        const consentStatus = await engageTestbedConsentRequest(context);
-        const parsedAppContext = consentStatus.parsedAppContext;
+        const consentStatus = await fetchConsentStatus(dataSourceUri, idToken);
         if (consentStatus.status === "consentGranted") {
           return {
             statusCode: 303,
@@ -125,7 +137,7 @@ export default new (class TestbedConsentsHandler extends BaseRequestHandler {
               Location: prepareRedirectUrl(parsedAppContext.object.redirectUrl, TestbedConfig.ident, [
                 { key: "consentStatus", value: "consentGranted" },
                 { key: "consentToken", value: consentStatus.data.consentToken },
-                { key: "dataSource", value: consentStatus.dataSource },
+                { key: "dataSource", value: consentStatus.dataSourceUri },
               ]),
             },
             cookies: [prepareCookie("appContext")],
