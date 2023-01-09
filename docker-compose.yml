@@ -13,6 +13,7 @@ services:
       - AWS_PROFILE=${AWS_PROFILE:-virtualfinland}
       - AWS_REGION=${AWS_REGION:-eu-north-1}
       - AUTHGW_ENDPOINT_URL_OVERRIDE=https://virtualfinland-authgw.localhost
+      - DEBUG_MODE=false
     volumes:
       - ./:/app
       - $HOME/.aws/credentials:/home/node/.aws/credentials:ro
