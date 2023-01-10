@@ -3,9 +3,8 @@ import * as SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
 import * as TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
 import { AccessDeniedException } from "./exceptions";
 import { decodeIdToken } from "./JWK-Utils";
-
 import { omitEmptyObjectKeys } from "./transformers";
-import { Authorizer } from "./types";
+import { AuthorizationHeaders, Authorizer } from "./types";
 
 /**
  * Resolve authorization provider from authorization header
@@ -29,7 +28,7 @@ function resolveAuthProvider(authorization: string): string {
  * @param authHeaders
  * @returns
  */
-function getAuthorizator(authHeaders: { authorization: string; [attr: string]: string }): Authorizer {
+function getAuthorizator(authHeaders: AuthorizationHeaders): Authorizer {
   const provider = resolveAuthProvider(authHeaders.authorization);
   if (SinunaAuthorizer.isMatchingProvider(provider)) {
     return SinunaAuthorizer;
@@ -51,13 +50,14 @@ export default {
    * @param authData
    * @returns
    */
-  async authorize(authorization: string | string[], authorizationContext: string | string[]): Promise<void> {
+  async authorize(authorization: string | string[], authorizationContext: string | string[], consentToken: string | string[]): Promise<void> {
     const authHeaders = omitEmptyObjectKeys({
       authorization: String(authorization),
-      context: String(authorizationContext),
+      context: authorizationContext ? String(authorizationContext) : "",
+      consentToken: consentToken ? String(consentToken) : "",
     });
 
     const authorizator = getAuthorizator(authHeaders);
-    return await authorizator.authorize(authHeaders.authorization, authHeaders.context);
+    return await authorizator.authorize(authHeaders);
   },
 };

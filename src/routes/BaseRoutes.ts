@@ -28,7 +28,8 @@ export default {
   async AuthorizeRequest(context: Context): Promise<HttpResponse> {
     const authorization = context.request.headers.authorization;
     const authorizationContext = context.request.headers["x-authorization-context"];
-    await Authorizator.authorize(authorization, authorizationContext); // Throws AccessDeniedException if access needs to be denied
+    const consentToken = context.request.headers["x-consent-token"];
+    await Authorizator.authorize(authorization, authorizationContext, consentToken); // Throws AccessDeniedException if access needs to be denied
 
     return {
       statusCode: 200,

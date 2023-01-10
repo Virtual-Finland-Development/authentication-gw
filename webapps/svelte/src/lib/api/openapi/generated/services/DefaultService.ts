@@ -53,6 +53,7 @@ export class DefaultService {
     public authorizeRequest({
         authorization,
         xAuthorizationContext,
+        xConsentToken,
     }: {
         /**
          * id_token as a bearer header
@@ -62,6 +63,10 @@ export class DefaultService {
          * Optional usage context
          */
         xAuthorizationContext?: string,
+        /**
+         * Optional consent token, the consent will be verified if the given authorization issuer has a consent service
+         */
+        xConsentToken?: string,
     }): CancelablePromise<{
         message?: string;
     }> {
@@ -71,6 +76,7 @@ export class DefaultService {
             headers: {
                 'Authorization': authorization,
                 'X-Authorization-Context': xAuthorizationContext,
+                'X-Consent-Token': xConsentToken,
             },
             errors: {
                 401: `Access denied message`,

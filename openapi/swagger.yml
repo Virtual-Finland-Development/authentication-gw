@@ -52,6 +52,12 @@ paths:
           description: "Optional usage context"
           schema:
             type: string
+        - in: header
+          name: X-Consent-Token
+          required: false
+          description: "Optional consent token, the consent will be verified if the given authorization issuer has a consent service"
+          schema:
+            type: string
       responses:
         "200":
           description: Access granted message

@@ -145,7 +145,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
 
       try {
         // Verify logout token
-        await authorize(idToken, "logout");
+        await authorize({ authorization: idToken, context: "logout" });
       } catch (error) {
         throw new NoticeException("Already logged out");
       }
