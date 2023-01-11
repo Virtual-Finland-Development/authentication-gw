@@ -65,9 +65,30 @@ export default class UIState extends LoginAppComponent {
     this.handleCurrentState();
   }
 
-  transitToUrl(url, transitionName: KnownTransitionNames) {
+  transitToUrl(url: string, transitionName: KnownTransitionNames, transitMode: "iframe" | "window" = "iframe") {
     this.flagTransition(transitionName);
-    window.location.href = url;
+    if (transitMode === "iframe") {
+      const loginTestForm = document.getElementById("loginTestForm") as HTMLFormElement;
+      if (!loginTestForm) {
+        throw new Error("loginTestForm not found");
+      }
+
+      const urlObj = new URL(url);
+      loginTestForm.setAttribute("action", urlObj.origin + urlObj.pathname);
+
+      const urlParams = urlObj.searchParams;
+      for (const [key, value] of urlParams.entries()) {
+        const input = document.createElement("input");
+        input.setAttribute("type", "hidden");
+        input.setAttribute("name", key);
+        input.setAttribute("value", value);
+        loginTestForm.appendChild(input);
+      }
+
+      loginTestForm.submit();
+    } else {
+      window.location.href = url;
+    }
   }
 
   resetViewState(transitionName: KnownTransitionNames, refresh: boolean = false) {
