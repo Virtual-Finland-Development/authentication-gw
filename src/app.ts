@@ -3,8 +3,8 @@ import OpenAPIBackend from "openapi-backend";
 
 import BaseRoutes from "./routes/BaseRoutes";
 import OpenIdAuthRoutes from "./routes/OpenidAuthRoutes";
+import TestbedConsentRoutes from "./routes/providers/testbed/TestbedConsentRoutes";
 import Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
-import TestbedSpecialRoutes from "./routes/TestbedSpecialRoutes";
 
 import { getCORSHeaders } from "./utils/default-headers";
 import { debug, log } from "./utils/logging";
@@ -14,11 +14,14 @@ const { promises: fs } = require("fs");
 
 // Setup the OpenAPI backend
 const api = new OpenAPIBackend({
-  definition: "./openapi/authentication-gw.yml",
+  definition: "./openapi/swagger.yml",
   ajvOpts: {
     formats: {
       "date-time": (data: string) => {
         return !isNaN(Date.parse(data));
+      },
+      uri: (data: string) => {
+        return data.includes("://");
       },
     },
   },
@@ -28,7 +31,7 @@ const api = new OpenAPIBackend({
 api.register({
   ...OpenIdAuthRoutes,
   ...Saml2AuthRoutes,
-  ...TestbedSpecialRoutes,
+  ...TestbedConsentRoutes,
   ...BaseRoutes,
 });
 
@@ -89,10 +92,10 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
  * @returns
  */
 async function handleSwaggerDocsRequest(event: APIGatewayProxyEventV2) {
-  if (event.rawPath === "/docs/openapi/authentication-gw.yml") {
+  if (event.rawPath === "/docs/openapi/swagger.yml") {
     return {
       statusCode: 200,
-      body: await fs.readFile("./openapi/authentication-gw.yml", "utf8"),
+      body: await fs.readFile("./openapi/swagger.yml", "utf8"),
       headers: {
         "Content-Type": "text/yaml",
       },

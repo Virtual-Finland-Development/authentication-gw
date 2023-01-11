@@ -1,55 +1,37 @@
 import axios from "axios";
 import AppSettings from "../../AppSettings";
-export type ConsentSituation = { status: string; consentToken?: string; redirectUrl?: string };
+import AuthenticationGW from "./AuthenticationGW";
+export type ConsentSituation = { consentStatus: string; consentToken?: string; redirectUrl?: string };
 
-export default class ConsentAPI {
+export default class ConsentAPI extends AuthenticationGW {
   /**
    *
-   * @param consentId
+   * @param dataSource
    * @param idToken
    * @param returnUrl
    * @returns
    */
-  async getConsentSituation(consentId: string, idToken: string, returnUrl?: string): Promise<ConsentSituation> {
-    // Request the consent: https://ioxio.com/guides/how-to-build-an-application#request-consent
+  async getConsentSituation(dataSource: string, idToken: string, returnUrl?: string) {
     try {
-      const response = await axios.post(`${AppSettings.testbedAPIHost}/testbed/reverse-proxy`, {
-        method: "POST",
-        url: `https://consent.testbed.fi/Consent/Request`,
-        body: JSON.stringify({
-          dataSource: consentId,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
+      const response = await this.client.testbedConsentCheck({
+        authorization: `Bearer ${idToken}`,
+        requestBody: {
+          appContext: this.generateAppContext(returnUrl),
+          dataSources: [{ uri: dataSource }],
         },
       });
 
-      if (response.data.type === "verifyUserConsent") {
-        if (typeof returnUrl !== "string") {
-          returnUrl = window.location.href;
-        }
-        const redirectUrl = `${response.data.verifyUrl}?${new URLSearchParams({
-          returnUrl: returnUrl,
-        }).toString()}`;
-
-        return {
-          status: "verifyUserConsent",
-          redirectUrl: redirectUrl,
-        };
-      } else if (response.data.type === "consentGranted") {
-        return {
-          status: "consentGranted",
-          consentToken: response.data.consentToken,
-        };
+      const sitation = response.find((situation) => situation.dataSource === dataSource);
+      if (!sitation) {
+        throw new Error("Unexpected response: missing data source from the response");
       }
-      throw new Error("Unexpected response");
+      return sitation;
     } catch (error) {
-      console.log("/Consent/Request error:", error);
+      console.log("ConsentAPI.getConsentSituation", error);
+      return {
+        consentStatus: "failed",
+      };
     }
-    return {
-      status: "failed",
-    };
   }
 
   /**
@@ -60,7 +42,7 @@ export default class ConsentAPI {
    */
   async testConsentIdRequest(dataSourceUrl: string, inputData: any, consentToken: string, idToken: string): Promise<any> {
     // Test with a request: https://ioxio.com/guides/how-to-build-an-application#using-the-consent-token
-    const response = await axios.post(`${AppSettings.testbedAPIHost}/testbed/reverse-proxy`, {
+    const response = await axios.post(`${AppSettings.getTestbedAPIHost()}/testbed/reverse-proxy`, {
       method: "POST",
       url: dataSourceUrl,
       body: JSON.stringify(inputData),
@@ -81,13 +63,8 @@ export default class ConsentAPI {
    * @returns
    */
   async verifyConsentToken(consentToken: string): Promise<any> {
-    // Verify the consent token: https://ioxio.com/guides/verify-consent-in-a-data-source
-    const response = await axios.post(`${AppSettings.authenticationGatewayHost}/consent/testbed/verify`, null, {
-      headers: {
-        "X-Consent-Token": consentToken,
-      },
+    return await this.client.testbedConsentVerify({
+      xConsentToken: consentToken,
     });
-
-    return response;
   }
 }

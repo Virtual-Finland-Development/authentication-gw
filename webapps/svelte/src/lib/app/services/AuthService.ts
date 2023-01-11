@@ -1,5 +1,5 @@
-import AuthenticationGW, { AuthenticationGWProps } from "../api/AuthenticationGW";
-import LoginAppComponent from "./LoginAppComponent";
+import AuthenticationGW, { AuthenticationGWProps } from "../../api/AuthenticationGW";
+import LoginAppComponent from "../LoginAppComponent";
 
 /**
  * Example app auth service

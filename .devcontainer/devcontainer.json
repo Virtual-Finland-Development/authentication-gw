@@ -25,11 +25,11 @@
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [3000],
+  // "forwardPorts": [4078],
 
   // Use 'portsAttributes' to set default properties for specific forwarded ports. More info: https://code.visualstudio.com/docs/remote/devcontainerjson-reference.
   "portsAttributes": {
-    "3000": {
+    "4078": {
       "label": "Authentication GW",
       "onAutoForward": "notify"
     }

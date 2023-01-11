@@ -10,9 +10,9 @@ import Settings from "../../utils/Settings";
 import { ensureObject } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import * as SinunaRequests from "./service/SinunaRequests";
+import { parseSinunaAuthenticateResponse, SinunaStateAttributor } from "./service/SinunaResponseParsers";
 import SinunaSettings from "./Sinuna.config";
-import * as SinunaRequests from "./utils/SinunaRequests";
-import { parseSinunaAuthenticateResponse, SinunaStateAttributor } from "./utils/SinunaResponseParsers";
 
 /**
  * @see: https://developer.sinuna.fi/integration_documentation/

@@ -54,7 +54,7 @@
     /**************************************************************************/
     const AppSettings = {
         appName: "authflow-test",
-        authenticationGatewayHost: "http://localhost:3000", // the authentication gw host
+        authenticationGatewayHost: "http://localhost:4078", // the authentication gw host
         authResponseHandlerUrl: window.location.origin + window.location.pathname, // the url without query params etc
         generateAppContext() { // App context generator
             return encodeURIComponent(btoa(JSON.stringify({ appName: this.appName, redirectUrl: this.authResponseHandlerUrl })));

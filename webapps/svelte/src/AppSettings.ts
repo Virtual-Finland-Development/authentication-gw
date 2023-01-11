@@ -1,5 +1,5 @@
 export default {
   appName: "authflow-test",
-  authenticationGatewayHost: "http://localhost:3000",
-  testbedAPIHost: "http://localhost:3003",
+  getAuthenticationGatewayHost: () => import.meta.env.VITE_AUTHGW_API_URL || "http://localhost:4078",
+  getTestbedAPIHost: () => import.meta.env.VITE_TESTBED_API_URL || "http://localhost:3003",
 };

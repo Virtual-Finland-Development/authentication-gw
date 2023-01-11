@@ -1,14 +1,52 @@
 version: "3.7"
 
 services:
-  app:
+  ###
+  # authentication-gw API
+  ###
+  authgw:
     image: node:18-alpine
     user: node
     command: sh -c "npm install && npm run start"
     working_dir: /app
+    environment:
+      - AWS_PROFILE=${AWS_PROFILE:-virtualfinland}
+      - AWS_REGION=${AWS_REGION:-eu-north-1}
+      - AUTHGW_ENDPOINT_URL_OVERRIDE=https://virtualfinland-authgw.localhost
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     volumes:
       - ./:/app
+      - $HOME/.aws/credentials:/home/node/.aws/credentials:ro
     ports:
-      - 3000:3000
+      - 4078:4078
     stdin_open: true
     tty: true
+  ###
+  # Local https
+  ###
+  caddy:
+    image: caddy/caddy:2.6.2-alpine
+    ports:
+      - 80:80 # for http->https redirection
+      - 443:443
+    volumes:
+      - ./resources/docker/caddy/config/Caddyfile:/etc/caddy/Caddyfile
+      - ./resources/docker/caddy/data:/data
+      - caddy_config:/config
+  ###
+  # Demo app
+  ###
+  demoApp:
+    image: node:18-alpine
+    user: node
+    command: sh -c "npm install && npm run start"
+    working_dir: /app
+    environment:
+      - VITE_AUTHGW_API_URL=https://virtualfinland-authgw.localhost
+    volumes:
+      - ./webapps/svelte/:/app
+      - ./openapi/swagger.yml:/app/public/swagger.yml
+    ports:
+      - 5000:5000
+volumes:
+  caddy_config:

@@ -1,12 +1,12 @@
 import AppSettings from "../../AppSettings";
 import { AuthenticationProtocol } from "../api/AuthenticationGW";
 import { log } from "../utils/helpers";
-import AuthService from "./AuthService";
 import AuthState from "./AuthState";
 import ConsentEventListener from "./ConsentEventListener";
-import ConsentService from "./ConsentService";
 import ConsentState from "./ConsentState";
 import LoginEventListener from "./LoginEventListener";
+import AuthService from "./services/AuthService";
+import ConsentService from "./services/ConsentService";
 import UIState from "./UIState";
 
 export default class LoginApp {
