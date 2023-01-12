@@ -13,7 +13,7 @@ custom:
 provider:
   name: "offline"
   stage: offline
-  timeout: 15
+  timeout: 20
 
 functions:
   api-app:

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { debug } from "../../../utils/logging";
 import Runtime from "../../../utils/Runtime";
+import Settings from "../../../utils/Settings";
 
 type ISituationResponseDataPair<T, K extends keyof T = keyof T> = K extends keyof T ? { status: K; data: T[K]; idToken: string; dataSourceUri: string } : never;
 type ISituationResponseData = ISituationResponseDataPair<{
@@ -30,6 +31,7 @@ export async function fetchConsentStatus(dataSourceUri: string, idToken: string)
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
       },
+      timeout: Settings.REQUEST_TIMEOUT_SECS,
     }
   );
 

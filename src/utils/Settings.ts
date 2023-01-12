@@ -37,4 +37,5 @@ export default {
   getStage(): string {
     return this.getEnv("STAGE");
   },
+  REQUEST_TIMEOUT_SECS: 15,
 };
