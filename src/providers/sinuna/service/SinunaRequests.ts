@@ -28,7 +28,7 @@ export async function getTokensWithLoginCode(loginCode: string): Promise<{ acces
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: "Basic " + generateBase64Hash(`${CLIENT_ID}:${CLIENT_SECRET}`),
       },
-      timeout: Settings.REQUEST_TIMEOUT_SECS,
+      timeout: Settings.REQUEST_TIMEOUT_MSECS,
     }
   );
 
@@ -51,7 +51,7 @@ export async function getUserInfoWithAccessToken(accessToken: string) {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    timeout: Settings.REQUEST_TIMEOUT_SECS,
+    timeout: Settings.REQUEST_TIMEOUT_MSECS,
   });
 
   debug("getUserInfoWithAccessToken", response.data);

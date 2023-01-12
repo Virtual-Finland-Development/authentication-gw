@@ -26,7 +26,7 @@ export async function getTokensWithLoginCode(loginCode: string): Promise<{ acces
       headers: {
         Authorization: "Basic " + generateBase64Hash(`${CLIENT_ID}:${CLIENT_SECRET}`),
       },
-      timeout: Settings.REQUEST_TIMEOUT_SECS,
+      timeout: Settings.REQUEST_TIMEOUT_MSECS,
     }
   );
 

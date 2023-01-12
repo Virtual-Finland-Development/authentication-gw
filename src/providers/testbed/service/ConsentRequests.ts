@@ -31,7 +31,7 @@ export async function fetchConsentStatus(dataSourceUri: string, idToken: string)
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
       },
-      timeout: Settings.REQUEST_TIMEOUT_SECS,
+      timeout: Settings.REQUEST_TIMEOUT_MSECS,
     }
   );
 
