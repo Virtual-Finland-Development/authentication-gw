@@ -1,4 +1,4 @@
-import { handler } from "../../src/api-app";
+import { handler } from "../../src/app";
 export async function testRequestEvent(method: string, rawPath: string, queryStringParameters?: any, body?: any, headers?: any) {
   const event = {
     routeKey: `${method} ${rawPath}`,

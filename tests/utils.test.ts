@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { SinunaStateAttributor } from "../src/providers/sinuna/utils/SinunaResponseParsers";
+import { SinunaStateAttributor } from "../src/providers/sinuna/service/SinunaResponseParsers";
 import { ValidationError } from "../src/utils/exceptions";
 import { createSecretHash, decrypt, encrypt } from "../src/utils/hashes";
 import { ensureUrlQueryParam, omitEmptyObjectKeys, omitObjectKeysOtherThan } from "../src/utils/transformers";
