@@ -18,8 +18,6 @@ export function debug(...messages: Array<any>) {
           debugMessages.push("Failed to stringify debug message");
           debugMessages.push(error);
         }
-      } else if (typeof message === "object" && message !== null) {
-        debugMessages.push(JSON.stringify(message));
       } else if (message instanceof AxiosError) {
         const parts = logAxiosException(message, true);
         for (const part of parts) {
@@ -27,6 +25,8 @@ export function debug(...messages: Array<any>) {
         }
       } else if (message instanceof Error) {
         debugMessages.push(exceptionToObject(message));
+      } else if (typeof message === "object" && message !== null) {
+        debugMessages.push(JSON.stringify(message));
       } else {
         debugMessages.push(message);
       }

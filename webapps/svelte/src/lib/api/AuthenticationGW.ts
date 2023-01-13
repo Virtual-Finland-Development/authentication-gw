@@ -17,27 +17,29 @@ export default class AuthenticationGW {
     LogoutRequest: string;
   };
 
-  constructor(props: AuthenticationGWProps) {
-    this.props = props;
+  constructor(props?: AuthenticationGWProps) {
+    this.props = props || ({ appName: "default", redirectUrl: window.location.origin + window.location.pathname } as AuthenticationGWProps);
 
     const { provider, protocol } = this.props;
-    this.provider = provider.toLowerCase();
-    this.protocol = protocol.toLowerCase();
+    this.provider = provider?.toLowerCase();
+    this.protocol = protocol?.toLowerCase();
 
     if (!this.props.logoutRedirectUrl) {
       this.props.logoutRedirectUrl = this.props.redirectUrl;
     }
 
+    const baseURL = AppSettings.getAuthenticationGatewayHost();
+
     // Create the openapi client
     this.client = new AuthGWClient({
-      BASE: AppSettings.authenticationGatewayHost,
+      BASE: baseURL,
       WITH_CREDENTIALS: true,
     }).default;
 
     // Setup the redirect urls
     this.redirectUrls = {
-      AuthenticationRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/authentication-request`,
-      LogoutRequest: `${AppSettings.authenticationGatewayHost}/auth/${this.protocol}/${this.provider}/logout-request`,
+      AuthenticationRequest: `${baseURL}/auth/${this.protocol}/${this.provider}/authentication-request`,
+      LogoutRequest: `${baseURL}/auth/${this.protocol}/${this.provider}/logout-request`,
     };
   }
 
@@ -46,7 +48,7 @@ export default class AuthenticationGW {
    * @param redirectUrl
    * @returns
    */
-  #generateAppContext(redirectUrl?: string): string {
+  generateAppContext(redirectUrl?: string): string {
     // App context generator
     return encodeURIComponent(btoa(JSON.stringify({ appName: this.props.appName, redirectUrl: redirectUrl || this.props.redirectUrl })));
   }
@@ -55,7 +57,7 @@ export default class AuthenticationGW {
    *
    */
   getLoginUrl(): string {
-    return `${this.redirectUrls.AuthenticationRequest}?appContext=${this.#generateAppContext()}`;
+    return `${this.redirectUrls.AuthenticationRequest}?appContext=${this.generateAppContext()}`;
   }
 
   /**
@@ -64,7 +66,7 @@ export default class AuthenticationGW {
    */
   getLogoutUrl(idToken: string): string {
     const urlParams = new URLSearchParams({
-      appContext: this.#generateAppContext(),
+      appContext: this.generateAppContext(),
       idToken: idToken,
     });
 
@@ -76,10 +78,8 @@ export default class AuthenticationGW {
    * @param idToken
    */
   async authorize(idToken: string) {
-    const { provider } = this.props;
     const response = await this.client.authorizeRequest({
       authorization: `Bearer ${idToken}`,
-      xAuthorizationProvider: provider,
       xAuthorizationContext: "demo app",
     });
     return response;
@@ -92,7 +92,7 @@ export default class AuthenticationGW {
    */
   async getLoggedInState(loginCode: string) {
     const { provider, protocol } = this.props;
-    const payload = { loginCode: loginCode, appContext: this.#generateAppContext() };
+    const payload = { loginCode: loginCode, appContext: this.generateAppContext() };
 
     switch (protocol) {
       case "openId":

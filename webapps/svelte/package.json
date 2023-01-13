@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "start": "npm run dev",
-    "dev": "vite",
+    "dev": "vite --port 5000 --host",
     "build": "vite build",
     "preview": "vite preview",
     "predev": "npm run generate-authgw-openapi",
     "prebuild": "npm run generate-authgw-openapi",
-    "generate-authgw-openapi": "ts-node ./src/lib/api/openapi/generate-authgw-openapi.ts"
+    "copy-authgw-openapi": "cp ../../openapi/swagger.yml ./public/swagger.yml 2>/dev/null || true",
+    "generate-authgw-openapi": "npm run copy-authgw-openapi && ts-node ./src/lib/api/openapi/generate-authgw-openapi.ts"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.2",

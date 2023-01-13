@@ -7,3 +7,4 @@ infra/.lambda
 *.drawio.bkp
 certificates/*
 !certificates/*.sh
+resources/docker/caddy/data/*

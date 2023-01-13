@@ -1,6 +1,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ConsentDataSource } from '../models/ConsentDataSource';
+
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 
@@ -51,6 +53,7 @@ export class DefaultService {
     public authorizeRequest({
         authorization,
         xAuthorizationContext,
+        xConsentToken,
     }: {
         /**
          * id_token as a bearer header
@@ -60,6 +63,10 @@ export class DefaultService {
          * Optional usage context
          */
         xAuthorizationContext?: string,
+        /**
+         * Optional consent token, the consent will be verified if the given authorization issuer has a consent service
+         */
+        xConsentToken?: string,
     }): CancelablePromise<{
         message?: string;
     }> {
@@ -69,6 +76,7 @@ export class DefaultService {
             headers: {
                 'Authorization': authorization,
                 'X-Authorization-Context': xAuthorizationContext,
+                'X-Consent-Token': xConsentToken,
             },
             errors: {
                 401: `Access denied message`,
@@ -89,12 +97,132 @@ export class DefaultService {
     }> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/consent/testbed/verify',
+            url: '/consents/testbed/consent-verify',
             headers: {
                 'X-Consent-Token': xConsentToken,
             },
             errors: {
                 401: `Unverified message`,
+            },
+        });
+    }
+
+    /**
+     * Check the testbed consent status for a dataSource
+     * @returns any Redirect to the testbed consent service, or back to the app context
+     * @throws ApiError
+     */
+    public testbedConsentCheck({
+        authorization,
+        requestBody,
+    }: {
+        /**
+         * id_token as a bearer header
+         */
+        authorization: string,
+        /**
+         * Retrieve the authentication token from the auth provider service
+         */
+        requestBody: {
+            /**
+             * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
+             */
+            appContext: string;
+            /**
+             * Testbed data sources
+             */
+            dataSources: Array<ConsentDataSource>;
+        },
+    }): CancelablePromise<Array<({
+        consentStatus: string;
+        redirectUrl: string;
+        dataSource: string;
+    } | {
+        consentStatus: string;
+        consentToken: string;
+        dataSource: string;
+    })>> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/consents/testbed/consent-check',
+            headers: {
+                'Authorization': authorization,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Access denied message`,
+            },
+        });
+    }
+
+    /**
+     * Transition to the testbed consent page
+     * @returns void
+     * @throws ApiError
+     */
+    public testbedConsentRequest({
+        appContext,
+        authorization,
+        dataSource,
+        idToken,
+    }: {
+        /**
+         * Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}
+         */
+        appContext: string,
+        /**
+         * id_token as a bearer header
+         */
+        authorization?: string,
+        /**
+         * Testbed data source url
+         */
+        dataSource?: string,
+        /**
+         * id_token
+         */
+        idToken?: string,
+    }): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/consents/testbed/consent-request',
+            headers: {
+                'Authorization': authorization,
+            },
+            query: {
+                'appContext': appContext,
+                'dataSource': dataSource,
+                'idToken': idToken,
+            },
+            errors: {
+                303: `Redirect to the testbed consent service, or back to the app context`,
+                401: `Access denied message`,
+            },
+        });
+    }
+
+    /**
+     * Transition from the testbed consent page back to the app context
+     * @returns void
+     * @throws ApiError
+     */
+    public testbedConsentResponse({
+        status,
+    }: {
+        /**
+         * Consent status
+         */
+        status: 'success' | 'fail',
+    }): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/consents/testbed/consent-response',
+            query: {
+                'status': status,
+            },
+            errors: {
+                303: `Redirect back to the app context`,
             },
         });
     }

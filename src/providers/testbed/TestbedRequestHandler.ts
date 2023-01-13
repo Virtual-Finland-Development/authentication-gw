@@ -11,8 +11,8 @@ import Settings from "../../utils/Settings";
 import { ensureObject } from "../../utils/transformers";
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import * as TestbedRequests from "./service/TestbedRequests";
 import TestbedSettings from "./Testbed.config";
-import * as TestbedRequests from "./utils/TestbedRequests";
 import { authorize } from "./TestbedAuthorizer";
 
 /**
@@ -21,9 +21,6 @@ import { authorize } from "./TestbedAuthorizer";
  */
 export default new (class TestbedRequestHandler extends BaseRequestHandler implements AuthRequestHandler {
   identityProviderIdent = TestbedSettings.ident;
-
-  async initialize(): Promise<void> {}
-
   /**
    * GET->REDIRECT: The route for handling the auth flow initiating process
    *
@@ -62,10 +59,11 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     try {
-      debug(context.request.query);
+      debug("Response query params", context.request.query);
 
-      if (context.request.query.error) {
-        throw new NoticeException(String(context.request.query.error_description) || String(context.request.query.error));
+      const errorInQuery = context.request.query?.error || context.request.query?.error_description;
+      if (errorInQuery) {
+        throw new NoticeException(String(errorInQuery));
       }
 
       const loginCode = String(context.request.query.code);
@@ -147,7 +145,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
 
       try {
         // Verify logout token
-        await authorize(idToken, "logout");
+        await authorize({ authorization: idToken, context: "logout" });
       } catch (error) {
         throw new NoticeException("Already logged out");
       }

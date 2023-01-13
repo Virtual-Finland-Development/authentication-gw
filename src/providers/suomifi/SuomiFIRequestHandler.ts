@@ -12,10 +12,10 @@ import { parseBase64XMLBody } from "../../utils/transformers";
 
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import { getSuomiFISAML2Client } from "./service/SuomiFISAML2";
+import { createSuomiFiLoggedInCode, extractSuomiFiLoggedInState, parseSuomiFiBasicProfileFromIdToken } from "./service/SuomifiStateTools";
 import SuomiFISettings from "./SuomiFI.config";
 import { createSignedInTokens, generateSaml2RelayState, getJKWSJsonConfiguration } from "./SuomiFIAuthorizer";
-import { getSuomiFISAML2Client } from "./utils/SuomiFISAML2";
-import { createSuomiFiLoggedInCode, extractSuomiFiLoggedInState, parseSuomiFiBasicProfileFromIdToken } from "./utils/SuomifiStateTools";
 
 /**
  * @see: https://palveluhallinta.suomi.fi/en/sivut/tunnistus/kayttoonotto/kayttoonoton-vaiheet

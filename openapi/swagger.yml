@@ -52,6 +52,12 @@ paths:
           description: "Optional usage context"
           schema:
             type: string
+        - in: header
+          name: X-Consent-Token
+          required: false
+          description: "Optional consent token, the consent will be verified if the given authorization issuer has a consent service"
+          schema:
+            type: string
       responses:
         "200":
           description: Access granted message
@@ -73,7 +79,7 @@ paths:
                   message:
                     type: string
                     default: "Access Denied"
-  "/consent/testbed/verify":
+  "/consents/testbed/consent-verify":
     post:
       operationId: TestbedConsentVerify
       parameters:
@@ -102,6 +108,150 @@ paths:
                   message:
                     type: string
                     default: "Unverified"
+  "/consents/testbed/consent-check":
+    post:
+      operationId: TestbedConsentCheck
+      description: Check the testbed consent status for a dataSource
+      parameters:
+        - in: header
+          name: Authorization
+          description: "id_token as a bearer header"
+          example: "Bearer asd23123czxc.a3123asdasd.zxczxc"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Retrieve the authentication token from the auth provider service
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dataSources, appContext]
+              properties:
+                appContext:
+                  type: string
+                  description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
+                dataSources:
+                  type: array
+                  description: "Testbed data sources"
+                  items:
+                    $ref: "#/components/schemas/ConsentDataSource"
+      responses:
+        "200":
+          description: Redirect to the testbed consent service, or back to the app context
+          content:
+            application/json:
+              schema:
+                type: array
+                description: "Array of consent status objects"
+                items:
+                  anyOf:
+                    - type: object
+                      required: [consentStatus, dataSource, redirectUrl]
+                      properties:
+                        consentStatus:
+                          type: string
+                          example: "verifyUserConsent"
+                        redirectUrl:
+                          type: string
+                          example: "/consent/testbed/request"
+                        dataSource:
+                          type: string
+                          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+                    - type: object
+                      required: [consentStatus, dataSource, consentToken]
+                      properties:
+                        consentStatus:
+                          type: string
+                          example: "consentGranted"
+                        consentToken:
+                          type: string
+                          example: "asdad2.awasdasd.123123"
+                        dataSource:
+                          type: string
+                          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+        "401":
+          description: Access denied message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access Denied"
+  "/consents/testbed/consent-request":
+    get:
+      operationId: TestbedConsentRequest
+      description: "Transition to the testbed consent page"
+      parameters:
+        - in: header
+          name: Authorization
+          description: "id_token as a bearer header"
+          example: "Bearer asd23123czxc.a3123asdasd.zxczxc"
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: appContext
+          schema:
+            type: string
+          required: true
+          description: "Base64Url-encoded object with attributes eg: {appName: string, redirectUrl: string}"
+        - in: query
+          name: dataSource
+          schema:
+            type: string
+          required: false
+          description: "Testbed data source url"
+          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+        - in: query
+          name: idToken
+          schema:
+            type: string
+          required: false
+          description: id_token
+          example: asd23123czxc.a3123asdasd.zxczxc
+      responses:
+        "303":
+          description: Redirect to the testbed consent service, or back to the app context
+          headers:
+            location:
+              description: Redirection url
+              schema:
+                type: string
+        "401":
+          description: Access denied message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access Denied"
+  "/consents/testbed/consent-response":
+    get:
+      operationId: TestbedConsentResponse
+      description: "Transition from the testbed consent page back to the app context"
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [success, fail]
+          required: true
+          description: Consent status
+          example: success
+      responses:
+        "303":
+          description: Redirect back to the app context
+          headers:
+            location:
+              description: Redirection url
+              schema:
+                type: string
   "/auth/openid/{provider}/authentication-request":
     get:
       operationId: OpenIdAuthenticationRequest
@@ -513,3 +663,16 @@ paths:
       responses:
         "200":
           description: .well-known/jwks.json
+components:
+  schemas:
+    ConsentDataSource:
+      type: object
+      required: ["uri"]
+      properties:
+        uri:
+          type: string
+          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+        consentToken:
+          type: string
+          nullable: true
+          description: "Consent token for the data source"

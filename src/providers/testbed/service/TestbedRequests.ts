@@ -4,7 +4,7 @@ import { debug } from "../../../utils/logging";
 import Runtime from "../../../utils/Runtime";
 import Settings from "../../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../../utils/transformers";
-import SinunaSettings from "../Sinuna.config";
+import TestbedSettings from "../Testbed.config";
 
 /**
  *
@@ -12,22 +12,21 @@ import SinunaSettings from "../Sinuna.config";
  * @returns
  */
 export async function getTokensWithLoginCode(loginCode: string): Promise<{ accessToken: string; idToken: string; expiresAt: string }> {
-  const CLIENT_ID = await Settings.getStageSecret("SINUNA_CLIENT_ID");
-  const CLIENT_SECRET = await Settings.getStageSecret("SINUNA_CLIENT_SECRET");
-
+  const CLIENT_ID = await Settings.getSecret("TESTBED_CLIENT_ID");
+  const CLIENT_SECRET = await Settings.getSecret("TESTBED_CLIENT_SECRET");
   const response = await axios.post(
-    `https://login.iam.qa.sinuna.fi/oxauth/restv1/token`,
+    `https://login.testbed.fi/api/oauth/token`,
     new URLSearchParams({
       grant_type: "authorization_code",
       code: loginCode,
-      scope: SinunaSettings.scope,
-      redirect_uri: Runtime.getAppUrl("/auth/openid/sinuna/authenticate-response"),
+      scope: TestbedSettings.scope,
+      redirect_uri: Runtime.getAppUrl("/auth/openid/testbed/authenticate-response"),
     }).toString(),
     {
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
         Authorization: "Basic " + generateBase64Hash(`${CLIENT_ID}:${CLIENT_SECRET}`),
       },
+      timeout: Settings.REQUEST_TIMEOUT_MSECS,
     }
   );
 
@@ -46,7 +45,7 @@ export async function getTokensWithLoginCode(loginCode: string): Promise<{ acces
  * @returns
  */
 export async function getUserInfoWithAccessToken(accessToken: string) {
-  const response = await axios.get(`https://login.iam.qa.sinuna.fi/oxauth/restv1/userinfo`, {
+  const response = await axios.post(`https://login.testbed.fi/api/oauth/userinfo`, null, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

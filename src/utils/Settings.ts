@@ -3,7 +3,7 @@ import { getSecretParameter } from "./libs/AWS";
 export default {
   async getSecret(key: string, defaultValue?: string): Promise<string> {
     // Skip aws parameter store on test and local environment
-    if (this.getEnv("NODE_ENV") === "test" || this.getStage() === "offline") {
+    if (this.getEnv("NODE_ENV") === "test" || (this.getStage() === "offline" && this.hasEnv(key))) {
       return this.getEnv(key, defaultValue);
     }
 
@@ -18,6 +18,9 @@ export default {
   },
   async getStageSecret(key: string, defaultValue?: string): Promise<string> {
     return this.getSecret(`${this.getStage()}_${key}`, defaultValue);
+  },
+  hasEnv(key: string): boolean {
+    return typeof process.env[key] !== "undefined" && process.env[key] !== "";
   },
   getEnv(key: string, defaultValue: string = ""): string {
     return this.getEnvironmentValue(key, defaultValue);
@@ -34,4 +37,5 @@ export default {
   getStage(): string {
     return this.getEnv("STAGE");
   },
+  REQUEST_TIMEOUT_MSECS: 15000,
 };

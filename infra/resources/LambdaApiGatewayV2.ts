@@ -139,7 +139,7 @@ function createLambdaFunction(
     tags: stack.tags,
     environment: ifObjectEmpty(configuration.environment) ? undefined : { variables: configuration.environment },
     layers: [configuration.nodeModulesLayer.arn],
-    timeout: 15,
+    timeout: 20,
     memorySize: 1024,
   });
 

@@ -3,6 +3,7 @@
 import axios from "axios";
 import * as jwt from "jsonwebtoken";
 import jwktopem from "jwk-to-pem";
+import { Context } from "openapi-backend";
 import { ValidationError } from "./exceptions";
 import { debug } from "./logging";
 import { leftTrim } from "./transformers";
@@ -39,7 +40,7 @@ export function decodeIdToken(idToken: string | null): { decodedToken: jwt.Jwt |
     throw new Error("Missing ID Token");
   }
 
-  const token = leftTrim(idToken, "Bearer ");
+  const token = parseAuthorizationHeaderValue(idToken);
   const decodedToken = jwt.decode(token, { complete: true });
   return {
     decodedToken: decodedToken,
@@ -88,6 +89,24 @@ export async function getPublicKey(decodedToken: jwt.Jwt | null, issuerConfig: I
   const key = await getJwksKey(keyId, issuerConfig);
   debug("Found public key");
   return { pem: jwktopem(key), key: key };
+}
+
+/**
+ *
+ * @param context
+ * @returns
+ */
+export function parseAuthorizationFromContext(context: Context): string {
+  return parseAuthorizationHeaderValue(String(context.request.headers.authorization));
+}
+
+/**
+ *
+ * @param authorization
+ * @returns
+ */
+export function parseAuthorizationHeaderValue(authorization: string): string {
+  return leftTrim(authorization, "Bearer ");
 }
 
 /* ---------------Private------------------- */

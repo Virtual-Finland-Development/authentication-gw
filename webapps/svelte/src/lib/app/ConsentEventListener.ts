@@ -5,9 +5,9 @@ export default async function ConsentEventListener(loginApp: LoginApp) {
     loginApp.UIState.setTransition("consent", false);
 
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has("status")) {
-      const status = urlParams.get("status");
-      if (status === "success") {
+    if (urlParams.has("consentStatus")) {
+      const consentStatus = urlParams.get("consentStatus");
+      if (consentStatus === "consentGranted") {
         loginApp.log("ConsentEventListener", "Consent success");
         await loginApp.ConsentService.consentify();
       } else {

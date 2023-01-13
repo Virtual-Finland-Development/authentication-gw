@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { Context } from "openapi-backend";
 
 import SinunaRequestHandler from "../providers/sinuna/SinunaRequestHandler";
@@ -6,10 +7,20 @@ import TestbedRequestHandler from "../providers/testbed/TestbedRequestHandler";
 
 import { AccessDeniedException, ValidationError } from "../utils/exceptions";
 import { debug, log } from "../utils/logging";
-import { ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
+import { ensureArray, ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
 import { getJSONResponseHeaders } from "./default-headers";
 import { AuthRequestHandler, HttpResponse, NotifyErrorType } from "./types";
 import { parseAppContext } from "./validators";
+
+/**
+ *
+ * @param redirectUrl
+ * @param providerIdent
+ * @returns
+ */
+export function prepareRedirectUrl(redirectUrl: string, providerIdent: string, params?: Array<{ key: string; value: any }>): string {
+  return ensureUrlQueryParams(redirectUrl, [{ key: "provider", value: providerIdent }, ...ensureArray(params)]);
+}
 
 /**
  *
@@ -20,8 +31,8 @@ import { parseAppContext } from "./validators";
  */
 export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, providerIdent: string): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { param: "loginCode", value: loginCode },
-    { param: "provider", value: providerIdent },
+    { key: "loginCode", value: loginCode },
+    { key: "provider", value: providerIdent },
   ]);
 }
 
@@ -33,8 +44,8 @@ export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, 
  */
 export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: string): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { param: "logout", value: "success" },
-    { param: "provider", value: providerIdent },
+    { key: "logout", value: "success" },
+    { key: "provider", value: providerIdent },
   ]);
 }
 
@@ -47,10 +58,10 @@ export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: str
  */
 export function prepareErrorRedirectUrl(redirectUrl: string, message: { error: string; provider?: string; intent: string; type: NotifyErrorType }): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { param: "error", value: message.error },
-    { param: "provider", value: message.provider || "unknown" },
-    { param: "intent", value: message.intent },
-    { param: "type", value: message.type },
+    { key: "error", value: message.error },
+    { key: "provider", value: message.provider || "unknown" },
+    { key: "intent", value: message.intent },
+    { key: "type", value: message.type },
   ]);
 }
 
@@ -90,7 +101,7 @@ export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: { er
  * @param value
  * @returns
  */
-export function prepareCookie(name: string, value: string): string {
+export function prepareCookie(name: string, value: string = ""): string {
   return `${name}=${value}; SameSite=None; Secure; HttpOnly`;
 }
 
@@ -110,6 +121,8 @@ export function InternalServerErrorHandler(error: any) {
     statusCode = 422;
   } else if (error instanceof AccessDeniedException) {
     statusCode = 401;
+  } else if (error instanceof AxiosError) {
+    statusCode = error.response?.status || 500;
   }
 
   return {
@@ -183,15 +196,21 @@ export function getAuthProviderRequestHandler(context: Context, defaultProvider?
  * @param defaultAuthProviderIdent
  * @returns
  */
-export function generateRequestHandlers(operationNames: Array<string>, operationPrefix: string, defaultAuthProviderIdent?: string): any {
+export function generateRouteRequestHandlers(operationNames: Array<string>, operationPrefix: string, defaultAuthProviderIdent?: string, requestsHandler?: any): any {
   return operationNames.reduce((operations: Record<string, (context: Context) => Promise<HttpResponse>>, operationName: string) => {
-    operations[`${operationPrefix}${operationName}`] = async (context: Context) => {
-      const handler: any = getAuthProviderRequestHandler(context, defaultAuthProviderIdent); // @TODO: fix this any by defining the operationName type
-      await handler.initialize();
-      const response = await handler[operationName](context);
-      debug("Response", response);
-      return response;
-    };
+    operations[`${operationPrefix}${operationName}`] = generateRequestHandlerOperation(operationName, defaultAuthProviderIdent, requestsHandler);
     return operations;
   }, {});
+}
+
+export function generateRequestHandlerOperation(operationName: string, defaultAuthProviderIdent?: string, requestsHandler?: any): (context: Context) => Promise<HttpResponse> {
+  return async (context: Context) => {
+    if (!requestsHandler) {
+      requestsHandler = getAuthProviderRequestHandler(context, defaultAuthProviderIdent);
+    }
+    await requestsHandler.initialize();
+    const response = await requestsHandler[operationName](context);
+    debug("Response", response);
+    return response;
+  };
 }

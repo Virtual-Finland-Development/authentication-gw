@@ -49,17 +49,39 @@ if (response.status !== 200) {
 
 The development setup can be set up using vscode devcontainers or with local tools
 
+### Prerequisites
+
+Needs AWS credentials for some features to work:
+
+Read more about setup of AWS credentials here: [AWS: Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+
+- Environment variables:
+  - `AWS_PROFILE`: defaults to `virtualfinland`
+- AWS credentials file:
+  - `~/.aws/credentials`
+
 ### Run with vscode devcontainer
 
 Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/remote/containers
 
 - Open the project folder as devcontainer
-- Browse the API-docs at http://localhost:3000/
   - In the container, the default `postStartCommand` is set to `npm run start` which should publish the endpoint
 
 ### Run with docker compose
 
 - `docker compose up`
+
+API served at:
+
+- https://virtualfinland-authgw.localhost/ (\*self-signed certificate)
+- http://localhost:4078/
+
+Demo app served at:
+
+- https://virtualfinland-authgw-demo.localhost/ (\*self-signed certificate)
+- http://localhost:5000/
+
+\* The self-signed certificate is blocked by the browser by default. You can add the certificate to the browser's trusted certificates by accepting it with the browsers warning dialog or by @TODO: missing documentation.
 
 ### Run with local tools
 
@@ -68,9 +90,9 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 
 ## Usage
 
-- OpenAPI documentation: [./openapi/authentication-gw.yml](./openapi/authentication-gw.yml)
+- OpenAPI documentation: [./openapi/swagger.yml](./openapi/swagger.yml)
 
-  - served with swagger at http://localhost:3000/docs/ when running locally
+  - served with swagger at http://localhost:4078/docs/ when running locally
 
 - Documentation for using the service in frontend apps: [./docs/frontend-app-usage.md](docs/frontend-app-usage.md)
 
@@ -94,3 +116,8 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 - [OpenAPI Backend](https://github.com/anttiviljami/openapi-backend)
 - [OpenAPI 3.0](https://swagger.io/specification/)
 - [Swagger UI](https://github.com/sylwit/aws-serverless-swagger-ui)
+
+### Development tools
+
+- [Caddy docker](https://hub.docker.com/_/caddy)
+- [Devcontainers](https://code.visualstudio.com/docs/remote/containers)

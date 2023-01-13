@@ -10,11 +10,11 @@ import { JWKS, verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
 import Settings from "../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
-import { ParsedAppContext } from "../../utils/types";
+import { AuthorizationHeaders, ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
+import { resolveSuomiFiUserIdFromProfileData } from "./service/SuomifiStateTools";
+import { SuomiFiProfile } from "./service/SuomifiTypes";
 import SuomiFIConfig from "./SuomiFI.config";
-import { resolveSuomiFiUserIdFromProfileData } from "./utils/SuomifiStateTools";
-import { SuomiFiProfile } from "./utils/SuomifiTypes";
 
 const SUOMIFI_ISSUER = "virtual-finland/authentication-gw/suomifi";
 
@@ -119,13 +119,13 @@ export function isMatchingProvider(provider: string): boolean {
 }
 
 /**
- * @param idToken
- * @param context - which app source is requesting access
+ *
+ * @param authorizationHeaders
  */
-export async function authorize(idToken: string, context: string): Promise<void> {
+export async function authorize(authorizationHeaders: AuthorizationHeaders): Promise<void> {
   try {
     // Verify token
-    const verified = await verifyIdToken(idToken, { issuer: SUOMIFI_ISSUER, jwks: await getJKWSJsonConfiguration() });
+    const verified = await verifyIdToken(authorizationHeaders.authorization, { issuer: SUOMIFI_ISSUER, jwks: await getJKWSJsonConfiguration() });
 
     // Validate rest of the fields
     const parsedAppContext = parseAppContext(verified.appContextHash); // Throws
