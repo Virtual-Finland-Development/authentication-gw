@@ -12,7 +12,7 @@ import { fetchConsentStatus } from "./service/ConsentRequests";
 import TestbedConfig from "./Testbed.config";
 import { verifyConsent } from "./TestbedAuthorizer";
 
-export default new (class TestbedConsentsHandler extends BaseRequestHandler {
+export default new (class TestbedConsentRequestsHandler extends BaseRequestHandler {
   identityProviderIdent = TestbedConfig.ident;
 
   /**

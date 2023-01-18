@@ -1,10 +1,8 @@
 import { APIGatewayProxyEventV2, Context as APIGatewayContext } from "aws-lambda";
 import OpenAPIBackend from "openapi-backend";
 
+import AppRoutes from "./routes/AppRoutes";
 import BaseRoutes from "./routes/BaseRoutes";
-import OpenIdAuthRoutes from "./routes/OpenidAuthRoutes";
-import TestbedConsentRoutes from "./routes/providers/testbed/TestbedConsentRoutes";
-import Saml2AuthRoutes from "./routes/Saml2AuthRoutes";
 
 import { getCORSHeaders } from "./utils/default-headers";
 import { debug, log } from "./utils/logging";
@@ -29,9 +27,7 @@ const api = new OpenAPIBackend({
 
 // register your framework specific request handlers here
 api.register({
-  ...OpenIdAuthRoutes,
-  ...Saml2AuthRoutes,
-  ...TestbedConsentRoutes,
+  ...AppRoutes,
   ...BaseRoutes,
 });
 
