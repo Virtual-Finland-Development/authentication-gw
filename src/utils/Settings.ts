@@ -1,4 +1,4 @@
-import { getSecretParameter } from "./libs/AWS";
+import { getSecretParameter } from "./libs/AWS/SecretsManager";
 
 export default {
   async getSecret(key: string, defaultValue?: string): Promise<string> {

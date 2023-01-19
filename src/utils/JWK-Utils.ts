@@ -4,6 +4,7 @@ import axios from "axios";
 import * as jwt from "jsonwebtoken";
 import jwktopem from "jwk-to-pem";
 import { Context } from "openapi-backend";
+import CacheService from "./CacheService";
 import { ValidationError } from "./exceptions";
 import { debug } from "./logging";
 import { leftTrim } from "./transformers";
@@ -119,12 +120,15 @@ export function parseAuthorizationHeaderValue(authorization: string): string {
  */
 async function getJwksKey(keyId: string, issuerConfig: IssuerConfig): Promise<jwktopem.JWK> {
   const cacheKey = `jwks-key::${keyId}`;
-  let key = await cacheService.get(cacheKey);
+  const ttlMs = 4 * 60 * 1000; // 4 hours
+  let key = await CacheService.fetch(cacheKey);
   if (!key) {
     debug("Fetching JWKS key..");
     const jwks = await getJwks(issuerConfig);
     key = jwks.keys.find((key: jwt.JwtHeader) => key.kid === keyId);
-    await cacheService.set(cacheKey, key);
+    if (key) {
+      await CacheService.save(cacheKey, key, ttlMs);
+    }
   }
 
   if (!key) {
@@ -159,16 +163,3 @@ async function getJwks(issuerConfig: IssuerConfig): Promise<JWKS> {
   }
   return (await axios.get(jwksUri)).data;
 }
-
-/**
- * Simple in-memory cache service snub
- */
-const cacheService = {
-  store: new Map<string, any>(),
-  async get(key: string) {
-    return this.store.get(key);
-  },
-  async set(key: string, value: any) {
-    this.store.set(key, value);
-  },
-};

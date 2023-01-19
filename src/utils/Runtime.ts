@@ -30,4 +30,7 @@ export default {
   getRequestOrigin(): string {
     return runtimeState.requestOrigin;
   },
+  sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  },
 };
