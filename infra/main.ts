@@ -3,14 +3,16 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
 import Settings from "../src/utils/Settings";
-import { createApiEndpoint, createLambdaRoute, createStack, StackConfig } from "./resources/LambdaApiGatewayV2";
+import { createDynamoDBCacheTable } from "./resources/DynamoDBCacheTable";
+import { createApiEndpoint, createLambdaRoute, createStack } from "./resources/LambdaApiGatewayV2";
+import { createStackConfig } from "./utils";
 
-const configuration: StackConfig = {
-  name: "Authenticator",
+const configuration = createStackConfig({
+  name: "authentication-gw",
   stage: pulumi.getStack(),
   project: "Virtual Finland",
   pulumiOrganization: pulumi.getOrganization(),
-};
+});
 
 /**
  * Dependencies layer for lambda functions
@@ -29,6 +31,12 @@ const nodeModulesLayer = new aws.lambda.LayerVersion("authentication-gw-dependen
 const stack = createStack(`${configuration.stage}-authentication-gw`, configuration);
 
 /**
+ * DynamoDB table
+ */
+const cacheTable = createDynamoDBCacheTable(configuration, stack.role);
+export const dynamoDBCacheTableName = cacheTable.name; // For pulumi output
+
+/**
  * Routes
  */
 const appRoutes = [
@@ -44,6 +52,7 @@ const appRoutes = [
       environment: {
         STAGE: configuration.stage,
         DEBUG_MODE: Settings.getEnv("DEBUG_MODE", "false"),
+        DYNAMODB_CACHE_TABLE_NAME: dynamoDBCacheTableName,
       },
       nodeModulesLayer: nodeModulesLayer,
     },

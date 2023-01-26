@@ -1,9 +1,9 @@
-import { getSecretParameter } from "./libs/AWS";
+import { getSecretParameter } from "./libs/AWS/SecretsManager";
 
 export default {
   async getSecret(key: string, defaultValue?: string): Promise<string> {
     // Skip aws parameter store on test and local environment
-    if (this.getEnv("NODE_ENV") === "test" || (this.getStage() === "offline" && this.hasEnv(key))) {
+    if (this.getEnv("NODE_ENV") === "test" || (this.getStage() === "local" && this.hasEnv(key))) {
       return this.getEnv(key, defaultValue);
     }
 
@@ -35,7 +35,7 @@ export default {
     return `${this.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL", "http://localhost:8000")}`;
   },
   getStage(): string {
-    return this.getEnv("STAGE");
+    return this.getEnv("STAGE", "local");
   },
   REQUEST_TIMEOUT_MSECS: 15000,
 };

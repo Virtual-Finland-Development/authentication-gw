@@ -1,36 +1,7 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { ifObjectEmpty } from "../../src/utils/transformers";
-
-/* ---------------Types------------------- */
-
-export type LambdaApiGatewayV2Stack = {
-  role: aws.iam.Role;
-  apiGateway: aws.apigatewayv2.Api;
-  tags: { [name: string]: string };
-  config: StackConfig;
-};
-
-type LambdaFunctionConfig = {
-  name: string;
-  handler: string;
-  code: any;
-  environment: { [name: string]: string };
-  nodeModulesLayer: aws.lambda.LayerVersion;
-};
-
-type LambdaRouteConfig = {
-  name: string;
-  method: "ANY" | "POST" | "GET";
-  path: string;
-};
-
-export type StackConfig = {
-  name: string;
-  stage: string;
-  project: string;
-  pulumiOrganization: string;
-};
+import { LambdaApiGatewayV2Stack, LambdaFunctionConfig, LambdaRouteConfig, StackConfig } from "../types";
 
 /* ---------------Public------------------- */
 
@@ -46,7 +17,7 @@ export function createStack(apiGatewayName: string, configuration: StackConfig):
   return {
     apiGateway: apiGw,
     role: role,
-    tags: { Name: configuration.name, Environment: configuration.stage, Project: configuration.project },
+    tags: configuration.getTags(),
     config: configuration,
   };
 }
@@ -121,16 +92,7 @@ function getApiGateway(name: string) {
   });
 }
 
-function createLambdaFunction(
-  stack: LambdaApiGatewayV2Stack,
-  configuration: {
-    name: string;
-    handler: string;
-    code: any;
-    environment: { [name: string]: string };
-    nodeModulesLayer: aws.lambda.LayerVersion;
-  }
-): aws.lambda.Function {
+function createLambdaFunction(stack: LambdaApiGatewayV2Stack, configuration: LambdaFunctionConfig): aws.lambda.Function {
   const lamdaFunction = new aws.lambda.Function(configuration.name, {
     runtime: "nodejs16.x",
     role: stack.role.arn,

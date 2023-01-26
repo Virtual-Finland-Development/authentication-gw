@@ -12,7 +12,7 @@ custom:
 
 provider:
   name: "offline"
-  stage: offline
+  stage: local
   timeout: 20
 
 functions:
@@ -23,8 +23,9 @@ functions:
           method: any
           path: /{proxy+}
     environment:
-      STAGE: "offline"
+      STAGE: "local"
       DEBUG_MODE: ${env:DEBUG_MODE, false}
       AWS_PROFILE: ${env:AWS_PROFILE, 'virtualfinland'}
       AWS_REGION: ${env:AWS_REGION, 'eu-north-1'}
       AUTHGW_ENDPOINT_URL_OVERRIDE: ${env:AUTHGW_ENDPOINT_URL_OVERRIDE, ''}
+      DYNAMODB_CACHE_TABLE_NAME: ${env:DYNAMODB_CACHE_TABLE_NAME, 'authentigation-gw-CacheTable-local'}
