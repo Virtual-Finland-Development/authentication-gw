@@ -94,7 +94,7 @@ const RemoteCache = {
 
 function shouldUseRemoteCache(): boolean {
   // Skip store on test and local environment
-  return Settings.getEnv("NODE_ENV") !== "test" && Settings.getStage() !== "offline";
+  return Settings.getEnv("NODE_ENV") !== "test" && Settings.getStage() !== "local";
 }
 
 /**

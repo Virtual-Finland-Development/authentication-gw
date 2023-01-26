@@ -1,13 +1,11 @@
-import Runtime from "../../Runtime";
-
-const AWS = require("aws-sdk");
+import AWS from "aws-sdk";
 
 //
 // --> public <--
 //
 
 export async function scanForDynamoDBItems(tableName: string, filterExpression: string, expressionAttributeValues: any, limit?: number) {
-  const dynamoDB = await getDynamoDBTable(tableName);
+  const dynamoDB = await getDynamoDBClient();
   const params: any = {
     TableName: tableName,
     FilterExpression: filterExpression,
@@ -23,7 +21,7 @@ export async function scanForDynamoDBItems(tableName: string, filterExpression: 
 }
 
 export async function getDynamoDBItem(tableName: string, key: string): Promise<string | number | boolean | null> {
-  const dynamoDB = await getDynamoDBTable(tableName);
+  const dynamoDB = await getDynamoDBClient();
   const params = {
     TableName: tableName,
     Key: {
@@ -35,7 +33,7 @@ export async function getDynamoDBItem(tableName: string, key: string): Promise<s
 }
 
 export async function putDynamoDBItem(tableName: string, item: Record<string, string | number | boolean | null>) {
-  const dynamoDB = await getDynamoDBTable(tableName);
+  const dynamoDB = await getDynamoDBClient();
   const params = {
     TableName: tableName,
     Item: item,
@@ -44,7 +42,7 @@ export async function putDynamoDBItem(tableName: string, item: Record<string, st
 }
 
 export async function deleteDynamoDBItem(tableName: string, key: string) {
-  const dynamoDB = await getDynamoDBTable(tableName);
+  const dynamoDB = await getDynamoDBClient();
   const params = {
     TableName: tableName,
     Key: {
@@ -59,26 +57,9 @@ export async function deleteDynamoDBItem(tableName: string, key: string) {
 //
 let dynamoDBClient: any;
 
-async function getDynamoDBTable(tableName: string) {
+export async function getDynamoDBClient() {
   if (!dynamoDBClient) {
     dynamoDBClient = new AWS.DynamoDB.DocumentClient();
   }
-  await waitForTableToBeReady(dynamoDBClient, tableName, 10);
   return dynamoDBClient;
-}
-
-async function waitForTableToBeReady(dynamoDBClient: any, tableName: string, retries: number, delayMs: number = 1000) {
-  const params = {
-    TableName: tableName,
-  };
-  try {
-    await dynamoDBClient.waitFor("tableExists", params).promise();
-  } catch (error) {
-    if (retries > 0) {
-      await Runtime.sleep(delayMs);
-      await waitForTableToBeReady(dynamoDBClient, tableName, retries - 1, delayMs);
-    } else {
-      throw error;
-    }
-  }
 }
