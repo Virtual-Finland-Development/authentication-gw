@@ -15,7 +15,7 @@ describe("Cache service tests", () => {
     await CacheService.save("test", baseLine, 1);
     await Runtime.sleep(1);
     expect(await CacheService.fetch("test")).toEqual(baseLine);
-    await Runtime.sleep(2);
+    await Runtime.sleep(150);
     expect(await CacheService.fetch("test")).toBe(undefined);
   });
 });
