@@ -1,15 +1,11 @@
 import { AxiosError } from "axios";
 import { Context } from "openapi-backend";
 
-import SinunaRequestHandler from "../providers/sinuna/SinunaRequestHandler";
-import SuomiFIRequestHandler from "../providers/suomifi/SuomiFIRequestHandler";
-import TestbedRequestHandler from "../providers/testbed/TestbedRequestHandler";
-
 import { AccessDeniedException, ValidationError } from "../utils/exceptions";
-import { debug, log } from "../utils/logging";
+import { log } from "../utils/logging";
 import { ensureArray, ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
 import { getJSONResponseHeaders } from "./default-headers";
-import { AuthRequestHandler, HttpResponse, NotifyErrorType } from "./types";
+import { NotifyErrorType } from "./types";
 import { parseAppContext } from "./validators";
 
 /**
@@ -138,7 +134,7 @@ export function InternalServerErrorHandler(error: any) {
  * @param defaultProvider
  * @returns
  */
-export function resolveProvider(context: Context, defaultProvider: string | undefined) {
+export function resolveProvider(context: Context, defaultProvider?: string | undefined) {
   let provider = defaultProvider;
   if (context.request.params?.provider) {
     // Url path params
@@ -164,53 +160,4 @@ export function resolveProvider(context: Context, defaultProvider: string | unde
   }
 
   return provider;
-}
-
-/**
- * Utility function for selecting the correct request handler based on the provider ident.
- *
- * @param context
- * @param defaultProvider
- * @returns
- */
-export function getAuthProviderRequestHandler(context: Context, defaultProvider?: string): AuthRequestHandler {
-  const provider = resolveProvider(context, defaultProvider);
-
-  switch (provider.toLowerCase()) {
-    case SinunaRequestHandler.identityProviderIdent.toLowerCase():
-      return SinunaRequestHandler;
-    case SuomiFIRequestHandler.identityProviderIdent.toLowerCase():
-      return SuomiFIRequestHandler;
-    case TestbedRequestHandler.identityProviderIdent.toLowerCase():
-      return TestbedRequestHandler;
-    default:
-      throw new ValidationError(`Unknown auth provider: ${provider}`);
-  }
-}
-
-/**
- * Utility function for generating request handlers for auth routes.
- *
- * @param operationNames
- * @param operationPrefix
- * @param defaultAuthProviderIdent
- * @returns
- */
-export function generateRouteRequestHandlers(operationNames: Array<string>, operationPrefix: string, defaultAuthProviderIdent?: string, requestsHandler?: any): any {
-  return operationNames.reduce((operations: Record<string, (context: Context) => Promise<HttpResponse>>, operationName: string) => {
-    operations[`${operationPrefix}${operationName}`] = generateRequestHandlerOperation(operationName, defaultAuthProviderIdent, requestsHandler);
-    return operations;
-  }, {});
-}
-
-export function generateRequestHandlerOperation(operationName: string, defaultAuthProviderIdent?: string, requestsHandler?: any): (context: Context) => Promise<HttpResponse> {
-  return async (context: Context) => {
-    if (!requestsHandler) {
-      requestsHandler = getAuthProviderRequestHandler(context, defaultAuthProviderIdent);
-    }
-    await requestsHandler.initialize();
-    const response = await requestsHandler[operationName](context);
-    debug("Response", response);
-    return response;
-  };
 }

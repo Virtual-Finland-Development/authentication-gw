@@ -3,10 +3,10 @@ import { Context } from "openapi-backend";
 import { AccessDeniedException, NoticeException } from "./exceptions";
 import { debug } from "./logging";
 import { prepareCookie, prepareLoginErrorRedirectUrl, prepareLogoutErrorRedirectUrl } from "./route-utils";
-import { HttpResponse, NotifyErrorType } from "./types";
+import { HttpResponse, IBaseRequestHandler, NotifyErrorType } from "./types";
 import { parseAppContext } from "./validators";
 
-export abstract class BaseRequestHandler {
+export abstract class BaseRequestHandler implements IBaseRequestHandler {
   abstract identityProviderIdent: string;
 
   /**

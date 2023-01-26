@@ -93,3 +93,11 @@ export type AuthorizationHeaders = {
   context?: string;
   consentToken?: string;
 };
+
+export interface IBaseRequestHandler {
+  identityProviderIdent: string;
+  initialize(): Promise<void>;
+  getAuthenticateResponseFailedResponse(context: Context, error: any): Promise<HttpResponse>;
+  getLogoutRequestFailedResponse(context: Context | string, error: any, errorTypeOverride?: NotifyErrorType): Promise<HttpResponse>;
+  [attr: string]: any;
+}
