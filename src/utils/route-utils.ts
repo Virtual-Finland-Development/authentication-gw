@@ -1,8 +1,9 @@
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { AxiosError } from "axios";
 import { Context } from "openapi-backend";
 
 import { AccessDeniedException, ValidationError } from "../utils/exceptions";
-import { log } from "../utils/logging";
+import { debug, log } from "../utils/logging";
 import { ensureArray, ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
 import { getJSONResponseHeaders } from "./default-headers";
 import { NotifyErrorType } from "./types";
@@ -106,9 +107,10 @@ export function prepareCookie(name: string, value: string = ""): string {
  * @param error
  * @returns
  */
-export function InternalServerErrorHandler(error: any) {
+export function InternalServerErrorHandler(error: any, event: APIGatewayProxyEventV2) {
   const exception = exceptionToObject(error);
   log(exception);
+  debug({ headers: event.headers, sourceIp: event.requestContext?.http?.sourceIp, body: event.body });
 
   let statusCode = 500;
   if (exception.statusCode) {

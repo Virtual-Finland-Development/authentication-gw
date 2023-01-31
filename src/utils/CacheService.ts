@@ -1,4 +1,5 @@
 import { deleteDynamoDBItem, putDynamoDBItem, scanForDynamoDBItems } from "./libs/AWS/DynamoDB";
+import { debug } from "./logging";
 import Settings from "./Settings";
 
 function getTableName(): string {
@@ -103,20 +104,24 @@ function shouldUseRemoteCache(): boolean {
  * @returns
  */
 async function getFromCache(key: string): Promise<any> {
-  const cacheKey = getCacheKey(key);
-  if (LocalCache.has(cacheKey)) {
-    return parseCacheItemValue(LocalCache.get(cacheKey)); // Expires in instance lifetime
-  }
+  try {
+    const cacheKey = getCacheKey(key);
+    if (LocalCache.has(cacheKey)) {
+      return parseCacheItemValue(LocalCache.get(cacheKey)); // Expires in instance lifetime
+    }
 
-  if (!shouldUseRemoteCache()) {
-    return undefined;
-  }
+    if (!shouldUseRemoteCache()) {
+      return undefined;
+    }
 
-  const remoteValue = await RemoteCache.get(cacheKey);
-  if (remoteValue) {
-    LocalCache.set(remoteValue);
+    const remoteValue = await RemoteCache.get(cacheKey);
+    if (remoteValue) {
+      LocalCache.set(remoteValue);
+    }
+    return parseCacheItemValue(remoteValue);
+  } catch (error) {
+    debug("CacheService.getFromCache", error);
   }
-  return parseCacheItemValue(remoteValue);
 }
 
 /**
@@ -126,10 +131,14 @@ async function getFromCache(key: string): Promise<any> {
  * @param ttlMs - Time to live in milliseconds
  */
 async function saveToCache(key: string, value: any, ttlMs?: number) {
-  const cacheItem = generateCacheItem(key, value, ttlMs);
-  LocalCache.set(cacheItem);
-  if (shouldUseRemoteCache()) {
-    await RemoteCache.set(cacheItem);
+  try {
+    const cacheItem = generateCacheItem(key, value, ttlMs);
+    LocalCache.set(cacheItem);
+    if (shouldUseRemoteCache()) {
+      await RemoteCache.set(cacheItem);
+    }
+  } catch (error) {
+    debug("CacheService.saveToCache", error);
   }
 }
 
@@ -138,10 +147,14 @@ async function saveToCache(key: string, value: any, ttlMs?: number) {
  * @param key
  */
 async function removeFromCache(key: string) {
-  const cacheKey = getCacheKey(key);
-  LocalCache.delete(cacheKey);
-  if (shouldUseRemoteCache()) {
-    await RemoteCache.delete(cacheKey);
+  try {
+    const cacheKey = getCacheKey(key);
+    LocalCache.delete(cacheKey);
+    if (shouldUseRemoteCache()) {
+      await RemoteCache.delete(cacheKey);
+    }
+  } catch (error) {
+    debug("CacheService.removeFromCache", error);
   }
 }
 

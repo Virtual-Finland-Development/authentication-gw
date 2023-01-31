@@ -77,7 +77,7 @@ export const handler = async (event: APIGatewayProxyEventV2, context: APIGateway
       context
     );
   } catch (error) {
-    return InternalServerErrorHandler(error);
+    return InternalServerErrorHandler(error, event);
   }
 };
 
