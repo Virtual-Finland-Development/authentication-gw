@@ -1,3 +1,4 @@
+import { JwtPayload } from "jsonwebtoken";
 import { Context } from "openapi-backend";
 
 export type AppContext = {
@@ -80,13 +81,15 @@ export type Authorizer = {
    * @param token
    * @throws AccessDeniedException - if access is denied
    */
-  authorize: (authorizationHeaders: AuthorizationHeaders) => Promise<void>;
+  authorize: (authorizationHeaders: AuthorizationHeaders) => Promise<AuthorizerResponse>;
 
   /**
    * Matches the provider to the authorizer
    */
   isMatchingProvider: (provider: string) => boolean;
 };
+
+export type AuthorizerResponse = { message?: string; authorization: JwtPayload | null; consent: JwtPayload | null };
 
 export type AuthorizationHeaders = {
   authorization: string;

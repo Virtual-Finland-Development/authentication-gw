@@ -1,7 +1,7 @@
 import { AccessDeniedException } from "../../utils/exceptions";
 import { verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
-import { AuthorizationHeaders } from "../../utils/types";
+import { AuthorizationHeaders, AuthorizerResponse } from "../../utils/types";
 import SinunaConfig from "./Sinuna.config";
 
 export function isMatchingProvider(provider: string): boolean {
@@ -12,7 +12,7 @@ export function isMatchingProvider(provider: string): boolean {
  *
  * @param authorizationHeaders
  */
-export async function authorize(authorizationHeaders: AuthorizationHeaders): Promise<void> {
+export async function authorize(authorizationHeaders: AuthorizationHeaders): Promise<AuthorizerResponse> {
   try {
     // Verify token
     const verified = await verifyIdToken(authorizationHeaders.authorization, {
@@ -20,6 +20,11 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
       openIdConfigUrl: "https://login.iam.qa.sinuna.fi/oxauth/.well-known/openid-configuration",
     });
     debug(verified);
+
+    return {
+      authorization: verified,
+      consent: null,
+    };
   } catch (error) {
     throw new AccessDeniedException(String(error));
   }

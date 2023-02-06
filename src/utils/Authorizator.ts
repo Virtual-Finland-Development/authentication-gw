@@ -4,7 +4,7 @@ import * as TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
 import { AccessDeniedException } from "./exceptions";
 import { decodeIdToken } from "./JWK-Utils";
 import { omitEmptyObjectKeys } from "./transformers";
-import { AuthorizationHeaders, Authorizer } from "./types";
+import { AuthorizationHeaders, Authorizer, AuthorizerResponse } from "./types";
 
 /**
  * Resolve authorization provider from authorization header
@@ -50,7 +50,7 @@ export default {
    * @param authData
    * @returns
    */
-  async authorize(authorization: string | string[], authorizationContext: string | string[], consentToken: string | string[]): Promise<void> {
+  async authorize(authorization: string | string[], authorizationContext: string | string[], consentToken: string | string[]): Promise<AuthorizerResponse> {
     const authHeaders = omitEmptyObjectKeys({
       authorization: String(authorization),
       context: authorizationContext ? String(authorizationContext) : "",

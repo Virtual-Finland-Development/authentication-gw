@@ -69,6 +69,8 @@ export class DefaultService {
         xConsentToken?: string,
     }): CancelablePromise<{
         message?: string;
+        authorization?: any;
+        consent?: any;
     }> {
         return this.httpRequest.request({
             method: 'POST',

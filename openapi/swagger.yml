@@ -69,6 +69,10 @@ paths:
                   message:
                     type: string
                     default: "Access Granted"
+                  authorization:
+                    type: object
+                  consent:
+                    type: object
         "401":
           description: Access denied message
           content:
