@@ -73,13 +73,18 @@ Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/r
 
 API served at:
 
-- https://virtualfinland-authgw.localhost/ (\*self-signed certificate)
 - http://localhost:4078/
 
 Demo app served at:
 
-- https://virtualfinland-authgw-demo.localhost/ (\*self-signed certificate)
 - http://localhost:5000/
+
+### Run with self-signed SSL-certificate:
+
+- `docker compose up -f docker-compose.yml -f docker-compose.caddy.yml`
+
+- https://virtualfinland-authgw.localhost/ (\*self-signed certificate)
+- https://virtualfinland-authgw-demo.localhost/ 
 
 \* The self-signed certificate is blocked by the browser by default. You can add the certificate to the browser's trusted certificates by accepting it with the browsers warning dialog or by importing the caddy root CA certificate `./resources/docker/caddy/data/caddy/pki/authorities/local/root.crt` to the browser's trusted certificates.
 

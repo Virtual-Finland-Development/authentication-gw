@@ -31,18 +31,6 @@ services:
       - traefik.http.routers.authgw.entrypoints=websecure
       - traefik.http.routers.authgw.tls=true
   ###
-  # Local https
-  ###
-  caddy:
-    image: caddy/caddy:2.6.2-alpine
-    ports:
-      - 80:80 # for http->https redirection
-      - 443:443
-    volumes:
-      - ./resources/docker/caddy/config/Caddyfile:/etc/caddy/Caddyfile
-      - ./resources/docker/caddy/data:/data
-      - caddy_config:/config
-  ###
   # Demo app
   ###
   demoApp:
@@ -59,5 +47,3 @@ services:
       - 5000:5000
     labels:
       - traefik.http.routers.demoApp.rule=Host(`virtualfinland-authgw-demo.localhost`)
-volumes:
-  caddy_config:
