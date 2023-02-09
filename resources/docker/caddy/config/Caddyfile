@@ -10,5 +10,5 @@ virtualfinland-authgw.localhost {
 
 virtualfinland-authgw-demo.localhost {
     tls internal
-    reverse_proxy demoApp:5000
+    reverse_proxy demoApp:4075
 }

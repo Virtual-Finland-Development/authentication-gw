@@ -77,7 +77,7 @@ API served at:
 
 Demo app served at:
 
-- http://localhost:5000/
+- http://localhost:4075/
 
 ### Run with self-signed SSL-certificate:
 

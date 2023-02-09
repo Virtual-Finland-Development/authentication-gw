@@ -44,6 +44,6 @@ services:
       - ./webapps/svelte/:/app
       - ./openapi/swagger.yml:/app/public/swagger.yml
     ports:
-      - 5000:5000
+      - 4075:5000
     labels:
       - traefik.http.routers.demoApp.rule=Host(`virtualfinland-authgw-demo.localhost`)
