@@ -30,6 +30,8 @@ services:
       - traefik.http.routers.authgw.rule=Host(`virtualfinland-authgw.localhost`)
       - traefik.http.routers.authgw.entrypoints=websecure
       - traefik.http.routers.authgw.tls=true
+    networks:
+      - vfd-network
   ###
   # Demo app
   ###
@@ -47,3 +49,10 @@ services:
       - 4075:5000
     labels:
       - traefik.http.routers.demoApp.rule=Host(`virtualfinland-authgw-demo.localhost`)
+    networks:
+      - vfd-network
+
+networks:
+  vfd-network:
+    driver: bridge
+    external: true

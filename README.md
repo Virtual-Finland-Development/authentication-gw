@@ -60,6 +60,16 @@ Read more about setup of AWS credentials here: [AWS: Configuration and credentia
 - AWS credentials file:
   - `~/.aws/credentials`
 
+#### Docker requirements
+
+If using docker compose, the following network must be created: `vfd-network`.
+
+Create the network with the following command:
+
+```
+docker network create vfd-network
+```
+
 ### Run with vscode devcontainer
 
 Read more of the vscode devcontainers here: https://code.visualstudio.com/docs/remote/containers
