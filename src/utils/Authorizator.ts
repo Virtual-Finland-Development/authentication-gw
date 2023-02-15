@@ -1,9 +1,9 @@
-import { debug } from "console";
 import * as SinunaAuthorizer from "../providers/sinuna/SinunaAuthorizer";
 import * as SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
 import * as TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
 import { AccessDeniedException } from "./exceptions";
 import { decodeIdToken } from "./JWK-Utils";
+import { debug } from "./logging";
 import { omitEmptyObjectKeys } from "./transformers";
 import { AuthorizationHeaders, Authorizer, AuthorizerResponse } from "./types";
 
