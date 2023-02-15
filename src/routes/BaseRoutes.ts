@@ -34,10 +34,7 @@ export default {
     return {
       statusCode: 200,
       headers: getJSONResponseHeaders(),
-      body: JSON.stringify({
-        message: "Access Granted",
-        ...response,
-      }),
+      body: JSON.stringify(response),
     };
   },
   // openapi-backend special handlers
