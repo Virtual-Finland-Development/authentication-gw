@@ -2,6 +2,8 @@
 
 import axios from "axios";
 import * as jwt from "jsonwebtoken";
+import { decode as jwtDecode } from 'jsonwebtoken'; // @see: https://github.com/auth0/node-jsonwebtoken/issues/875#issuecomment-1375779641
+
 import jwktopem from "jwk-to-pem";
 import { Context } from "openapi-backend";
 import CacheService from "./CacheService";
@@ -42,7 +44,7 @@ export function decodeIdToken(idToken: string | null): { decodedToken: jwt.Jwt |
   }
 
   const token = parseAuthorizationHeaderValue(idToken);
-  const decodedToken = jwt.decode(token, { complete: true });
+  const decodedToken = jwtDecode(token, { complete: true });
   return {
     decodedToken: decodedToken,
     token: token,

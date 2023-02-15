@@ -1,3 +1,4 @@
+import { debug } from "console";
 import * as SinunaAuthorizer from "../providers/sinuna/SinunaAuthorizer";
 import * as SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
 import * as TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
@@ -18,7 +19,9 @@ function resolveAuthProvider(authorization: string): string {
     if (typeof result.decodedToken?.payload === "object" && typeof result.decodedToken.payload?.iss === "string") {
       return result.decodedToken.payload.iss;
     }
-  } catch (error) {}
+  } catch (error) {
+    debug(error);
+  }
   throw new AccessDeniedException("Invalid authorization header");
 }
 
