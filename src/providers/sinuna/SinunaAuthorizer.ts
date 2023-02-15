@@ -22,8 +22,8 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
     debug(verified);
 
     return {
+      message: "Access granted",
       authorization: verified,
-      consent: null,
     };
   } catch (error) {
     throw new AccessDeniedException(String(error));

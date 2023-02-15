@@ -135,8 +135,8 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
     }
 
     return {
+      message: "Access granted",
       authorization: verified,
-      consent: null,
     };
   } catch (error) {
     debug(error);

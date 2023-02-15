@@ -20,8 +20,8 @@ export function isMatchingProvider(provider: string): boolean {
  */
 export async function authorize(authorizationHeaders: AuthorizationHeaders): Promise<AuthorizerResponse> {
   const response: AuthorizerResponse = {
+    message: "Access denied",
     authorization: null,
-    consent: null,
   };
 
   try {
@@ -31,6 +31,8 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
       openIdConfigUrl: "https://login.testbed.fi/.well-known/openid-configuration",
     });
     debug(verified);
+
+    response.message = "Access granted";
     response.authorization = verified;
   } catch (error) {
     throw new AccessDeniedException(String(error));
@@ -57,6 +59,6 @@ export async function verifyConsent(consentToken: string): Promise<JwtPayload> {
     return verified;
   } catch (error) {
     debug(error);
-    throw new AccessDeniedException("Unverified");
+    throw new AccessDeniedException("Consent unverified");
   }
 }

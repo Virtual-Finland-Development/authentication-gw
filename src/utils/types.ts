@@ -89,7 +89,7 @@ export type Authorizer = {
   isMatchingProvider: (provider: string) => boolean;
 };
 
-export type AuthorizerResponse = { message?: string; authorization: JwtPayload | null; consent: JwtPayload | null };
+export type AuthorizerResponse = { message: string; authorization: JwtPayload | null; consent?: JwtPayload | null };
 
 export type AuthorizationHeaders = {
   authorization: string;

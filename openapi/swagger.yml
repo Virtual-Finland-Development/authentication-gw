@@ -65,10 +65,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [message, authorization]
                 properties:
                   message:
                     type: string
-                    default: "Access Granted"
+                    default: "Access granted"
                   authorization:
                     type: object
                   consent:
