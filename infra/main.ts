@@ -7,7 +7,7 @@ import { createDynamoDBCacheTable } from "./resources/DynamoDBCacheTable";
 import { createApiEndpoint, createLambdaRoute, createStack } from "./resources/LambdaApiGatewayV2";
 import { createStackConfig } from "./utils";
 
-const configuration = createStackConfig({
+const stackConfig = createStackConfig({
   name: "authentication-gw",
   stage: pulumi.getStack(),
   project: "Virtual Finland",
@@ -17,23 +17,24 @@ const configuration = createStackConfig({
 /**
  * Dependencies layer for lambda functions
  */
-const nodeModulesLayer = new aws.lambda.LayerVersion("authentication-gw-dependenices-layer", {
+const layerName = stackConfig.generateResourceName("nodeModulesLayer");
+const nodeModulesLayer = new aws.lambda.LayerVersion(layerName, {
   code: new pulumi.asset.AssetArchive({
     "./nodejs/node_modules": new pulumi.asset.FileArchive("./.lambda/layers/node_modules"),
   }),
   compatibleRuntimes: [aws.lambda.Runtime.NodeJS16dX],
-  layerName: "authentication-gw-dependenices-layer",
+  layerName: layerName,
 });
 
 /**
  * Stack
  */
-const stack = createStack(`${configuration.stage}-authentication-gw`, configuration);
+const stack = createStack(stackConfig);
 
 /**
  * DynamoDB table
  */
-const cacheTable = createDynamoDBCacheTable(configuration, stack.role);
+const cacheTable = createDynamoDBCacheTable(stackConfig, stack.role);
 export const dynamoDBCacheTableName = cacheTable.name; // For pulumi output
 
 /**
@@ -43,14 +44,14 @@ const appRoutes = [
   createLambdaRoute(stack, {
     route: { name: "api-app", method: "ANY", path: "/{proxy+}" },
     lambdaFunction: {
-      name: "authentication-gw-dev-api-app",
+      name: "apiApp",
       handler: "app.handler",
       code: new pulumi.asset.AssetArchive({
         ".": new pulumi.asset.FileArchive("../dist"),
         "./openapi": new pulumi.asset.FileArchive("../openapi"),
       }),
       environment: {
-        STAGE: configuration.stage,
+        STAGE: stackConfig.stage,
         DEBUG_MODE: Settings.getEnv("DEBUG_MODE", "false"),
         DYNAMODB_CACHE_TABLE_NAME: dynamoDBCacheTableName,
       },
@@ -63,5 +64,5 @@ const appRoutes = [
 export const endpoint = createApiEndpoint(stack, appRoutes);
 
 // Export testbed api dependency endpoint url (for the demo webapp)
-const testbedApiStackRef = new pulumi.StackReference(`${configuration.pulumiOrganization}/testbed-api/${configuration.stage}`);
+const testbedApiStackRef = new pulumi.StackReference(`${stackConfig.pulumiOrganization}/testbed-api/${stackConfig.stage}`);
 export const testbedApiEndpoint = testbedApiStackRef.getOutput("url");

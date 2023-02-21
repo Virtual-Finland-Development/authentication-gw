@@ -1,8 +1,8 @@
 import * as aws from "@pulumi/aws";
 import { StackConfig } from "../types";
 
-export function createDynamoDBCacheTable(configuration: StackConfig, lambdaFunctionExecRole: aws.iam.Role) {
-  const tableName = configuration.generateResourceName("CacheTable");
+export function createDynamoDBCacheTable(stackConfig: StackConfig, lambdaFunctionExecRole: aws.iam.Role) {
+  const tableName = stackConfig.generateResourceName("CacheTable");
   const cacheTable = new aws.dynamodb.Table(tableName, {
     name: tableName,
     attributes: [{ name: "CacheKey", type: "S" }],
@@ -12,10 +12,10 @@ export function createDynamoDBCacheTable(configuration: StackConfig, lambdaFunct
       enabled: true,
     },
     billingMode: "PAY_PER_REQUEST",
-    tags: configuration.getTags(),
+    tags: stackConfig.getTags(),
   });
 
-  const policyName = configuration.generateResourceName("dynamoDBPolicy");
+  const policyName = stackConfig.generateResourceName("dynamoDBPolicy");
   const dynamoDBPolicy = new aws.iam.Policy(policyName, {
     name: policyName,
     description: "DynamoDB policy for authentication-gw",
@@ -34,7 +34,7 @@ export function createDynamoDBCacheTable(configuration: StackConfig, lambdaFunct
   });
 
   // Attach to role
-  const rolePolicyAttachmentName = configuration.generateResourceName("dynamoDBPolicyAttachment");
+  const rolePolicyAttachmentName = stackConfig.generateResourceName("dynamoDBPolicyAttachment");
   new aws.iam.RolePolicyAttachment(rolePolicyAttachmentName, {
     role: lambdaFunctionExecRole.name,
     policyArn: dynamoDBPolicy.arn,
