@@ -29,14 +29,12 @@ export default {
     const authorization = context.request.headers.authorization;
     const authorizationContext = context.request.headers["x-authorization-context"];
     const consentToken = context.request.headers["x-consent-token"];
-    await Authorizator.authorize(authorization, authorizationContext, consentToken); // Throws AccessDeniedException if access needs to be denied
+    const response = await Authorizator.authorize(authorization, authorizationContext, consentToken); // Throws AccessDeniedException if access needs to be denied
 
     return {
       statusCode: 200,
       headers: getJSONResponseHeaders(),
-      body: JSON.stringify({
-        message: "Access Granted",
-      }),
+      body: JSON.stringify(response),
     };
   },
   // openapi-backend special handlers

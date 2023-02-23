@@ -3,8 +3,9 @@ import * as SuomiFIAuthorizer from "../providers/suomifi/SuomiFIAuthorizer";
 import * as TestbedAuthorizer from "../providers/testbed/TestbedAuthorizer";
 import { AccessDeniedException } from "./exceptions";
 import { decodeIdToken } from "./JWK-Utils";
+import { debug } from "./logging";
 import { omitEmptyObjectKeys } from "./transformers";
-import { AuthorizationHeaders, Authorizer } from "./types";
+import { AuthorizationHeaders, Authorizer, AuthorizerResponse } from "./types";
 
 /**
  * Resolve authorization provider from authorization header
@@ -18,7 +19,9 @@ function resolveAuthProvider(authorization: string): string {
     if (typeof result.decodedToken?.payload === "object" && typeof result.decodedToken.payload?.iss === "string") {
       return result.decodedToken.payload.iss;
     }
-  } catch (error) {}
+  } catch (error) {
+    debug(error);
+  }
   throw new AccessDeniedException("Invalid authorization header");
 }
 
@@ -50,7 +53,7 @@ export default {
    * @param authData
    * @returns
    */
-  async authorize(authorization: string | string[], authorizationContext: string | string[], consentToken: string | string[]): Promise<void> {
+  async authorize(authorization: string | string[], authorizationContext: string | string[], consentToken: string | string[]): Promise<AuthorizerResponse> {
     const authHeaders = omitEmptyObjectKeys({
       authorization: String(authorization),
       context: authorizationContext ? String(authorizationContext) : "",

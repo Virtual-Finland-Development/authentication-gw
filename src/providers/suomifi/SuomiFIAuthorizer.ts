@@ -10,7 +10,7 @@ import { JWKS, verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
 import Settings from "../../utils/Settings";
 import { transformExpiresInToExpiresAt_ISOString } from "../../utils/transformers";
-import { AuthorizationHeaders, ParsedAppContext } from "../../utils/types";
+import { AuthorizationHeaders, AuthorizerResponse, ParsedAppContext } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
 import { resolveSuomiFiUserIdFromProfileData } from "./service/SuomifiStateTools";
 import { SuomiFiProfile } from "./service/SuomifiTypes";
@@ -122,7 +122,7 @@ export function isMatchingProvider(provider: string): boolean {
  *
  * @param authorizationHeaders
  */
-export async function authorize(authorizationHeaders: AuthorizationHeaders): Promise<void> {
+export async function authorize(authorizationHeaders: AuthorizationHeaders): Promise<AuthorizerResponse> {
   try {
     // Verify token
     const verified = await verifyIdToken(authorizationHeaders.authorization, { issuer: SUOMIFI_ISSUER, jwks: await getJKWSJsonConfiguration() });
@@ -133,6 +133,11 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
     if (nonce !== verified.nonce) {
       throw new AccessDeniedException("Invalid authorizing context secret");
     }
+
+    return {
+      message: "Access granted",
+      authorization: verified,
+    };
   } catch (error) {
     debug(error);
     throw new AccessDeniedException(String(error));
