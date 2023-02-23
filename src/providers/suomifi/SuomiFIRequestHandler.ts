@@ -54,10 +54,11 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
    * @returns AuthenticateResponse -> LoginResponse
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
-    const body = parseBase64XMLBody(context.request.body);
-    const samlClient = await getSuomiFISAML2Client();
-
     try {
+      const body = parseBase64XMLBody(context.request.body);
+      debug(body);
+
+      const samlClient = await getSuomiFISAML2Client(body.SAMLResponse);  
       const result = await samlClient.validatePostResponseAsync(body); // throws
 
       const { parsedAppContext, idToken, expiresAt, userId } = await createSignedInTokens(body.RelayState, result.profile); // throws

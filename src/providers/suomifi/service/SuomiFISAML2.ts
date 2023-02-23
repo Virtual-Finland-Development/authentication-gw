@@ -1,19 +1,17 @@
-import axios from "axios";
 import { parseXml2JsFromString } from "node-saml/lib/xml";
+import { resolveBase64Hash } from "../../../utils/hashes";
+import { debug } from "../../../utils/logging";
 import Runtime from "../../../utils/Runtime";
 import Settings from "../../../utils/Settings";
 const { SAML } = require("node-saml");
-
-let suomiSaml: typeof SAML;
 
 /**
  * @see: https://github.com/node-saml/node-saml
  * @returns
  */
-export const getSuomiFISAML2Client = async function (): Promise<typeof SAML> {
-  if (!suomiSaml) {
+export const getSuomiFISAML2Client = async function (samlResponse?: string): Promise<typeof SAML> {
     const privateKey = await Settings.getStageSecret("SUOMIFI_PRIVATE_KEY");
-    suomiSaml = new SAML({
+    return new SAML({
       entryPoint: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SSO",
       callbackUrl: Runtime.getAppUrl("/auth/saml2/suomifi/authenticate-response"),
       logoutUrl: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SLO",
@@ -23,17 +21,25 @@ export const getSuomiFISAML2Client = async function (): Promise<typeof SAML> {
       signatureAlgorithm: "sha256",
       digestAlgorithm: "sha256",
       privateKey: privateKey,
-      cert: async function (callback: (err: any, certs?: Array<string>) => void) {
+      cert: async (callback: (err: any, certs?: Array<string>) => void) => {
         try {
-          const response = await axios.get("https://testi.apro.tunnistus.fi/static/metadata/idp-metadata.xml");
-          const xmljsDoc = await parseXml2JsFromString(response.data);
+
+          if (typeof samlResponse !== "string") {
+            throw new Error("No SAMLResponse provided");
+          }
+
+          const xmljsDoc = await parseXml2JsFromString(resolveBase64Hash(samlResponse));
+          debug(xmljsDoc);
+          
           const certs = [
-            xmljsDoc.EntityDescriptor?.Signature?.[0]?.KeyInfo?.[0]?.X509Data?.[0]?.X509Certificate?.[0]?._,
-            xmljsDoc?.EntityDescriptor?.IDPSSODescriptor?.[0]?.KeyDescriptor?.[0]?.KeyInfo?.[0]?.X509Data?.[0]?.X509Certificate?.[0]?._,
-            xmljsDoc?.EntityDescriptor?.IDPSSODescriptor?.[0]?.KeyDescriptor?.[1]?.KeyInfo?.[0]?.X509Data?.[0]?.X509Certificate?.[0]?._,
+            xmljsDoc.Response?.Signature?.[0]?.KeyInfo?.[0]?.X509Data?.[0]?.X509Certificate?.[0]?._,
           ]
             .filter((cert) => typeof cert === "string")
             .map((cert) => cert.replace(/\s/g, ""));
+
+          if (certs.length === 0) {
+            throw new Error("No certificates found");
+          }
           callback(null, certs);
         } catch (error) {
           callback(error);
@@ -52,7 +58,6 @@ export const getSuomiFISAML2Client = async function (): Promise<typeof SAML> {
       },
       disableRequestedAuthnContext: true,
       identifierFormat: null,
-    });
-  }
-  return suomiSaml;
-};
+    }
+  );
+}
