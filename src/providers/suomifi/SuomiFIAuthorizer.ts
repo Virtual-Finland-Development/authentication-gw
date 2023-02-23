@@ -41,8 +41,9 @@ async function generateNonce(parsedAppContext: ParsedAppContext): Promise<string
 async function signAsLoggedIn(parsedAppContext: ParsedAppContext, nonce: string, suomifiProfile: SuomiFiProfile): Promise<{ idToken: string; expiresAt: string; userId: string }> {
   const expiresIn = 60 * 60; // 1 hour
   const { nameID, nameIDFormat, issuer, sessionIndex } = suomifiProfile;
+  const email = suomifiProfile.email || suomifiProfile.mail;
   const userId = await resolveSuomiFiUserIdFromProfileData(suomifiProfile);
-  const suomifiKeyPayload = { appContextHash: parsedAppContext.hash, nonce: nonce, ...{ nameID, nameIDFormat, issuer, sessionIndex, userId } };
+  const suomifiKeyPayload = { appContextHash: parsedAppContext.hash, nonce: nonce, ...{ nameID, nameIDFormat, issuer, sessionIndex, userId, email } };
 
   return {
     idToken: jwt.sign(suomifiKeyPayload, await Settings.getStageSecret("SUOMIFI_JWT_PRIVATE_KEY"), {
@@ -136,7 +137,13 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
 
     return {
       message: "Access granted",
-      authorization: verified,
+      authorization: {
+        userId: verified.userId,
+        email: verified.email,
+        issuer: SUOMIFI_ISSUER,
+        expiresAt: verified.exp,
+        issuedAt: verified.iat,
+      },
     };
   } catch (error) {
     debug(error);

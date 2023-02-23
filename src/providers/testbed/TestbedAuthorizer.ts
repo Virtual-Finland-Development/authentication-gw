@@ -33,7 +33,14 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
     debug(verified);
 
     response.message = "Access granted";
-    response.authorization = verified;
+    response.authorization = {
+      userId: verified.sub,
+      email: verified.email,
+      issuer: verified.iss,
+      expiresAt: verified.exp,
+      issuedAt: verified.iat,
+    };
+    
   } catch (error) {
     throw new AccessDeniedException(String(error));
   }

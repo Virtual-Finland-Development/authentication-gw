@@ -23,7 +23,13 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
 
     return {
       message: "Access granted",
-      authorization: verified,
+      authorization: {
+        userId: verified.inum,
+        email: verified.email,
+        issuer: verified.iss,
+        expiresAt: verified.exp,
+        issuedAt: verified.iat,
+      },
     };
   } catch (error) {
     throw new AccessDeniedException(String(error));
