@@ -7,7 +7,7 @@ import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, NoticeException, ValidationError } from "../../utils/exceptions";
 import { debug, log } from "../../utils/logging";
-import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutErrorRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
+import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
 import { parseBase64XMLBody } from "../../utils/transformers";
 
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
@@ -179,7 +179,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
       await samlClient.validateRedirectAsync(body, originalQuery); // throws
     } catch (error) {
       log("LogoutResponse", error);
-      logoutRedirectUrl = prepareLogoutErrorRedirectUrl(logoutRedirectUrl, { error: "Logout session could not be ended", type: "info", provider: this.identityProviderIdent });
+      logoutRedirectUrl = prepareLogoutRedirectUrl(logoutRedirectUrl, this.identityProviderIdent, { message: "Suboptimal logout validation response", type: "warning"});
     }
 
     return {
