@@ -66,12 +66,13 @@ The login code is either a temporary code that can be exchanged for authenticati
 
 If login fails / the attempt is cancelled etc, the user is redirected to the `redirectUrl` with a query parameters package:
 
-- `error`: the error message
+- `success=0`, int-boolean, `0` if login fails, `1` on success
+- `message`: the error message
 - `type`: message type, one of `danger`, `warning`, `info`
 - `provider`: authentication provider, eg. `sinuna`
-- `intent=AuthenticationRequest`: intent of the request, with a login situation its always `AuthenticationRequest`
+- `event=login`: intent of the request, with a login situation its always `login`
 
-eg: `https://${frontendAppHost}/login-handler.html?error=Authentication+cancelled&type=info&provider=sinuna&intent=AuthenticationRequest`
+eg: `https://${frontendAppHost}/login-handler.html?success=0&message=Authentication+failed&type=info&provider=sinuna&intent=login`
 
 ## LoginRequest
 
@@ -140,9 +141,10 @@ eg: `https://${frontendAppHost}/login-handler.html?logout=success&provider=sinun
 
 If logout fails / user is already logged out etc, the user is redirected to the `redirectUrl` with with a query parameters package:
 
-- `error`: the error message
+- `success=0`: int-boolean, `0` if logout fails, `1` on success
+- `message`: the error message
 - `type`: message type, one of `danger`, `warning`, `info`
 - `provider`: authentication provider, eg. `sinuna`
-- `intent=LogoutRequest`: intent of the request, with a logout situation its always `LogoutRequest`
+- `event=logout`: intent of the request, with a logout situation its always `logout`
 
-eg: `https://${frontendAppHost}/login-handler.html?error=Already+logged+out&type=info&provider=sinuna&intent=LogoutRequest`
+eg: `https://${frontendAppHost}/login-handler.html?success=0&message=Logout+failed&type=info&provider=sinuna&intent=event`

@@ -2,15 +2,27 @@ import LoginApp from "./LoginApp";
 
 export default async function LoginEventListener(loginApp: LoginApp) {
   const urlParams = new URLSearchParams(window.location.search);
+  const provider = urlParams.get("provider");
+  const loginCode = urlParams.get("loginCode");
+  const event = urlParams.get("event");
+  const success = urlParams.get("success");
+  
+  const affectsThisApp = provider && provider.toLowerCase() === loginApp.getName().toLowerCase();
 
-  const affectsThisApp = urlParams.has("provider") && urlParams.get("provider").toLowerCase() === loginApp.getName().toLowerCase();
-  if (!loginApp.AuthState.isLoggedIn()) {
-    if (affectsThisApp && urlParams.has("loginCode")) {
+  if (affectsThisApp && event === "logout") {
+    //
+    // Handle logout response
+    //
+    if (success) {
+      loginApp.AuthState.logout();
+      loginApp.UIState.resetViewState("auth"); // reset view state
+    }
+  } else if (!loginApp.AuthState.isLoggedIn()) {
+    if (affectsThisApp && loginCode) {
       loginApp.log("LoginEventListener", "Logged-in code received, fetching auth state..");
       //
       // Handle login response
       //
-      const loginCode = urlParams.get("loginCode");
       try {
         const loggedInState = await loginApp.AuthService.fetchLoggedInState(loginCode);
         loginApp.AuthState.login(loggedInState); // Store state in local storage
@@ -21,16 +33,6 @@ export default async function LoginEventListener(loginApp: LoginApp) {
       }
     } else {
       loginApp.UIState.handleCurrentState(); // Init UI
-    }
-  } else if (affectsThisApp && urlParams.has("logout")) {
-    loginApp.log("LoginEventListener", "Logout event received, logging out");
-    //
-    // Handle logout response
-    //
-    const logoutResponse = urlParams.get("logout");
-    if (logoutResponse === "success") {
-      loginApp.AuthState.logout();
-      loginApp.UIState.resetViewState("auth"); // reset view state
     }
   } else {
     //
