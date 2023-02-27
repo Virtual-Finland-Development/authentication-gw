@@ -67,7 +67,7 @@ export abstract class BaseRequestHandler implements IBaseRequestHandler {
 
     let errorMessage = "Logout failed";
     let errorType: NotifyType = "danger";
-    let success: RedirectMessage["success"] = "0";
+    let success: RedirectMessage["success"] = false;
 
     if (error instanceof NoticeException) {
       errorMessage = error.message;
