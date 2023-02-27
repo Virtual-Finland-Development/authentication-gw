@@ -66,7 +66,7 @@ The login code is either a temporary code that can be exchanged for authenticati
 
 If login fails / the attempt is cancelled etc, the user is redirected to the `redirectUrl` with a query parameters package:
 
-- `success=0`, int-boolean, `0` if login fails, `1` on success
+- `success=false`, boolean, `false` if login fails, `true` on success
 - `message`: the error message
 - `type`: message type, one of `danger`, `warning`, `info`
 - `provider`: authentication provider, eg. `sinuna`
@@ -141,7 +141,7 @@ eg: `https://${frontendAppHost}/login-handler.html?logout=success&provider=sinun
 
 If logout fails / user is already logged out etc, the user is redirected to the `redirectUrl` with with a query parameters package:
 
-- `success=0`: int-boolean, `0` if logout fails, `1` on success
+- `success=false`, boolean, `false` if login fails, `true` on success
 - `message`: the error message
 - `type`: message type, one of `danger`, `warning`, `info`
 - `provider`: authentication provider, eg. `sinuna`

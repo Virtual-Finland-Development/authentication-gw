@@ -5,7 +5,7 @@ export default async function LoginEventListener(loginApp: LoginApp) {
   const provider = urlParams.get("provider");
   const loginCode = urlParams.get("loginCode");
   const event = urlParams.get("event");
-  const success = urlParams.get("success");
+  const success = urlParams.get("success") === "true";
   
   const affectsThisApp = provider && provider.toLowerCase() === loginApp.getName().toLowerCase();
 

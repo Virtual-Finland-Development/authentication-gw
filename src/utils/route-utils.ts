@@ -28,10 +28,10 @@ export function prepareRedirectUrl(redirectUrl: string, providerIdent: string, p
  * @returns 
  */
 export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, providerIdent: string, message?: RedirectMessage): string {
-  const params: Array<{key: string, value: string | undefined}> = [
+  const params: Array<{key: string, value: string | undefined | boolean}> = [
     { key: "loginCode", value: loginCode },
     { key: "provider", value: providerIdent },
-    { key: "success", value: "1"},
+    { key: "success", value: true},
     { key: "event", value: "login"},
   ];
 
@@ -51,8 +51,8 @@ export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, 
  * @returns 
  */
 export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: string, message?: RedirectMessage): string {
-  const params: Array<{key: string, value: string | undefined}> = [
-    { key: "success", value: "1"},
+  const params: Array<{key: string, value: string | undefined | boolean}> = [
+    { key: "success", value: true},
     { key: "event", value: "logout" },
     { key: "provider", value: providerIdent },
     { key: "logout", value: "success" } // @obsolete
@@ -75,7 +75,7 @@ export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: str
  */
 export function prepareErrorRedirectUrl(redirectUrl: string, message: RedirectMessage): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { key: "success", value: "0"},
+    { key: "success", value: false},
     { key: "message", value: message.message },
     { key: "provider", value: message.provider || "unknown" },
     { key: "event", value: message.event },

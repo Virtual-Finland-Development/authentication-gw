@@ -106,7 +106,7 @@ export interface IBaseRequestHandler {
 }
 
 export type RedirectMessage = { 
-  success?: "0" | "1", 
+  success?: boolean, 
   message?: string; 
   provider?: string; 
   type?: NotifyType,

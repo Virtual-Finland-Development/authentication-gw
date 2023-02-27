@@ -123,9 +123,10 @@ export function ensureArray(value: any): any[] {
  * @param value
  * @returns
  */
-export function ensureUrlQueryParam(url: string, key: string, value: string | undefined): string {
+export function ensureUrlQueryParam(url: string, key: string, value: string | undefined | boolean): string {
   const urlObj = new URL(url);
-  urlObj.searchParams.set(key, typeof value !== "undefined" ? value : "");
+  const parsedValue = typeof value === "boolean" ? (value ? "true" : "false") : typeof value !== "undefined" ? value : "";
+  urlObj.searchParams.set(key, parsedValue);
   return urlObj.toString();
 }
 
@@ -135,7 +136,7 @@ export function ensureUrlQueryParam(url: string, key: string, value: string | un
  * @param params
  * @returns
  */
-export function ensureUrlQueryParams(url: string, params: Array<{ key: string; value: string | undefined }>): string {
+export function ensureUrlQueryParams(url: string, params: Array<{ key: string; value: string | undefined | boolean }>): string {
   for (const group of params) {
     url = ensureUrlQueryParam(url, group.key, group.value);
   }

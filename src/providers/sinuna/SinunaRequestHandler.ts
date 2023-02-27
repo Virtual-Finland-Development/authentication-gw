@@ -139,7 +139,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
         cookies: [prepareCookie("appContext", parsedAppContext.hash)],
       };
     } catch (error) {
-      return this.getLogoutRequestFailedResponse(context, error, { success: "1" });
+      return this.getLogoutRequestFailedResponse(context, error, { success: true });
     }
   }
 

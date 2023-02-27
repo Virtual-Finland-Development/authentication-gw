@@ -166,7 +166,7 @@ export default new (class TestbedRequestHandler extends BaseRequestHandler imple
         cookies: [prepareCookie("appContext", parsedAppContext.hash)],
       };
     } catch (error) {
-      return this.getLogoutRequestFailedResponse(context, error, { success: "1" });
+      return this.getLogoutRequestFailedResponse(context, error, { success: true });
     }
   }
 
