@@ -66,7 +66,7 @@ export function exceptionToObject(error: any): {
 
   if (error instanceof Error) {
     name = error.name;
-    message = error.message;
+    message = error.message || `Exception: ${error.name}`;
     stack = error.stack;
     if (error instanceof AxiosError) {
       message = `External API: ${message}`;
@@ -81,7 +81,7 @@ export function exceptionToObject(error: any): {
       message = typeof error === "string" ? error : "Unknown error";
     }
   }
-
+  
   message = typeof message === "string" ? message : "Unknown error message";
 
   return {

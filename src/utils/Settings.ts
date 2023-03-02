@@ -11,7 +11,7 @@ export default {
       return await getSecretParameter(key);
     } catch (error) {
       if (typeof defaultValue !== "string") {
-        throw error;
+        throw new Error(`Secret ${key} could not be retrieved`);
       }
       return defaultValue;
     }
