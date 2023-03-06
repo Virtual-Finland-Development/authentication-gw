@@ -75,12 +75,14 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
     const consentSituations = await fetchConsentStatuses(resolvableDataSource.map((ds: { uri: string; }) => ds.uri), idToken);
     for (const consentStatus of consentSituations) {
       if (consentStatus.status === "verifyUserConsent") {
+        const dataSourceUri = consentStatus.data.missingConsents[0].dataSource;
         consentResponses.push({
           consentStatus: consentStatus.status,
+          dataSource: dataSourceUri,
           redirectUrl: ensureUrlQueryParams(Runtime.getAppUrl("/consents/testbed/consent-request"), [
             { key: "appContext", value: parsedAppContext.hash }, // Or maybe provide these at the frontend?
             { key: "idToken", value: consentStatus.idToken },
-            { key: "dataSource", value: consentStatus.data.missingConsents[0].dataSource },
+            { key: "dataSource", value: dataSourceUri },
           ]),
         });
       } else if (consentStatus.status === "consentGranted") {
