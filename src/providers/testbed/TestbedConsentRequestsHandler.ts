@@ -24,7 +24,10 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
    */
   async TestbedConsentVerify(context: Context): Promise<HttpResponse> {
     const consentToken = String(context.request.headers["x-consent-token"]);
-    await verifyConsent(consentToken); // Throws AccessDeniedException if access needs to be denied
+    await verifyConsent(consentToken, {
+      idToken: parseAuthorizationFromContext(context), // Optional
+      dataSource: context.request.headers["x-authorization-context"] as string, // Optional
+    }); // Throws AccessDeniedException if access needs to be denied
 
     return {
       statusCode: 200,

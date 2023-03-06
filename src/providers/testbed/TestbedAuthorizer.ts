@@ -1,8 +1,11 @@
+import * as jwt from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
 import { AccessDeniedException } from "../../utils/exceptions";
-import { verifyIdToken } from "../../utils/JWK-Utils";
+import { decodeIdToken, verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
+import Settings from "../../utils/Settings";
 import { AuthorizationHeaders, AuthorizerResponse } from "../../utils/types";
+import { verifyConsent as verifyConsentFromService } from "./service/ConsentRequests";
 import TestbedConfig from "./Testbed.config";
 
 /**
@@ -47,7 +50,10 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
 
   // Verify consent if requested
   if (authorizationHeaders.consentToken) {
-    response.consent = await verifyConsent(authorizationHeaders.consentToken);
+    response.consent = await verifyConsent(authorizationHeaders.consentToken, {
+      idToken: authorizationHeaders.authorization,
+      dataSource: authorizationHeaders.context,
+    });
   }
 
   return response;
@@ -58,14 +64,96 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
  * @param consentToken
  * @see: https://ioxio.com/guides/verify-consent-in-a-data-source
  */
-export async function verifyConsent(consentToken: string): Promise<JwtPayload> {
+export async function verifyConsent(consentToken: string, comparePackage?: { idToken?: string, dataSource?: string}): Promise<JwtPayload> {
   try {
     // Verify token
     const verified = await verifyIdToken(consentToken, { issuer: "https://consent.testbed.fi", jwksUri: "https://consent.testbed.fi/.well-known/jwks.json" });
     debug(verified);
+
+    // Verify consent
+    if (typeof comparePackage?.dataSource === "string") {
+      if (verified.dsi !== comparePackage?.dataSource) {
+        throw new AccessDeniedException("Invalid dsi");
+      }
+    }
+
+    if (typeof comparePackage?.idToken === "string") {
+      const { decodedToken } = decodeIdToken(comparePackage?.idToken);
+      if (decodedToken === null || typeof decodedToken.payload !== "object") {
+        throw new Error("Invalid idToken");
+      }
+      if (verified.acr !== decodedToken.payload.acr) {
+        throw new AccessDeniedException("Invalid acr");
+      }
+      if (verified.appiss !== decodedToken.payload.iss) {
+        throw new AccessDeniedException("Invalid appiss");
+      }
+      if (verified.app !== decodedToken.payload.aud) {
+        throw new AccessDeniedException("Invalid app");
+      }
+      if (verified.v !== "0.2") {
+        throw new AccessDeniedException("Invalid v (version)");
+      }
+
+      // @TODO: Verify sub against users api data
+      if (verified.subiss !== decodedToken.payload.iss) {
+        throw new AccessDeniedException("Invalid subiss");
+      }
+    }
+
+    if (typeof comparePackage?.dataSource === "string" && typeof comparePackage?.idToken === "string") {
+      const verified = await verifyConsentFromService(comparePackage?.idToken, consentToken, comparePackage?.idToken);
+      if (!verified) {
+        throw new AccessDeniedException("Consent unverified by provider service");
+      }
+    }
+
     return verified;
   } catch (error) {
     debug(error);
     throw new AccessDeniedException("Consent unverified");
   }
+}
+
+/**
+ * 
+ * @param idToken 
+ * @returns 
+ */
+export async function createConsentRequestToken(idToken: string): Promise<string> {
+  const { decodedToken } = decodeIdToken(idToken);
+
+  if (decodedToken === null || typeof decodedToken.payload !== "object") {
+    throw new Error("Invalid idToken");
+  }
+
+  const expiresIn = 60 * 60; // 1 hour
+  const keyId = `vfd:authgw:${Settings.getStage()}:testbed:jwt`;
+  const keyIssuer = "https://virtual-finland-development-auth-files.s3.eu-north-1.amazonaws.com";
+  
+  const payload = {
+    sub: decodedToken.payload.sub,
+    subiss: decodedToken.payload.subiss || "https://login.testbed.fi",
+    acr: decodedToken.payload.acr,
+    app: await Settings.getSecret("TESTBED_CLIENT_ID"),
+    appiss: "https://login.testbed.fi",
+    aud: "https://consent.testbed.fi",
+  };
+  
+  const customHeader = {
+    kid: keyId,
+    alg: "RS256",
+    typ: "JWT",
+    v: "0.2",
+  };
+
+  const key = await Settings.getStageSecret("TESTBED_CONSENT_JWKS_PRIVATE_KEY");
+  
+  return jwt.sign(payload, key, {
+    header: customHeader,
+    algorithm: "RS256",
+    expiresIn: expiresIn,
+    issuer: keyIssuer,
+    keyid: keyId,
+  })
 }

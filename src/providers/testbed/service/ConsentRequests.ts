@@ -1,9 +1,8 @@
 import axios from "axios";
-import * as jwt from "jsonwebtoken";
-import { decodeIdToken } from "../../../utils/JWK-Utils";
 import { debug } from "../../../utils/logging";
 import Runtime from "../../../utils/Runtime";
 import Settings from "../../../utils/Settings";
+import { createConsentRequestToken } from "../TestbedAuthorizer";
 
 type ISituationResponseDataPair<T, K extends keyof T = keyof T> = K extends keyof T ? { status: K; data: T[K]; idToken: string; dataSourceUri: string } : never;
 type ISituationResponseData = ISituationResponseDataPair<{
@@ -14,50 +13,6 @@ type ISituationResponseData = ISituationResponseDataPair<{
     consentToken: string;
   };
 }>;
-
-/**
- * 
- * @param idToken 
- * @returns 
- */
-async function createConsentRequestToken(idToken: string): Promise<string> {
-  const { decodedToken } = decodeIdToken(idToken);
-
-  if (decodedToken === null || typeof decodedToken.payload !== "object") {
-    throw new Error("Invalid idToken");
-  }
-
-  const expiresIn = 60 * 60; // 1 hour
-  const keyId = `vfd:authgw:${Settings.getStage()}:testbed:jwt`;
-  const keyIssuer = "https://virtual-finland-development-auth-files.s3.eu-north-1.amazonaws.com";
-  
-  const payload = {
-    sub: decodedToken.payload.sub,
-    subiss: decodedToken.payload.subiss || "https://login.testbed.fi",
-    acr: decodedToken.payload.acr,
-    app: await Settings.getSecret("TESTBED_CLIENT_ID"),
-    appiss: "https://login.testbed.fi",
-    aud: "https://consent.testbed.fi",
-  };
-  
-  const customHeader = {
-    kid: keyId,
-    alg: "RS256",
-    typ: "JWT",
-    v: "0.2",
-  };
-
-  const key = await Settings.getStageSecret("TESTBED_CONSENT_JWKS_PRIVATE_KEY");
-  
-  return jwt.sign(payload, key, {
-    header: customHeader,
-    algorithm: "RS256",
-    expiresIn: expiresIn,
-    issuer: keyIssuer,
-    keyid: keyId,
-  })
-}
-
 
 /**
  * @see: https://ioxio.com/guides/how-to-build-an-application#request-consent
@@ -149,4 +104,36 @@ export async function fetchConsentStatus(dataSourceUri: string, idToken: string)
     };
   }
   throw new Error("Unexpected response");
+}
+
+/**
+ * 
+ * @param idToken 
+ * @param consentToken 
+ * @param dataSourceUri 
+ * @returns 
+ */
+export async function verifyConsent(idToken: string, consentToken: string, dataSourceUri: string): Promise<boolean> {
+  const response = await axios.post(
+    "https://consent.testbed.fi/Consent/Verify",
+    JSON.stringify({
+      dataSource: dataSourceUri
+    }),
+    {
+      headers: {
+        "Authorization": `Bearer ${idToken}`,
+        "X-Consent-Token": consentToken,
+        "Content-Type": "application/json",
+      },
+      timeout: Settings.REQUEST_TIMEOUT_MSECS,
+    }
+  );
+
+  const consentStatus = response.data;
+  debug("consent status response", {
+    status: response.status,
+    verified: consentStatus.verified
+  });
+
+  return consentStatus.verified;
 }
