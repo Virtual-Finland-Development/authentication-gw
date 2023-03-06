@@ -100,7 +100,7 @@ export async function getPublicKey(decodedToken: jwt.Jwt | null, issuerConfig: I
  * @returns
  */
 export function parseAuthorizationFromContext(context: Context): string {
-  return parseAuthorizationHeaderValue(String(context.request.headers.authorization));
+  return parseAuthorizationHeaderValue(context.request.headers.authorization as string);
 }
 
 /**
@@ -109,6 +109,9 @@ export function parseAuthorizationFromContext(context: Context): string {
  * @returns
  */
 export function parseAuthorizationHeaderValue(authorization: string): string {
+  if (typeof authorization !== "string") {
+    return "";
+  }
   return leftTrim(authorization, "Bearer ");
 }
 

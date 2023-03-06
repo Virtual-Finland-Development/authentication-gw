@@ -4,6 +4,7 @@ import { AccessDeniedException } from "../../utils/exceptions";
 import { decodeIdToken, verifyIdToken } from "../../utils/JWK-Utils";
 import { debug } from "../../utils/logging";
 import Settings from "../../utils/Settings";
+import { ifString } from "../../utils/transformers";
 import { AuthorizationHeaders, AuthorizerResponse } from "../../utils/types";
 import { verifyConsent as verifyConsentFromService } from "./service/ConsentRequests";
 import TestbedConfig from "./Testbed.config";
@@ -72,15 +73,16 @@ export async function verifyConsent(consentToken: string, comparePackage?: { idT
     debug(verified);
 
     // Verify consent
-    if (typeof comparePackage?.dataSource === "string") {
+    if (ifString(comparePackage?.dataSource)) {
       if (verified.dsi !== comparePackage?.dataSource) {
         throw new AccessDeniedException("Invalid dsi");
       }
     }
 
-    if (typeof comparePackage?.idToken === "string") {
-      const { decodedToken } = decodeIdToken(comparePackage?.idToken);
+    if (ifString(comparePackage?.idToken)) {
+      const { decodedToken } = decodeIdToken(comparePackage?.idToken as string);
       if (decodedToken === null || typeof decodedToken.payload !== "object") {
+        console.log(comparePackage?.idToken, decodedToken);
         throw new Error("Invalid idToken");
       }
       if (verified.acr !== decodedToken.payload.acr) {
@@ -103,7 +105,7 @@ export async function verifyConsent(consentToken: string, comparePackage?: { idT
       if (verified.sub !== decodedToken.payload.sub) {
         throw new AccessDeniedException("Token mismatch: sub");
       }
-      if (typeof comparePackage?.consentUserId === "string") {
+      if (ifString(comparePackage?.consentUserId)) {
         if (verified.sub !== comparePackage?.consentUserId) {
           throw new AccessDeniedException("Input mismatch: sub");
         }
