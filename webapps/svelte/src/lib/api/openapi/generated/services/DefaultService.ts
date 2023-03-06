@@ -209,20 +209,10 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public testbedConsentResponse({
-        status,
-    }: {
-        /**
-         * Consent status
-         */
-        status: 'success' | 'fail',
-    }): CancelablePromise<void> {
+    public testbedConsentResponse(): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/consents/testbed/consent-response',
-            query: {
-                'status': status,
-            },
             errors: {
                 303: `Redirect back to the app context`,
             },
