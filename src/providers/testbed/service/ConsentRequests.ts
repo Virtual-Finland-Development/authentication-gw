@@ -29,7 +29,8 @@ async function createConsentRequestToken(idToken: string): Promise<string> {
 
   const expiresIn = 60 * 60; // 1 hour
   const keyId = `vfd:authgw:${Settings.getStage()}:testbed:jwt`;
-
+  const keyIssuer = "https://virtual-finland-development-auth-files.s3.eu-north-1.amazonaws.com";
+  
   const payload = {
     sub: decodedToken.payload.sub,
     subiss: decodedToken.payload.subiss || "https://login.testbed.fi",
@@ -52,7 +53,7 @@ async function createConsentRequestToken(idToken: string): Promise<string> {
     header: customHeader,
     algorithm: "RS256",
     expiresIn: expiresIn,
-    issuer: "https://virtual-finland-development-auth-files.s3.eu-north-1.amazonaws.com",
+    issuer: keyIssuer,
     keyid: keyId,
   })
 }
