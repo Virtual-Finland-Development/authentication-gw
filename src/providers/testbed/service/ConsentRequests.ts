@@ -113,14 +113,14 @@ export async function fetchConsentStatus(dataSourceUri: string, idToken: string)
       }
     );
     
-    const tokenResponseStatus = response.data;
+    const tokenResponseData = tokenResponse.data;
 
     debug("consent token response", {
-      status: response.status,
-      type: tokenResponseStatus.type
+      status: tokenResponse.status,
+      type: tokenResponseData.type
     });
 
-    if (tokenResponse.status !== 200 || tokenResponseStatus.type !== "allConsentsGranted") {
+    if (tokenResponse.status !== 200 || tokenResponseData.type !== "consentGranted") {
       throw new Error("Unexpected consent token response");
     }
 
@@ -129,7 +129,7 @@ export async function fetchConsentStatus(dataSourceUri: string, idToken: string)
       dataSourceUri: dataSourceUri,
       idToken: idToken,
       data: {
-        consentToken: tokenResponseStatus.consentToken,
+        consentToken: tokenResponseData.consentToken,
       },
     };
   } else if (response.status === 201 && consentStatus.type === "requestUserConsent") {
