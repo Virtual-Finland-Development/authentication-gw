@@ -53,13 +53,8 @@ export default {
    * @param authData
    * @returns
    */
-  async authorize(authorization: string | string[], authorizationContext: string | string[], consentToken: string | string[]): Promise<AuthorizerResponse> {
-    const authHeaders = omitEmptyObjectKeys({
-      authorization: String(authorization),
-      context: authorizationContext ? String(authorizationContext) : "",
-      consentToken: consentToken ? String(consentToken) : "",
-    });
-
+  async authorize(authorizationHeaders: AuthorizationHeaders): Promise<AuthorizerResponse> {
+    const authHeaders = omitEmptyObjectKeys(authorizationHeaders);
     const authorizator = getAuthorizator(authHeaders);
     return await authorizator.authorize(authHeaders);
   },

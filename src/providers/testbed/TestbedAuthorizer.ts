@@ -52,7 +52,8 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
   if (authorizationHeaders.consentToken) {
     response.consent = await verifyConsent(authorizationHeaders.consentToken, {
       idToken: authorizationHeaders.authorization,
-      dataSource: authorizationHeaders.context,
+      dataSource: authorizationHeaders.consentDataSource,
+      consentUserId: authorizationHeaders.consentUserId,
     });
   }
 
@@ -64,7 +65,7 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
  * @param consentToken
  * @see: https://ioxio.com/guides/verify-consent-in-a-data-source
  */
-export async function verifyConsent(consentToken: string, comparePackage?: { idToken?: string, dataSource?: string}): Promise<JwtPayload> {
+export async function verifyConsent(consentToken: string, comparePackage?: { idToken?: string, dataSource?: string, consentUserId?: string}): Promise<JwtPayload> {
   try {
     // Verify token
     const verified = await verifyIdToken(consentToken, { issuer: "https://consent.testbed.fi", jwksUri: "https://consent.testbed.fi/.well-known/jwks.json" });
@@ -83,33 +84,46 @@ export async function verifyConsent(consentToken: string, comparePackage?: { idT
         throw new Error("Invalid idToken");
       }
       if (verified.acr !== decodedToken.payload.acr) {
-        throw new AccessDeniedException("Invalid acr");
+        throw new AccessDeniedException("Token mismatch: acr");
       }
       if (verified.appiss !== decodedToken.payload.iss) {
-        throw new AccessDeniedException("Invalid appiss");
+        throw new AccessDeniedException("Token mismatch: appiss");
       }
       if (verified.app !== decodedToken.payload.aud) {
-        throw new AccessDeniedException("Invalid app");
+        throw new AccessDeniedException("Token mismatch: app");
       }
       if (verified.v !== "0.2") {
-        throw new AccessDeniedException("Invalid v (version)");
+        throw new AccessDeniedException("Token mismatch: v");
+      }
+      if (verified.subiss !== decodedToken.payload.iss) {
+        throw new AccessDeniedException("Token mismatch: subiss");
       }
 
-      // @TODO: Verify sub against users api data
-      if (verified.subiss !== decodedToken.payload.iss) {
-        throw new AccessDeniedException("Invalid subiss");
+      // User verification
+      if (verified.sub !== decodedToken.payload.sub) {
+        throw new AccessDeniedException("Token mismatch: sub");
       }
+      if (typeof comparePackage?.consentUserId === "string") {
+        if (verified.sub !== comparePackage?.consentUserId) {
+          throw new AccessDeniedException("Input mismatch: sub");
+        }
+      }
+      // @TODO: Verify user identity against the users-api service
     }
 
     if (typeof comparePackage?.dataSource === "string" && typeof comparePackage?.idToken === "string") {
       const verified = await verifyConsentFromService(comparePackage?.idToken, consentToken, comparePackage?.idToken);
       if (!verified) {
-        throw new AccessDeniedException("Consent unverified by provider service");
+        throw new AccessDeniedException("Consent unverified by the authentication provider service");
       }
     }
 
     return verified;
   } catch (error) {
+    if (error instanceof AccessDeniedException) {
+      throw error;
+    }
+    
     debug(error);
     throw new AccessDeniedException("Consent unverified");
   }

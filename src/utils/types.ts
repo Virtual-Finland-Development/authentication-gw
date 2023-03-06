@@ -95,6 +95,8 @@ export type AuthorizationHeaders = {
   authorization: string;
   context?: string;
   consentToken?: string;
+  consentDataSource?: string;
+  consentUserId?: string;
 };
 
 export interface IBaseRequestHandler {

@@ -47,15 +47,21 @@ paths:
           schema:
             type: string
         - in: header
-          name: X-Authorization-Context
-          required: false
-          description: "Optional usage context (eg. data source URI for the context)"
-          schema:
-            type: string
-        - in: header
           name: X-Consent-Token
           required: false
           description: "Optional consent token, the consent will be verified if the given authorization issuer has a consent service"
+          schema:
+            type: string
+        - in: header
+          name: X-Consent-Data-Source
+          required: false
+          description: "Data source URI for the consent verification context"
+          schema:
+            type: string
+        - in: header
+          name: X-Consent-User-Id
+          required: false
+          description: "Extra check for consent verification context"
           schema:
             type: string
       responses:
@@ -95,10 +101,19 @@ paths:
             type: string
         - in: header
           name: Authorization
+          required: true
           schema:
             type: string
         - in: header
-          name: X-Authorization-Context
+          name: X-Consent-Data-Source
+          required: false
+          description: "Data source URI for the consent verification context"
+          schema:
+            type: string
+        - in: header
+          name: X-Consent-User-Id
+          required: false
+          description: "Extra check for consent verification context"
           schema:
             type: string
       responses:

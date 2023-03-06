@@ -26,10 +26,14 @@ export default {
    * @returns
    */
   async AuthorizeRequest(context: Context): Promise<HttpResponse> {
-    const authorization = context.request.headers.authorization;
-    const authorizationContext = context.request.headers["x-authorization-context"];
-    const consentToken = context.request.headers["x-consent-token"];
-    const response = await Authorizator.authorize(authorization, authorizationContext, consentToken); // Throws AccessDeniedException if access needs to be denied
+
+    const response = await Authorizator.authorize({
+      authorization: context.request.headers.authorization as string,
+      context: context.request.headers["x-consent-data-source"] as string,
+      consentToken: context.request.headers["x-consent-token"] as string,
+      consentDataSource: context.request.headers["x-consent-data-source"] as string,
+      consentUserId: context.request.headers["x-consent-user-id"] as string,
+    }); // Throws AccessDeniedException if access needs to be denied
 
     return {
       statusCode: 200,
