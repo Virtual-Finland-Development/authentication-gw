@@ -21,22 +21,22 @@ type ISituationResponseData = ISituationResponseDataPair<{
  * @param idToken
  * @returns
  */
-export async function fetchConsentStatus(dataSourceUri: string, idToken: string): Promise<ISituationResponseData> {
+export async function fetchConsentStatuses(dataSourceUris: Array<string>, idToken: string): Promise<Array<ISituationResponseData>> {
 
   // Create consent request token
   const consentRequestToken = await createConsentRequestToken(idToken);
   debug("consentRequestToken", consentRequestToken);
   
-  const response = await axios.post(
+  const consentsResponse = await axios.post(
     "https://consent.testbed.fi/Consent/RequestConsents",
     JSON.stringify({
-      consentRequests: [
-        {
+      consentRequests: dataSourceUris.map(dataSourceUri => {
+        return {
           dataSource: dataSourceUri,
           required: true,
-        }
-      ],
-    }),
+        };
+      },
+    )}),
     {
       headers: {
         "X-Consent-Request-Token": consentRequestToken,
@@ -46,15 +46,39 @@ export async function fetchConsentStatus(dataSourceUri: string, idToken: string)
     }
   );
   
-  const consentStatus = response.data;
+  const consentsResponseData = consentsResponse.data;
   debug("consent status response", {
-    status: response.status,
-    type: consentStatus.type
+    status: consentsResponse.status,
+    type: consentsResponseData.type
   });
 
-  if (response.status === 200 && consentStatus.type === "allConsentsGranted") {
+  let greantedConsentUris = [];
+  const consentResponses: Array<ISituationResponseData> = [];
 
-    // All consents granted, fetch the approved consent token
+  if (consentsResponse.status === 200 && consentsResponseData.type === "allConsentsGranted") {
+    greantedConsentUris = dataSourceUris
+  } else if (consentsResponse.status === 201 && consentsResponseData.type === "requestUserConsent") {
+    const returnUrl = Runtime.getAppUrl("/consents/testbed/consent-response");
+    const redirectUrl = `${consentsResponseData.requestUrl}?${new URLSearchParams({
+      returnUrl: returnUrl,
+    }).toString()}`;
+
+    return [
+      {
+        status: "verifyUserConsent",
+        idToken: idToken,
+        dataSourceUri: consentsResponseData.missingConsents?.[0],
+        data: {
+          redirectUrl: redirectUrl,
+        },
+      }
+    ];
+  } else {
+    throw new Error("Unexpected response");
+  }
+
+  // For all consents granted, fetch the approved consent token
+  for (const dataSourceUri of greantedConsentUris) {
     const tokenResponse = await axios.post(
       "https://consent.testbed.fi/Consent/GetToken ",
       JSON.stringify({
@@ -80,30 +104,28 @@ export async function fetchConsentStatus(dataSourceUri: string, idToken: string)
       throw new Error("Unexpected consent token response");
     }
 
-    return {
+    consentResponses.push({
       status: "consentGranted",
       dataSourceUri: dataSourceUri,
       idToken: idToken,
       data: {
         consentToken: tokenResponseData.consentToken,
       },
-    };
-  } else if (response.status === 201 && consentStatus.type === "requestUserConsent") {
-    const returnUrl = Runtime.getAppUrl("/consents/testbed/consent-response");
-    const redirectUrl = `${consentStatus.requestUrl}?${new URLSearchParams({
-      returnUrl: returnUrl,
-    }).toString()}`;
-
-    return {
-      status: "verifyUserConsent",
-      idToken: idToken,
-      dataSourceUri: dataSourceUri,
-      data: {
-        redirectUrl: redirectUrl,
-      },
-    };
+    });
   }
-  throw new Error("Unexpected response");
+
+  return consentResponses;
+}
+
+/**
+ * 
+ * @param dataSourceUri 
+ * @param idToken 
+ * @returns 
+ */
+export async function fetchConsentStatus(dataSourceUri: string, idToken: string): Promise<ISituationResponseData> {
+  const consentStatuses = await fetchConsentStatuses([dataSourceUri], idToken);
+  return consentStatuses[0];
 }
 
 /**

@@ -8,7 +8,7 @@ import Runtime from "../../utils/Runtime";
 import { ensureUrlQueryParams } from "../../utils/transformers";
 import { HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
-import { fetchConsentStatus } from "./service/ConsentRequests";
+import { fetchConsentStatus, fetchConsentStatuses } from "./service/ConsentRequests";
 import TestbedConfig from "./Testbed.config";
 import { verifyConsent } from "./TestbedAuthorizer";
 
@@ -27,6 +27,7 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
     await verifyConsent(consentToken, {
       idToken: parseAuthorizationFromContext(context), // Optional
       dataSource: context.request.headers["x-consent-data-source"] as string, // Optional
+      consentUserId: context.request.headers["x-consent-user-id"] as string
     }); // Throws AccessDeniedException if access needs to be denied
 
     return {
@@ -51,28 +52,28 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
 
     const dataSources = context.request.requestBody.dataSources;
     const consentResponses = [];
-    for (const dataSource of dataSources) {
-      let consentStatus = {
-        status: "",
-        data: {} as any,
-        idToken: idToken,
-        dataSourceUri: dataSource.uri,
-      };
 
-      if (dataSource.consentToken) {
-        try {
-          await verifyConsent(dataSource.consentToken);
-          consentStatus.status = "consentGranted";
-          consentStatus.data.consentToken = dataSource.consentToken;
-        } catch (error) {
-          consentStatus.status = "verifyUserConsent";
-        }
-      } else {
-        const consentSituationData = await fetchConsentStatus(dataSource.uri, idToken);
-        consentStatus.status = consentSituationData.status;
-        consentStatus.data = consentSituationData.data;
+    const verifiableConsentRequests = dataSources.filter((dataSource: { consentToken: any; }) => dataSource.consentToken);
+    const fetchableConsentRequests = dataSources.filter((dataSource: { consentToken: any; }) => !dataSource.consentToken);
+
+    // Verify verifiable consent requests
+    for (const dataSource of verifiableConsentRequests) {
+      try {
+        await verifyConsent(dataSource.consentToken);
+        consentResponses.push({
+          status: "consentGranted",
+          data: { consentToken: dataSource.consentToken } as any,
+          idToken: idToken,
+          dataSourceUri: dataSource.uri,
+        });
+      } catch (error) {
+        fetchableConsentRequests.push(dataSource);
       }
+    }
 
+    // Fetch consent status for fetchable/unverified consent requests
+    const consentSituations = await fetchConsentStatuses(fetchableConsentRequests, idToken);
+    for (const consentStatus of consentSituations) {
       if (consentStatus.status === "verifyUserConsent") {
         consentResponses.push({
           consentStatus: consentStatus.status,
