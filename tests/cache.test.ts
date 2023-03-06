@@ -12,10 +12,9 @@ describe("Cache service tests", () => {
 
   test("Test ttl", async () => {
     const baseLine = { test: "test" };
-    await CacheService.save("test", baseLine, 1);
-    await Runtime.sleep(1);
+    await CacheService.save("test", baseLine, 10);
     expect(await CacheService.fetch("test")).toEqual(baseLine);
-    await Runtime.sleep(150);
+    await Runtime.sleep(250);
     expect(await CacheService.fetch("test")).toBe(undefined);
   });
 });
