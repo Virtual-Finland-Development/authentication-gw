@@ -70,6 +70,10 @@ export function exceptionToObject(error: any): {
     stack = error.stack;
     if (error instanceof AxiosError) {
       message = `External API: ${message}`;
+      if (error.response?.data?.detail) {
+        message = `${message} - ${error.response.data.detail}`;
+      }
+      //console.log(error);
     }
   } else {
     if (isObject(error) && typeof error.message === "string") {
