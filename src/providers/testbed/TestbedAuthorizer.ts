@@ -30,19 +30,19 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
 
   try {
     // Verify token
-    const verified = await verifyIdToken(authorizationHeaders.authorization, {
+    const { payload } = await verifyIdToken(authorizationHeaders.authorization, {
       issuer: "https://login.testbed.fi",
       openIdConfigUrl: "https://login.testbed.fi/.well-known/openid-configuration",
     });
-    debug(verified);
+    debug(payload);
 
     response.message = "Access granted";
     response.authorization = {
-      userId: verified.sub,
-      email: verified.email,
-      issuer: verified.iss,
-      expiresAt: verified.exp,
-      issuedAt: verified.iat,
+      userId: payload.sub,
+      email: payload.email,
+      issuer: payload.iss,
+      expiresAt: payload.exp,
+      issuedAt: payload.iat,
     };
     
   } catch (error) {
@@ -80,10 +80,12 @@ export async function verifyConsent(consentToken: string, comparePackage?: { idT
     // Verify token
     const verified = await verifyIdToken(consentToken, { issuer: "https://consent.testbed.fi", jwksUri: "https://consent.testbed.fi/.well-known/jwks.json" });
     debug(verified);
+    const payload = verified.payload;
+    const header = verified.header;
 
     // Verify consent
     if (ifString(comparePackage?.dataSource)) {
-      if (verified.dsi !== comparePackage?.dataSource) {
+      if (payload.dsi !== comparePackage?.dataSource) {
         throw new AccessDeniedException("Invalid dsi");
       }
     }
@@ -91,45 +93,44 @@ export async function verifyConsent(consentToken: string, comparePackage?: { idT
     if (ifString(comparePackage?.idToken)) {
       const { decodedToken } = decodeIdToken(comparePackage?.idToken as string);
       if (decodedToken === null || typeof decodedToken.payload !== "object") {
-        console.log(comparePackage?.idToken, decodedToken);
         throw new Error("Invalid idToken");
       }
-      if (verified.acr !== decodedToken.payload.acr) {
+      if (payload.acr !== decodedToken.payload.acr) {
         throw new AccessDeniedException("Token mismatch: acr");
       }
-      if (verified.appiss !== decodedToken.payload.iss) {
+      if (payload.appiss !== decodedToken.payload.iss) {
         throw new AccessDeniedException("Token mismatch: appiss");
       }
-      if (verified.app !== decodedToken.payload.aud) {
+      if (payload.app !== decodedToken.payload.aud) {
         throw new AccessDeniedException("Token mismatch: app");
       }
-      if (verified.v !== "0.2") {
+      if (header.v !== "0.2") {
         throw new AccessDeniedException("Token mismatch: v");
       }
-      if (verified.subiss !== decodedToken.payload.iss) {
+      if (payload.subiss !== decodedToken.payload.iss) {
         throw new AccessDeniedException("Token mismatch: subiss");
       }
 
       // User verification
-      if (verified.sub !== decodedToken.payload.sub) {
+      if (payload.sub !== decodedToken.payload.sub) {
         throw new AccessDeniedException("Token mismatch: sub");
       }
       if (ifString(comparePackage?.consentUserId)) {
-        if (verified.sub !== comparePackage?.consentUserId) {
+        if (payload.sub !== comparePackage?.consentUserId) {
           throw new AccessDeniedException("Input mismatch: sub");
         }
       }
       // @TODO: Verify user identity against the users-api service
     }
 
-    if (typeof comparePackage?.dataSource === "string" && typeof comparePackage?.idToken === "string") {
-      const verified = await verifyConsentFromService(comparePackage?.idToken, consentToken, comparePackage?.idToken);
-      if (!verified) {
+    if (ifString(comparePackage?.dataSource) && ifString(comparePackage?.idToken)) {
+      const serviceVerified = await verifyConsentFromService(comparePackage?.idToken as string, consentToken, comparePackage?.dataSource  as string);
+      if (!serviceVerified) {
         throw new AccessDeniedException("Consent unverified by the authentication provider service");
       }
     }
 
-    return verified;
+    return payload;
   } catch (error) {
     if (error instanceof AccessDeniedException) {
       throw error;
