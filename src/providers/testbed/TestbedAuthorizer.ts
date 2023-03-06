@@ -51,11 +51,20 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
 
   // Verify consent if requested
   if (authorizationHeaders.consentToken) {
-    response.consent = await verifyConsent(authorizationHeaders.consentToken, {
+    const verifiedConsent = await verifyConsent(authorizationHeaders.consentToken, {
       idToken: authorizationHeaders.authorization,
       dataSource: authorizationHeaders.consentDataSource,
       consentUserId: authorizationHeaders.consentUserId,
     });
+    
+    response.consent = {
+      dataSource: authorizationHeaders.consentDataSource,
+      userId: verifiedConsent.sub,
+      email: verifiedConsent.email,
+      issuer: verifiedConsent.iss,
+      expiresAt: verifiedConsent.exp,
+      issuedAt: verifiedConsent.iat,
+    };
   }
 
   return response;

@@ -1,4 +1,3 @@
-import { JwtPayload } from "jsonwebtoken";
 import { Context } from "openapi-backend";
 
 export type AppContext = {
@@ -89,7 +88,7 @@ export type Authorizer = {
   isMatchingProvider: (provider: string) => boolean;
 };
 
-export type AuthorizerResponse = { message: string; authorization: { userId?: string, email?: string, expiresAt?: number, issuedAt?: number, issuer?: string } | null; consent?: JwtPayload | null };
+export type AuthorizerResponse = { message: string; authorization: { userId?: string, email?: string, expiresAt?: number, issuedAt?: number, issuer?: string } | null; consent?: { dataSource?: string, userId?: string, email?: string, expiresAt?: number, issuedAt?: number, issuer?: string } | null };
 
 export type AuthorizationHeaders = {
   authorization: string;
