@@ -5,6 +5,6 @@ infra/.lambda
 .vscode
 !.vscode/tasks.json
 *.drawio.bkp
-certificates/*
-!certificates/*.sh
+certificates/*/*
+!certificates/*/*.sh
 resources/docker/caddy/data/*
