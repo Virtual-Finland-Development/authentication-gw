@@ -53,11 +53,11 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
     const dataSources = context.request.requestBody.dataSources;
     const consentResponses = [];
 
-    const verifiableConsentRequests = dataSources.filter((dataSource: { consentToken: any; }) => dataSource.consentToken);
-    const fetchableConsentRequests = dataSources.filter((dataSource: { consentToken: any; }) => !dataSource.consentToken);
+    const verifiableDataSources = dataSources.filter((dataSource: { consentToken: any; }) => dataSource.consentToken);
+    const resolvableDataSource = dataSources.filter((dataSource: { consentToken: any; }) => !dataSource.consentToken);
 
     // Verify verifiable consent requests
-    for (const dataSource of verifiableConsentRequests) {
+    for (const dataSource of verifiableDataSources) {
       try {
         await verifyConsent(dataSource.consentToken);
         consentResponses.push({
@@ -67,21 +67,20 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
           dataSourceUri: dataSource.uri,
         });
       } catch (error) {
-        fetchableConsentRequests.push(dataSource);
+        resolvableDataSource.push(dataSource);
       }
     }
 
     // Fetch consent status for fetchable/unverified consent requests
-    const consentSituations = await fetchConsentStatuses(fetchableConsentRequests, idToken);
+    const consentSituations = await fetchConsentStatuses(resolvableDataSource.map((ds: { uri: string; }) => ds.uri), idToken);
     for (const consentStatus of consentSituations) {
       if (consentStatus.status === "verifyUserConsent") {
         consentResponses.push({
           consentStatus: consentStatus.status,
-          dataSource: consentStatus.dataSourceUri,
           redirectUrl: ensureUrlQueryParams(Runtime.getAppUrl("/consents/testbed/consent-request"), [
             { key: "appContext", value: parsedAppContext.hash }, // Or maybe provide these at the frontend?
             { key: "idToken", value: consentStatus.idToken },
-            { key: "dataSource", value: consentStatus.dataSourceUri },
+            { key: "dataSource", value: consentStatus.data.missingConsents[0].dataSource },
           ]),
         });
       } else if (consentStatus.status === "consentGranted") {

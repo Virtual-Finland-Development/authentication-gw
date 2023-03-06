@@ -71,9 +71,8 @@ export function exceptionToObject(error: any): {
     if (error instanceof AxiosError) {
       message = `External API: ${message}`;
       if (error.response?.data?.detail) {
-        message = `${message} - ${error.response.data.detail}`;
+        message = `${message} - ${JSON.stringify(error.response.data.detail)}`;
       }
-      //console.log(error);
     }
   } else {
     if (isObject(error) && typeof error.message === "string") {

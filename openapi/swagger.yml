@@ -233,8 +233,8 @@ paths:
           schema:
             type: string
           required: false
-          description: "Testbed data source url"
-          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+          description: "Testbed data source uri"
+          example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
         - in: query
           name: idToken
           schema:

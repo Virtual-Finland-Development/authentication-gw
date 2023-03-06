@@ -4,10 +4,11 @@ import Runtime from "../../../utils/Runtime";
 import Settings from "../../../utils/Settings";
 import { createConsentRequestToken } from "../TestbedAuthorizer";
 
-type ISituationResponseDataPair<T, K extends keyof T = keyof T> = K extends keyof T ? { status: K; data: T[K]; idToken: string; dataSourceUri: string } : never;
+type ISituationResponseDataPair<T, K extends keyof T = keyof T> = K extends keyof T ? { status: K; data: T[K]; idToken: string; dataSourceUri?: string } : never;
 type ISituationResponseData = ISituationResponseDataPair<{
   verifyUserConsent: {
     redirectUrl: string;
+    missingConsents: Array<{ dataSource: string; required: boolean }>;
   };
   consentGranted: {
     consentToken: string;
@@ -67,9 +68,9 @@ export async function fetchConsentStatuses(dataSourceUris: Array<string>, idToke
       {
         status: "verifyUserConsent",
         idToken: idToken,
-        dataSourceUri: consentsResponseData.missingConsents?.[0],
         data: {
           redirectUrl: redirectUrl,
+          missingConsents: consentsResponseData.missingConsents,
         },
       }
     ];
