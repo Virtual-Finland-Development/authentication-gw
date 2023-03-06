@@ -30,3 +30,8 @@ EOF
 
 PRETTY_OUT=$(jq . testbed_party_config.json)
 echo $PRETTY_OUT > testbed_party_config.json
+
+echo "Move keys to structured folder"
+mkdir -p output/.well-known/dataspace
+mv testbed_jwks.json output/.well-known/jwks.json
+mv testbed_party_config.json output/.well-known/dataspace/party-configuration.json
