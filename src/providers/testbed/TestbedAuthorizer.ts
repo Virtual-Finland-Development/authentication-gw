@@ -124,7 +124,7 @@ export async function verifyConsent(consentToken: string, comparePackage?: { idT
     }
 
     if (ifString(comparePackage?.dataSource) && ifString(comparePackage?.idToken)) {
-      const serviceVerified = await verifyConsentFromService(comparePackage?.idToken as string, consentToken, comparePackage?.dataSource  as string);
+      const serviceVerified = await verifyConsentFromService(comparePackage?.idToken as string, consentToken, comparePackage?.dataSource as string);
       if (!serviceVerified) {
         throw new AccessDeniedException("Consent unverified by the authentication provider service");
       }
