@@ -26,9 +26,6 @@ export async function fetchConsentStatuses(dataSourceUris: Array<string>, idToke
 
   // Create consent request token
   const consentRequestToken = await createConsentRequestToken(idToken);
-  debug("consentRequestToken", consentRequestToken);
-  
-  
   const consentsResponse = await axios.post(
     "https://consent.testbed.fi/Consent/RequestConsents",
     {

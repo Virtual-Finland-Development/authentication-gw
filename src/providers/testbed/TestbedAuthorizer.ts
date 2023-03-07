@@ -175,11 +175,15 @@ export async function createConsentRequestToken(idToken: string): Promise<string
 
   const key = await Settings.getStageSecret("TESTBED_CONSENT_JWKS_PRIVATE_KEY");
   
-  return jwt.sign(payload, key, {
+  const token = jwt.sign(payload, key, {
     header: customHeader,
     algorithm: "RS256",
     expiresIn: expiresIn,
     issuer: keyIssuer,
     keyid: keyId,
-  })
+  });
+
+  debug("consentRequestToken", token);
+
+  return token;
 }
