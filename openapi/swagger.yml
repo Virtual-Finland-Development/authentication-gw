@@ -47,15 +47,21 @@ paths:
           schema:
             type: string
         - in: header
-          name: X-Authorization-Context
-          required: false
-          description: "Optional usage context"
-          schema:
-            type: string
-        - in: header
           name: X-Consent-Token
           required: false
           description: "Optional consent token, the consent will be verified if the given authorization issuer has a consent service"
+          schema:
+            type: string
+        - in: header
+          name: X-Consent-Data-Source
+          required: false
+          description: "Data source URI for the consent verification context"
+          schema:
+            type: string
+        - in: header
+          name: X-Consent-User-Id
+          required: false
+          description: "Extra check for consent verification context"
           schema:
             type: string
       responses:
@@ -72,8 +78,43 @@ paths:
                     default: "Access granted"
                   authorization:
                     type: object
+                    properties:
+                      userId:
+                        type: string
+                        example: "4124asdasd2312"
+                      email:
+                        type: string
+                        example: "test@email"
+                      expiresAt:
+                        type: number
+                        example: 123452313
+                      issuedAt:
+                        type: number
+                        example: 123452313
+                      issuer:
+                        type: string
+                        example: "vfd"
                   consent:
                     type: object
+                    properties:
+                      dataSource:
+                        type: string
+                        example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
+                      userId:
+                        type: string
+                        example: "4124asdasd2312"
+                      email:
+                        type: string
+                        example: "test@email"
+                      expiresAt:
+                        type: number
+                        example: 123452313
+                      issuedAt:
+                        type: number
+                        example: 123452313
+                      issuer:
+                        type: string
+                        example: "vfd"
         "401":
           description: Access denied message
           content:
@@ -90,6 +131,24 @@ paths:
       parameters:
         - in: header
           name: X-Consent-Token
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Authorization
+          required: false
+          schema:
+            type: string
+        - in: header
+          name: X-Consent-Data-Source
+          required: false
+          description: "Data source URI for the consent verification context"
+          schema:
+            type: string
+        - in: header
+          name: X-Consent-User-Id
+          required: false
+          description: "Extra check for consent verification context"
           schema:
             type: string
       responses:
@@ -163,7 +222,7 @@ paths:
                           example: "/consent/testbed/request"
                         dataSource:
                           type: string
-                          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+                          example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
                     - type: object
                       required: [consentStatus, dataSource, consentToken]
                       properties:
@@ -175,7 +234,7 @@ paths:
                           example: "asdad2.awasdasd.123123"
                         dataSource:
                           type: string
-                          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+                          example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
         "401":
           description: Access denied message
           content:
@@ -209,8 +268,8 @@ paths:
           schema:
             type: string
           required: false
-          description: "Testbed data source url"
-          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+          description: "Testbed data source uri"
+          example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
         - in: query
           name: idToken
           schema:
@@ -240,15 +299,6 @@ paths:
     get:
       operationId: TestbedConsentResponse
       description: "Transition from the testbed consent page back to the app context"
-      parameters:
-        - in: query
-          name: status
-          schema:
-            type: string
-            enum: [success, fail]
-          required: true
-          description: Consent status
-          example: success
       responses:
         "303":
           description: Redirect back to the app context
@@ -676,7 +726,7 @@ components:
       properties:
         uri:
           type: string
-          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+          example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
         consentToken:
           type: string
           nullable: true

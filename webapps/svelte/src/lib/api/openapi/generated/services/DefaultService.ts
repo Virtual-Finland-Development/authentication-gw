@@ -52,21 +52,26 @@ export class DefaultService {
      */
     public authorizeRequest({
         authorization,
-        xAuthorizationContext,
         xConsentToken,
+        xConsentDataSource,
+        xConsentUserId,
     }: {
         /**
          * id_token as a bearer header
          */
         authorization: string,
         /**
-         * Optional usage context
-         */
-        xAuthorizationContext?: string,
-        /**
          * Optional consent token, the consent will be verified if the given authorization issuer has a consent service
          */
         xConsentToken?: string,
+        /**
+         * Data source URI for the consent verification context
+         */
+        xConsentDataSource?: string,
+        /**
+         * Extra check for consent verification context
+         */
+        xConsentUserId?: string,
     }): CancelablePromise<{
         message: string;
         authorization: any;
@@ -77,8 +82,9 @@ export class DefaultService {
             url: '/authorize',
             headers: {
                 'Authorization': authorization,
-                'X-Authorization-Context': xAuthorizationContext,
                 'X-Consent-Token': xConsentToken,
+                'X-Consent-Data-Source': xConsentDataSource,
+                'X-Consent-User-Id': xConsentUserId,
             },
             errors: {
                 401: `Access denied message`,
@@ -92,8 +98,20 @@ export class DefaultService {
      */
     public testbedConsentVerify({
         xConsentToken,
+        authorization,
+        xConsentDataSource,
+        xConsentUserId,
     }: {
-        xConsentToken?: string,
+        xConsentToken: string,
+        authorization?: string,
+        /**
+         * Data source URI for the consent verification context
+         */
+        xConsentDataSource?: string,
+        /**
+         * Extra check for consent verification context
+         */
+        xConsentUserId?: string,
     }): CancelablePromise<{
         message?: string;
     }> {
@@ -102,6 +120,9 @@ export class DefaultService {
             url: '/consents/testbed/consent-verify',
             headers: {
                 'X-Consent-Token': xConsentToken,
+                'Authorization': authorization,
+                'X-Consent-Data-Source': xConsentDataSource,
+                'X-Consent-User-Id': xConsentUserId,
             },
             errors: {
                 401: `Unverified message`,
@@ -178,7 +199,7 @@ export class DefaultService {
          */
         authorization?: string,
         /**
-         * Testbed data source url
+         * Testbed data source uri
          */
         dataSource?: string,
         /**
@@ -209,20 +230,10 @@ export class DefaultService {
      * @returns void
      * @throws ApiError
      */
-    public testbedConsentResponse({
-        status,
-    }: {
-        /**
-         * Consent status
-         */
-        status: 'success' | 'fail',
-    }): CancelablePromise<void> {
+    public testbedConsentResponse(): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/consents/testbed/consent-response',
-            query: {
-                'status': status,
-            },
             errors: {
                 303: `Redirect back to the app context`,
             },

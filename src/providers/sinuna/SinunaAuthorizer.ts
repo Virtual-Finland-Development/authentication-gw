@@ -15,20 +15,20 @@ export function isMatchingProvider(provider: string): boolean {
 export async function authorize(authorizationHeaders: AuthorizationHeaders): Promise<AuthorizerResponse> {
   try {
     // Verify token
-    const verified = await verifyIdToken(authorizationHeaders.authorization, {
+    const { payload } = await verifyIdToken(authorizationHeaders.authorization, {
       issuer: "https://login.iam.qa.sinuna.fi",
       openIdConfigUrl: "https://login.iam.qa.sinuna.fi/oxauth/.well-known/openid-configuration",
     });
-    debug(verified);
+    debug(payload);
 
     return {
       message: "Access granted",
       authorization: {
-        userId: verified.inum,
-        email: verified.email,
-        issuer: verified.iss,
-        expiresAt: verified.exp,
-        issuedAt: verified.iat,
+        userId: payload.inum,
+        email: payload.email,
+        issuer: payload.iss,
+        expiresAt: payload.exp,
+        issuedAt: payload.iat,
       },
     };
   } catch (error) {

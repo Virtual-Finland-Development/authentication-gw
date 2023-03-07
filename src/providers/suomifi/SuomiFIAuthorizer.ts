@@ -126,23 +126,23 @@ export function isMatchingProvider(provider: string): boolean {
 export async function authorize(authorizationHeaders: AuthorizationHeaders): Promise<AuthorizerResponse> {
   try {
     // Verify token
-    const verified = await verifyIdToken(authorizationHeaders.authorization, { issuer: SUOMIFI_ISSUER, jwks: await getJKWSJsonConfiguration() });
+    const { payload } = await verifyIdToken(authorizationHeaders.authorization, { issuer: SUOMIFI_ISSUER, jwks: await getJKWSJsonConfiguration() });
 
     // Validate rest of the fields
-    const parsedAppContext = parseAppContext(verified.appContextHash); // Throws
+    const parsedAppContext = parseAppContext(payload.appContextHash); // Throws
     const nonce = await generateNonce(parsedAppContext);
-    if (nonce !== verified.nonce) {
+    if (nonce !== payload.nonce) {
       throw new AccessDeniedException("Invalid authorizing context secret");
     }
 
     return {
       message: "Access granted",
       authorization: {
-        userId: verified.userId,
-        email: verified.email,
+        userId: payload.userId,
+        email: payload.email,
         issuer: SUOMIFI_ISSUER,
-        expiresAt: verified.exp,
-        issuedAt: verified.iat,
+        expiresAt: payload.exp,
+        issuedAt: payload.iat,
       },
     };
   } catch (error) {

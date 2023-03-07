@@ -57,14 +57,17 @@ export function decodeIdToken(idToken: string | null): { decodedToken: jwt.Jwt |
  * @param issuerConfig
  * @returns
  */
-export async function verifyIdToken(idToken: string | null, issuerConfig: IssuerConfig): Promise<jwt.JwtPayload> {
+export async function verifyIdToken(idToken: string | null, issuerConfig: IssuerConfig): Promise<{ payload: jwt.JwtPayload, header: Record<string, string|number>}> {
   // Decode token
   const tokenResult = decodeIdToken(idToken);
 
   // Validate token
   const publicKey = await getPublicKey(tokenResult.decodedToken, issuerConfig);
   const verified = jwt.verify(tokenResult.token, publicKey.pem, { ignoreExpiration: false });
-  return verified as jwt.JwtPayload;
+  return {
+    payload: verified as jwt.JwtPayload,
+    header: tokenResult.decodedToken?.header as any,
+  };
 }
 
 /**
@@ -100,7 +103,7 @@ export async function getPublicKey(decodedToken: jwt.Jwt | null, issuerConfig: I
  * @returns
  */
 export function parseAuthorizationFromContext(context: Context): string {
-  return parseAuthorizationHeaderValue(String(context.request.headers.authorization));
+  return parseAuthorizationHeaderValue(context.request.headers.authorization as string);
 }
 
 /**
@@ -109,6 +112,9 @@ export function parseAuthorizationFromContext(context: Context): string {
  * @returns
  */
 export function parseAuthorizationHeaderValue(authorization: string): string {
+  if (typeof authorization !== "string") {
+    return "";
+  }
   return leftTrim(authorization, "Bearer ");
 }
 
