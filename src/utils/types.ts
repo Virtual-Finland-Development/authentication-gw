@@ -24,7 +24,7 @@ export type HttpResponse = {
 /**
  * Output error message level
  */
-export type NotifyErrorType = "info" | "warning" | "danger";
+export type NotifyType = "info" | "warning" | "danger";
 
 export interface AuthRequestHandler {
   /**
@@ -102,6 +102,14 @@ export interface IBaseRequestHandler {
   identityProviderIdent: string;
   initialize(): Promise<void>;
   getAuthenticateResponseFailedResponse(context: Context, error: any): Promise<HttpResponse>;
-  getLogoutRequestFailedResponse(context: Context | string, error: any, errorTypeOverride?: NotifyErrorType): Promise<HttpResponse>;
+  getLogoutRequestFailedResponse(context: Context | string, error: any, message?: RedirectMessage): Promise<HttpResponse>;
   [attr: string]: any;
+}
+
+export type RedirectMessage = { 
+  success?: boolean, 
+  message?: string; 
+  provider?: string; 
+  type?: NotifyType,
+  event?: string, 
 }

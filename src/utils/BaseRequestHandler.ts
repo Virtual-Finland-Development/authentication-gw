@@ -3,7 +3,7 @@ import { Context } from "openapi-backend";
 import { AccessDeniedException, NoticeException } from "./exceptions";
 import { debug } from "./logging";
 import { prepareCookie, prepareLoginErrorRedirectUrl, prepareLogoutErrorRedirectUrl } from "./route-utils";
-import { HttpResponse, IBaseRequestHandler, NotifyErrorType } from "./types";
+import { HttpResponse, IBaseRequestHandler, NotifyType, RedirectMessage } from "./types";
 import { parseAppContext } from "./validators";
 
 export abstract class BaseRequestHandler implements IBaseRequestHandler {
@@ -25,7 +25,7 @@ export abstract class BaseRequestHandler implements IBaseRequestHandler {
     debug(error);
 
     let errorMessage = "Authentication failed";
-    let errorType: NotifyErrorType = "danger";
+    let errorType: NotifyType = "danger";
 
     if (error instanceof NoticeException) {
       errorMessage = error.message;
@@ -40,7 +40,7 @@ export abstract class BaseRequestHandler implements IBaseRequestHandler {
 
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent }); // throws
     const redirectUrl = prepareLoginErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
-      error: errorMessage,
+      message: errorMessage,
       provider: this.identityProviderIdent,
       type: errorType,
     });
@@ -59,14 +59,15 @@ export abstract class BaseRequestHandler implements IBaseRequestHandler {
    *
    * @param context
    * @param error
-   * @param errorTypeOverride - override error type
+   * @param message - override message
    * @returns
    */
-  async getLogoutRequestFailedResponse(context: Context | string, error: any, errorTypeOverride?: NotifyErrorType): Promise<HttpResponse> {
+  async getLogoutRequestFailedResponse(context: Context | string, error: any, message?: RedirectMessage): Promise<HttpResponse> {
     debug(error);
 
     let errorMessage = "Logout failed";
-    let errorType: NotifyErrorType = "danger";
+    let errorType: NotifyType = "danger";
+    let success: RedirectMessage["success"] = false;
 
     if (error instanceof NoticeException) {
       errorMessage = error.message;
@@ -76,15 +77,20 @@ export abstract class BaseRequestHandler implements IBaseRequestHandler {
       errorType = "warning";
     }
 
-    if (typeof errorTypeOverride !== "undefined") {
-      errorType = errorTypeOverride;
-    }
+    if (message && message.type) {
+      errorType = message.type;
+    } 
+    if (message && typeof message.success !== "undefined") {
+      success = message.success;
+    } 
+
 
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent }); // throws
     const redirectUrl = prepareLogoutErrorRedirectUrl(parsedAppContext.object.redirectUrl, {
-      error: errorMessage,
+      success: success,
       provider: this.identityProviderIdent,
       type: errorType,
+      message: errorMessage,
     });
 
     return {

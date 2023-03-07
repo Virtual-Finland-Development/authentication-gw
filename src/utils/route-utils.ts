@@ -6,7 +6,7 @@ import { AccessDeniedException, ValidationError } from "../utils/exceptions";
 import { debug, log } from "../utils/logging";
 import { ensureArray, ensureUrlQueryParams, exceptionToObject } from "../utils/transformers";
 import { getJSONResponseHeaders } from "./default-headers";
-import { NotifyErrorType } from "./types";
+import { RedirectMessage } from "./types";
 import { parseAppContext } from "./validators";
 
 /**
@@ -20,30 +20,50 @@ export function prepareRedirectUrl(redirectUrl: string, providerIdent: string, p
 }
 
 /**
- *
- * @param redirectUrl
- * @param loginCode
- * @param providerIdent
- * @returns
+ * 
+ * @param redirectUrl 
+ * @param loginCode 
+ * @param providerIdent 
+ * @param message 
+ * @returns 
  */
-export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, providerIdent: string): string {
-  return ensureUrlQueryParams(redirectUrl, [
+export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, providerIdent: string, message?: RedirectMessage): string {
+  const params: Array<{key: string, value: string | undefined | boolean}> = [
     { key: "loginCode", value: loginCode },
     { key: "provider", value: providerIdent },
-  ]);
+    { key: "success", value: true},
+    { key: "event", value: "login"},
+  ];
+
+  if (message) {
+    params.push({ key: "message", value: message.message });
+    params.push({ key: "type", value: message.type });
+  }
+
+  return ensureUrlQueryParams(redirectUrl, params);
 }
 
 /**
- *
- * @param redirectUrl
- * @param providerIdent
- * @returns
+ * 
+ * @param redirectUrl 
+ * @param providerIdent 
+ * @param message 
+ * @returns 
  */
-export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: string): string {
-  return ensureUrlQueryParams(redirectUrl, [
-    { key: "logout", value: "success" },
+export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: string, message?: RedirectMessage): string {
+  const params: Array<{key: string, value: string | undefined | boolean}> = [
+    { key: "success", value: true},
+    { key: "event", value: "logout" },
     { key: "provider", value: providerIdent },
-  ]);
+    { key: "logout", value: "success" } // @obsolete
+  ];
+
+  if (message) {
+    params.push({ key: "message", value: message.message });
+    params.push({ key: "type", value: message.type });
+  }
+
+  return ensureUrlQueryParams(redirectUrl, params);
 }
 
 /**
@@ -53,11 +73,12 @@ export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: str
  * @param providerIdent
  * @returns
  */
-export function prepareErrorRedirectUrl(redirectUrl: string, message: { error: string; provider?: string; intent: string; type: NotifyErrorType }): string {
+export function prepareErrorRedirectUrl(redirectUrl: string, message: RedirectMessage): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { key: "error", value: message.error },
+    { key: "success", value: false},
+    { key: "message", value: message.message },
     { key: "provider", value: message.provider || "unknown" },
-    { key: "intent", value: message.intent },
+    { key: "event", value: message.event },
     { key: "type", value: message.type },
   ]);
 }
@@ -68,11 +89,11 @@ export function prepareErrorRedirectUrl(redirectUrl: string, message: { error: s
  * @param message
  * @returns
  */
-export function prepareLoginErrorRedirectUrl(redirectUrl: string, message: { error: string; provider?: string; type: NotifyErrorType }): string {
+export function prepareLoginErrorRedirectUrl(redirectUrl: string, message: RedirectMessage): string {
   return prepareErrorRedirectUrl(redirectUrl, {
-    error: message.error,
+    message: message.message,
     provider: message.provider,
-    intent: "LoginRequest",
+    event: "login",
     type: message.type,
   });
 }
@@ -83,11 +104,11 @@ export function prepareLoginErrorRedirectUrl(redirectUrl: string, message: { err
  * @param message
  * @returns
  */
-export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: { error: string; provider?: string; type: NotifyErrorType }): string {
+export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: RedirectMessage): string {
   return prepareErrorRedirectUrl(redirectUrl, {
-    error: message.error,
+    message: message.message,
     provider: message.provider,
-    intent: "LogoutRequest",
+    event: "logout",
     type: message.type,
   });
 }
