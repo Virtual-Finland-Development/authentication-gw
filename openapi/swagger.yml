@@ -78,8 +78,43 @@ paths:
                     default: "Access granted"
                   authorization:
                     type: object
+                    properties:
+                      userId:
+                        type: string
+                        example: "4124asdasd2312"
+                      email:
+                        type: string
+                        example: "test@email"
+                      expiresAt:
+                        type: number
+                        example: 123452313
+                      issuedAt:
+                        type: number
+                        example: 123452313
+                      issuer:
+                        type: string
+                        example: "vfd"
                   consent:
                     type: object
+                    properties:
+                      dataSource:
+                        type: string
+                        example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
+                      userId:
+                        type: string
+                        example: "4124asdasd2312"
+                      email:
+                        type: string
+                        example: "test@email"
+                      expiresAt:
+                        type: number
+                        example: 123452313
+                      issuedAt:
+                        type: number
+                        example: 123452313
+                      issuer:
+                        type: string
+                        example: "vfd"
         "401":
           description: Access denied message
           content:
@@ -187,7 +222,7 @@ paths:
                           example: "/consent/testbed/request"
                         dataSource:
                           type: string
-                          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+                          example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
                     - type: object
                       required: [consentStatus, dataSource, consentToken]
                       properties:
@@ -199,7 +234,7 @@ paths:
                           example: "asdad2.awasdasd.123123"
                         dataSource:
                           type: string
-                          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+                          example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
         "401":
           description: Access denied message
           content:
@@ -691,7 +726,7 @@ components:
       properties:
         uri:
           type: string
-          example: "https://gateway.testbed.fi/draft/Weather/Current/Metric?source=openweather"
+          example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
         consentToken:
           type: string
           nullable: true
