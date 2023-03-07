@@ -31,7 +31,7 @@ export default class ConsentService extends LoginAppComponent {
   }
 
   /**
-   * Consent flow btn click
+   * Consent flow btn clicks
    */
   async consentify() {
     this.log("ConsentService", `Resolving the consent for ${CONSENT_ID}..`);
@@ -47,6 +47,11 @@ export default class ConsentService extends LoginAppComponent {
       this.app.ConsentState.setConsentTokenFor(CONSENT_ID, this.#consentSituation.consentToken);
       this.app.UIState.resetViewState("consent", true); // reset view state
     }
+  }
+
+  redirectToProvider() {
+    this.log("ConsentService", `Redirecting to consents provider portal..`);
+    this.UIState.transitToUrl("https://consent.testbed.fi");
   }
 
   /* ---------------testing requests------------------- */
