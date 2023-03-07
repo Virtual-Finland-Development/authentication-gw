@@ -28,16 +28,17 @@ export async function fetchConsentStatuses(dataSourceUris: Array<string>, idToke
   const consentRequestToken = await createConsentRequestToken(idToken);
   debug("consentRequestToken", consentRequestToken);
   
+  
   const consentsResponse = await axios.post(
     "https://consent.testbed.fi/Consent/RequestConsents",
-    JSON.stringify({
+    {
       consentRequests: dataSourceUris.map(dataSourceUri => {
         return {
           dataSource: dataSourceUri,
           required: true,
         };
       },
-    )}),
+    )},
     {
       headers: {
         "X-Consent-Request-Token": consentRequestToken,
@@ -46,7 +47,7 @@ export async function fetchConsentStatuses(dataSourceUris: Array<string>, idToke
       timeout: Settings.REQUEST_TIMEOUT_MSECS,
     }
   );
-  
+
   const consentsResponseData = consentsResponse.data;
   debug("consent status response", {
     status: consentsResponse.status,
@@ -82,9 +83,9 @@ export async function fetchConsentStatuses(dataSourceUris: Array<string>, idToke
   for (const dataSourceUri of greantedConsentUris) {
     const tokenResponse = await axios.post(
       "https://consent.testbed.fi/Consent/GetToken ",
-      JSON.stringify({
+      {
         "dataSource": dataSourceUri
-      }),
+      },
       {
         headers: {
           "Content-Type": "application/json",
@@ -139,9 +140,9 @@ export async function fetchConsentStatus(dataSourceUri: string, idToken: string)
 export async function verifyConsent(idToken: string, consentToken: string, dataSourceUri: string): Promise<boolean> {
   const response = await axios.post(
     "https://consent.testbed.fi/Consent/Verify",
-    JSON.stringify({
+    {
       dataSource: dataSourceUri
-    }),
+    },
     {
       headers: {
         "Authorization": `Bearer ${idToken}`,
