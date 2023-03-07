@@ -56,7 +56,7 @@ Needs AWS credentials for some features to work:
 Read more about setup of AWS credentials here: [AWS: Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
 
 - Environment variables:
-  - `AWS_PROFILE`: defaults to `virtualfinland`
+  - `AWS_PROFILE`: defaults to `default`
 - AWS credentials file:
   - `~/.aws/credentials`
 

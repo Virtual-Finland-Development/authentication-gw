@@ -74,8 +74,21 @@ export class DefaultService {
         xConsentUserId?: string,
     }): CancelablePromise<{
         message: string;
-        authorization: any;
-        consent?: any;
+        authorization: {
+            userId?: string;
+            email?: string;
+            expiresAt?: number;
+            issuedAt?: number;
+            issuer?: string;
+        };
+        consent?: {
+            dataSource?: string;
+            userId?: string;
+            email?: string;
+            expiresAt?: number;
+            issuedAt?: number;
+            issuer?: string;
+        };
     }> {
         return this.httpRequest.request({
             method: 'POST',
