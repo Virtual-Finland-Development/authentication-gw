@@ -51,7 +51,13 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
     const idToken = parseAuthorizationFromContext(context);
 
     const dataSources = context.request.requestBody.dataSources;
-    const consentResponses = [];
+
+    const consentResponses: Array<{
+      consentStatus: string;
+      dataSource: string;
+      consentToken?: string;
+      redirectUrl?: string;
+    }> = [];
 
     const verifiableDataSources = dataSources.filter((dataSource: { consentToken: any; }) => dataSource.consentToken);
     const resolvableDataSource = dataSources.filter((dataSource: { consentToken: any; }) => !dataSource.consentToken);
@@ -61,10 +67,9 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
       try {
         await verifyConsent(dataSource.consentToken);
         consentResponses.push({
-          status: "consentGranted",
-          data: { consentToken: dataSource.consentToken } as any,
-          idToken: idToken,
-          dataSourceUri: dataSource.uri,
+          consentStatus: "consentGranted",
+          consentToken: dataSource.consentToken,
+          dataSource: dataSource.uri,
         });
       } catch (error) {
         resolvableDataSource.push(dataSource);
@@ -88,7 +93,7 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
       } else if (consentStatus.status === "consentGranted") {
         consentResponses.push({
           consentStatus: consentStatus.status,
-          dataSource: consentStatus.dataSourceUri,
+          dataSource: consentStatus.dataSourceUri as string,
           consentToken: consentStatus.data.consentToken,
         });
       }
