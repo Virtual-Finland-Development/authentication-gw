@@ -65,7 +65,10 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
     // Verify verifiable consent requests
     for (const dataSource of verifiableDataSources) {
       try {
-        await verifyConsent(dataSource.consentToken);
+        await verifyConsent(dataSource.consentToken, {
+          idToken: idToken,
+          dataSource: dataSource.uri,
+        });
         consentResponses.push({
           consentStatus: "consentGranted",
           consentToken: dataSource.consentToken,
