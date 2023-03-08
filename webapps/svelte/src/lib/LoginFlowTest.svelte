@@ -52,7 +52,7 @@ let states = loginApp.UIState.states;
           <button class="authorize is-special" disabled="{states.authorize.disabled}" on:click="{() => loginApp.AuthService.authorize()}">Authorize</button>
           {#if loginApp.ifHasFeature('consents')}
             <button class="consentify is-special" disabled="{states.consentify.disabled}" on:click="{() => loginApp.ConsentService.consentify()}">Check consent</button>
-            <button class="consentify is-special" on:click="{() => loginApp.ConsentService.redirectToProvider()}">Manage consents</button>
+            <a class="is-btn consentify is-special" href="https://consent.testbed.fi">Manage consents</a>
           {/if}
       </div>
     </div>

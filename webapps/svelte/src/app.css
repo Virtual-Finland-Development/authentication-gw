@@ -54,7 +54,7 @@ h1 {
   text-align: center;
 }
 
-button {
+button, a.is-btn {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -65,20 +65,24 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
+button:hover, a.is-btn:hover {
   border-color: #646cff;
 }
 button:focus,
-button:focus-visible {
+button:focus-visible,
+a.is-btn:focus,
+a.is-btn:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+a.is-btn.is-special:before,
 button.is-special:before {
   font-weight: bold;
   color: navy;
   content: "→ ";
 }
 
+a.is-btn.is-small,
 button.is-small {
   font-size: 0.8em;
   padding: 0.4em 0.8em;

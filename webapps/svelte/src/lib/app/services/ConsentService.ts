@@ -49,10 +49,6 @@ export default class ConsentService extends LoginAppComponent {
     }
   }
 
-  redirectToProvider() {
-    this.log("ConsentService", `Redirecting to consents provider portal..`);
-    this.UIState.transitToUrl("https://consent.testbed.fi");
-  }
 
   /* ---------------testing requests------------------- */
 
