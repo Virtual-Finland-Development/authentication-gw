@@ -1,6 +1,6 @@
 import * as aws from "@pulumi/aws";
-import * as awsNative from "@pulumi/aws-native";
 import * as pulumi from "@pulumi/pulumi";
+
 import { Output } from "@pulumi/pulumi";
 import Settings from "../../src/utils/Settings";
 import { StackConfig } from "../types";
@@ -38,12 +38,7 @@ export function createLambdaRole(stackConfig: StackConfig) {
   return lambdaRole;
 }
 
-export function createLambdaFunction(
-  stackConfig: StackConfig,
-  execRole: aws.iam.Role,
-  apiGatewayV2: aws.apigatewayv2.Api,
-  dynamoDBCacheTableName: Output<string>
-): awsNative.lambda.Function {
+export function createLambdaFunction(stackConfig: StackConfig, execRole: aws.iam.Role, dynamoDBCacheTableName: Output<string>): aws.lambda.Function {
   // Dependencies layer for lambda functions
   const nodeModulesLayerName = stackConfig.generateResourceName("nodeModulesLayer");
   const nodeModulesLayer = new aws.lambda.LayerVersion(nodeModulesLayerName, {
@@ -54,36 +49,16 @@ export function createLambdaFunction(
     layerName: nodeModulesLayerName,
   });
 
-  const snapStartBucketName = stackConfig.generateResourceName("snapstart-bucket");
-  const snapStartBucket = new aws.s3.Bucket(snapStartBucketName, {
-    versioning: {
-      enabled: true,
-    },
-  });
-
-  const snapStartFunctionCodeName = stackConfig.generateResourceName("function-code");
-  const snapStartFunctionCode = new aws.s3.BucketObject(snapStartFunctionCodeName, {
-    bucket: snapStartBucket.bucket,
-    source: new pulumi.asset.AssetArchive({
-      ".": new pulumi.asset.FileArchive("../dist"),
-      "./openapi": new pulumi.asset.FileArchive("../openapi"),
-    }),
-  });
-
   // Lambda function
   const functionName = stackConfig.generateResourceName("lambdaFunction");
-  const lamdaFunction = new awsNative.lambda.Function(functionName, {
+  const lamdaFunction = new aws.lambda.Function(functionName, {
     runtime: "nodejs18.x",
     role: execRole.arn,
     handler: "app.handler",
-    code: {
-      s3Bucket: snapStartFunctionCode.bucket,
-      s3Key: snapStartFunctionCode.key,
-      s3ObjectVersion: snapStartFunctionCode.versionId,
-    },
-    snapStart: {
-      applyOn: "PublishedVersions",
-    },
+    code: new pulumi.asset.AssetArchive({
+      ".": new pulumi.asset.FileArchive("../dist"),
+      "./openapi": new pulumi.asset.FileArchive("../openapi"),
+    }),
     layers: [nodeModulesLayer.arn],
     environment: {
       variables: {
@@ -94,21 +69,8 @@ export function createLambdaFunction(
     },
     timeout: 20,
     memorySize: 1024,
-    //tags: stackConfig.getTags(), // @TODO: Fix this
+    tags: stackConfig.getTags(),
   });
-
-  // Create permission
-  const permissionName = stackConfig.generateResourceName("invokePermission");
-  new aws.lambda.Permission(
-    permissionName,
-    {
-      action: "lambda:InvokeFunction",
-      principal: "apigateway.amazonaws.com",
-      function: lamdaFunction.arn,
-      sourceArn: pulumi.interpolate`${apiGatewayV2.executionArn}/*/*`,
-    },
-    { dependsOn: [apiGatewayV2, lamdaFunction] }
-  );
 
   return lamdaFunction;
 }

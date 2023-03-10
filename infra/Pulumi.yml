@@ -2,3 +2,6 @@ name: authentication-gw
 description: API Framework for different authentication flows
 runtime: nodejs
 main: main.ts
+config:
+  aws:region: eu-north-1
+  aws-native:region: eu-north-1
