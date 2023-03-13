@@ -10,15 +10,15 @@ import { LambdaApiGatewayV2Stack, LambdaFunctionConfig, LambdaRouteConfig, Stack
  * @param apiGatewayName
  * @returns
  */
-export function createStack(apiGatewayName: string, configuration: StackConfig): LambdaApiGatewayV2Stack {
-  const apiGw = getApiGateway(apiGatewayName);
-  const role = getLambdaRole();
+export function createStack(stackConfig: StackConfig): LambdaApiGatewayV2Stack {
+  const apiGw = getApiGateway(stackConfig);
+  const role = getLambdaRole(stackConfig);
 
   return {
     apiGateway: apiGw,
     role: role,
-    tags: configuration.getTags(),
-    config: configuration,
+    tags: stackConfig.getTags(),
+    config: stackConfig,
   };
 }
 
@@ -29,14 +29,14 @@ export function createStack(apiGatewayName: string, configuration: StackConfig):
  * @returns
  */
 export function createLambdaRoute(
-  stack: LambdaApiGatewayV2Stack,
+  apiV2stack: LambdaApiGatewayV2Stack,
   configuration: {
     route: LambdaRouteConfig;
     lambdaFunction: LambdaFunctionConfig;
   }
 ) {
-  const lambdaFunction = createLambdaFunction(stack, configuration.lambdaFunction);
-  const route = createApiGatewayRoute(stack, lambdaFunction, configuration.route);
+  const lambdaFunction = createLambdaFunction(apiV2stack, configuration.lambdaFunction);
+  const route = createApiGatewayRoute(apiV2stack, lambdaFunction, configuration.route);
   return route;
 }
 
@@ -56,8 +56,9 @@ export function createApiEndpoint(stack: LambdaApiGatewayV2Stack, routes: Array<
 
 /* ---------------Private------------------- */
 
-function getLambdaRole() {
-  const lambdaRole = new aws.iam.Role("lambdaRole", {
+function getLambdaRole(stackConfig: StackConfig) {
+  const roleName = stackConfig.generateResourceName("lambdaRole");
+  const lambdaRole = new aws.iam.Role(roleName, {
     assumeRolePolicy: {
       Version: "2012-10-17",
       Statement: [
@@ -73,12 +74,14 @@ function getLambdaRole() {
     },
   });
 
-  new aws.iam.RolePolicyAttachment("lambdaRoleAttachment", {
+  const lambdaRoleAttachmentName = stackConfig.generateResourceName("lambdaRoleAttachment");
+  new aws.iam.RolePolicyAttachment(lambdaRoleAttachmentName, {
     role: lambdaRole.name,
     policyArn: aws.iam.ManagedPolicy.AWSLambdaBasicExecutionRole,
   });
 
-  new aws.iam.RolePolicyAttachment("lambdaRoleSSMAccessAttachment", {
+  const lambdaRoleSSMAccessAttachmentName = stackConfig.generateResourceName("lambdaRoleSSMAccessAttachment");
+  new aws.iam.RolePolicyAttachment(lambdaRoleSSMAccessAttachmentName, {
     role: lambdaRole.name,
     policyArn: aws.iam.ManagedPolicy.AmazonSSMFullAccess,
   });
@@ -86,19 +89,21 @@ function getLambdaRole() {
   return lambdaRole;
 }
 
-function getApiGateway(name: string) {
-  return new aws.apigatewayv2.Api(`${name}-api-gw`, {
+function getApiGateway(stackConfig: StackConfig) {
+  const apiGwName = stackConfig.generateResourceName("apiGateway");
+  return new aws.apigatewayv2.Api(apiGwName, {
     protocolType: "HTTP",
   });
 }
 
-function createLambdaFunction(stack: LambdaApiGatewayV2Stack, configuration: LambdaFunctionConfig): aws.lambda.Function {
-  const lamdaFunction = new aws.lambda.Function(configuration.name, {
+function createLambdaFunction(apiV2stack: LambdaApiGatewayV2Stack, configuration: LambdaFunctionConfig): aws.lambda.Function {
+  const functionName = apiV2stack.config.generateResourceName(`${configuration.name}-lambdaFunction`);
+  const lamdaFunction = new aws.lambda.Function(functionName, {
     runtime: "nodejs16.x",
-    role: stack.role.arn,
+    role: apiV2stack.role.arn,
     handler: configuration.handler,
     code: configuration.code,
-    tags: stack.tags,
+    tags: apiV2stack.tags,
     environment: ifObjectEmpty(configuration.environment) ? undefined : { variables: configuration.environment },
     layers: [configuration.nodeModulesLayer.arn],
     timeout: 20,
@@ -106,22 +111,24 @@ function createLambdaFunction(stack: LambdaApiGatewayV2Stack, configuration: Lam
   });
 
   // Create permission
+  const permissionName = apiV2stack.config.generateResourceName("invokePermission");
   new aws.lambda.Permission(
-    `${configuration.name}-lambdaPermission`,
+    permissionName,
     {
       action: "lambda:InvokeFunction",
       principal: "apigateway.amazonaws.com",
       function: lamdaFunction.name,
-      sourceArn: pulumi.interpolate`${stack.apiGateway.executionArn}/*/*`,
+      sourceArn: pulumi.interpolate`${apiV2stack.apiGateway.executionArn}/*/*`,
     },
-    { dependsOn: [stack.apiGateway, lamdaFunction] }
+    { dependsOn: [apiV2stack.apiGateway, lamdaFunction] }
   );
 
   return lamdaFunction;
 }
 
 function createApiGatewayRoute(stack: LambdaApiGatewayV2Stack, lambdaFunction: aws.lambda.Function, configuration: LambdaRouteConfig): aws.apigatewayv2.Route {
-  const integration = new aws.apigatewayv2.Integration(`${configuration.name}-lambdaIntegration`, {
+  const integrationName = stack.config.generateResourceName("lambdaIntegration");
+  const integration = new aws.apigatewayv2.Integration(integrationName, {
     apiId: stack.apiGateway.id,
     integrationType: "AWS_PROXY",
     integrationUri: lambdaFunction.arn,
@@ -130,7 +137,8 @@ function createApiGatewayRoute(stack: LambdaApiGatewayV2Stack, lambdaFunction: a
     passthroughBehavior: "WHEN_NO_MATCH",
   });
 
-  return new aws.apigatewayv2.Route(`${configuration.name}-apiRoute`, {
+  const routeName = stack.config.generateResourceName("apiRoute");
+  return new aws.apigatewayv2.Route(routeName, {
     apiId: stack.apiGateway.id,
     routeKey: `${configuration.method} ${configuration.path}`,
     target: pulumi.interpolate`integrations/${integration.id}`,
