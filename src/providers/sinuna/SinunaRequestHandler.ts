@@ -125,22 +125,7 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    * @returns
    */
   async LogoutRequest(context: Context): Promise<HttpResponse> {
-    try {
-      const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
-      const LOGOUT_CALLBACK_REDIRECT_URI = Runtime.getAppUrl("/auth/openid/sinuna/logout-response");
-      const LOGOUT_REQUEST_URL = `https://login.iam.qa.sinuna.fi/oxauth/restv1/end_session?post_logout_redirect_uri=${LOGOUT_CALLBACK_REDIRECT_URI}`;
-      
-
-      return {
-        statusCode: 303,
-        headers: {
-          Location: LOGOUT_REQUEST_URL,
-        },
-        cookies: [prepareCookie("appContext", parsedAppContext.hash)],
-      };
-    } catch (error) {
-      return this.getLogoutRequestFailedResponse(context, error, { success: true });
-    }
+    return this.LogoutResponse(context);
   }
 
   /**
@@ -151,7 +136,10 @@ export default new (class SinunaRequestHandler extends BaseRequestHandler implem
    */
   async LogoutResponse(context: Context): Promise<HttpResponse> {
     const parsedAppContext = parseAppContext(context, { provider: this.identityProviderIdent });
-    const redirectUrl = prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent);
+    const redirectUrl = prepareLogoutRedirectUrl(parsedAppContext.object.redirectUrl, this.identityProviderIdent, {
+      message: "Log out from the Sinuna login session at: https://frontend.sunbackend.qa.sinuna.fi/",
+      type: "info",
+    });
 
     return {
       statusCode: 303,
