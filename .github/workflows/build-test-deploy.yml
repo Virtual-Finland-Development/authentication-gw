@@ -74,7 +74,7 @@ jobs:
       - name: Deploy Svelte-app to S3
         uses: jakejarvis/s3-sync-action@master
         with:
-          args: --delete
+          args: --delete --exclude '.well-known/*'
         env:
           AWS_S3_BUCKET: virtual-finland-development-auth-files/${{ inputs.environment }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
