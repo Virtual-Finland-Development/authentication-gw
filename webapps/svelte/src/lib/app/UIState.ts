@@ -1,3 +1,4 @@
+import { dialogs } from "svelte-dialogs";
 import AppSettings from "../../AppSettings";
 import SimpleJSONStore from "../utils/SimpleJSONStore";
 import LoginAppComponent from "./LoginAppComponent";
@@ -86,5 +87,22 @@ export default class UIState extends LoginAppComponent {
 
   ifInTransition(transitionName: KnownTransitionNames): boolean {
     return Boolean(this.#transitions.get(transitionName));
+  }
+
+  dispatchNotification(notification: { message: string; type: string }) {
+    console.log(notification);
+    switch (notification.type) {
+      case "danger":
+      case "error":
+        dialogs.error({ text: notification.message, title: notification.type });
+        break;
+      case "warning":
+        dialogs.warning({ text: notification.message, title: notification.type });
+        break;
+      case "info":
+      case "success":
+        dialogs.success({ text: notification.message, title: notification.type });
+        break;
+    }
   }
 }
