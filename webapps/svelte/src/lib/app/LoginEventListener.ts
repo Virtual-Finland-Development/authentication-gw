@@ -6,8 +6,16 @@ export default async function LoginEventListener(loginApp: LoginApp) {
   const loginCode = urlParams.get("loginCode");
   const event = urlParams.get("event");
   const success = urlParams.get("success") === "true";
-  
+  const message = urlParams.get("message");
+  const messageType = urlParams.get("type");
+
   const affectsThisApp = provider && provider.toLowerCase() === loginApp.getName().toLowerCase();
+
+  if (affectsThisApp && (event === "login" || event === "logout")) {
+    if (message && messageType) {
+      loginApp.UIState.dispatchNotification({ message, type: messageType });
+    }
+  }
 
   if (affectsThisApp && event === "logout") {
     //
