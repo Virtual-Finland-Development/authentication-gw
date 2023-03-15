@@ -2,7 +2,7 @@ import { describe, expect, test } from "@jest/globals";
 import { SinunaStateAttributor } from "../src/providers/sinuna/service/SinunaResponseParsers";
 import { ValidationError } from "../src/utils/exceptions";
 import { createSecretHash, decrypt, encrypt, generateBase64Hash, resolveBase64Hash } from "../src/utils/hashes";
-import { ensureUrlQueryParam, omitEmptyObjectKeys, omitObjectKeysOtherThan, parseUrlEncodedBody } from "../src/utils/transformers";
+import { ensureUrlQueryParam, omitEmptyObjectKeys, omitObjectKeysOtherThan, parseUrlEncoded } from "../src/utils/transformers";
 
 describe("Utils test", () => {
   test("Test ensureUrlQueryParam", () => {
@@ -58,7 +58,7 @@ describe("Utils test", () => {
   test("Test parseUrlEncodedBase64Body", () => {
     const relayState = { moi: "no-moi" };
     const body = new URLSearchParams({ RelayState: generateBase64Hash(relayState) }).toString();
-    const parsed = parseUrlEncodedBody(body);
+    const parsed = parseUrlEncoded(body);
     expect(parsed.RelayState).toBeDefined();
     expect(JSON.parse(resolveBase64Hash(parsed.RelayState))).toEqual(relayState);
   });

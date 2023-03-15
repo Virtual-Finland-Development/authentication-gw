@@ -174,7 +174,7 @@ export function ifString(text: any, minLength = 1): boolean {
  * @param body
  * @returns
  */
-export function parseUrlEncodedBody(body: string): { [attr: string]: string } {
+export function parseUrlEncoded(body: string): { [attr: string]: string } {
   const urlParams = new URLSearchParams(body);
   return Object.fromEntries(urlParams);
 }
