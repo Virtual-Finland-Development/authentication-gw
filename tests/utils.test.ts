@@ -1,8 +1,8 @@
 import { describe, expect, test } from "@jest/globals";
 import { SinunaStateAttributor } from "../src/providers/sinuna/service/SinunaResponseParsers";
 import { ValidationError } from "../src/utils/exceptions";
-import { createSecretHash, decrypt, encrypt } from "../src/utils/hashes";
-import { ensureUrlQueryParam, omitEmptyObjectKeys, omitObjectKeysOtherThan } from "../src/utils/transformers";
+import { createSecretHash, decrypt, encrypt, generateBase64Hash, resolveBase64Hash } from "../src/utils/hashes";
+import { ensureUrlQueryParam, omitEmptyObjectKeys, omitObjectKeysOtherThan, parseUrlEncodedBody } from "../src/utils/transformers";
 
 describe("Utils test", () => {
   test("Test ensureUrlQueryParam", () => {
@@ -53,5 +53,13 @@ describe("Utils test", () => {
 
     const hash = createSecretHash(value, secret, "sha512");
     expect(hash).toEqual(createSecretHash(value, secret, "sha512"));
+  });
+
+  test("Test parseUrlEncodedBase64Body", () => {
+    const relayState = { moi: "no-moi" };
+    const body = new URLSearchParams({ RelayState: generateBase64Hash(relayState) }).toString();
+    const parsed = parseUrlEncodedBody(body);
+    expect(parsed.RelayState).toBeDefined();
+    expect(JSON.parse(resolveBase64Hash(parsed.RelayState))).toEqual(relayState);
   });
 });

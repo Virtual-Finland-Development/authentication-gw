@@ -8,7 +8,7 @@ import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, NoticeException, ValidationError } from "../../utils/exceptions";
 import { debug, log } from "../../utils/logging";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
-import { parseBase64XMLBody } from "../../utils/transformers";
+import { parseUrlEncodedBody } from "../../utils/transformers";
 
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
@@ -55,10 +55,10 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     try {
-      const body = parseBase64XMLBody(context.request.body);
+      const body = parseUrlEncodedBody(context.request.body);
       debug(body);
 
-      const samlClient = await getSuomiFISAML2Client(body.SAMLResponse);  
+      const samlClient = await getSuomiFISAML2Client(body.SAMLResponse);
       const result = await samlClient.validatePostResponseAsync(body); // throws
 
       const { parsedAppContext, idToken, expiresAt, userId } = await createSignedInTokens(body.RelayState, result.profile); // throws
@@ -179,7 +179,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
       await samlClient.validateRedirectAsync(body, originalQuery); // throws
     } catch (error) {
       log("LogoutResponse", error);
-      logoutRedirectUrl = prepareLogoutRedirectUrl(logoutRedirectUrl, this.identityProviderIdent, { message: "Suboptimal logout validation response", type: "warning"});
+      logoutRedirectUrl = prepareLogoutRedirectUrl(logoutRedirectUrl, this.identityProviderIdent, { message: "Suboptimal logout validation response", type: "warning" });
     }
 
     return {

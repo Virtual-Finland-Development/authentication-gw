@@ -1,5 +1,4 @@
 import { AxiosError } from "axios";
-import { resolveBase64Hash } from "./hashes";
 
 /**
  *
@@ -84,7 +83,7 @@ export function exceptionToObject(error: any): {
       message = typeof error === "string" ? error : "Unknown error";
     }
   }
-  
+
   message = typeof message === "string" ? message : "Unknown error message";
 
   return {
@@ -175,10 +174,9 @@ export function ifString(text: any, minLength = 1): boolean {
  * @param body
  * @returns
  */
-export function parseBase64XMLBody(body: string): { [attr: string]: any } {
-  const uriComponent = resolveBase64Hash(body);
-  const decoded = new URLSearchParams(uriComponent);
-  return Object.fromEntries(decoded);
+export function parseUrlEncodedBody(body: string): { [attr: string]: string } {
+  const urlParams = new URLSearchParams(body);
+  return Object.fromEntries(urlParams);
 }
 
 /**
