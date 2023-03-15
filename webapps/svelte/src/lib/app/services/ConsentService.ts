@@ -36,19 +36,23 @@ export default class ConsentService extends LoginAppComponent {
   async consentify() {
     this.log("ConsentService", `Resolving the consent for ${CONSENT_ID}..`);
 
-    if (!this.#consentSituation) {
-      throw new Error("Consent service state not initialized");
-    }
+    try {
+      if (!this.#consentSituation) {
+        throw new Error("Consent service state not initialized");
+      }
 
-    if (this.#consentSituation.consentStatus === "verifyUserConsent") {
-      this.UIState.transitToUrl(this.#consentSituation.redirectUrl, "consent"); // Go to the consent page
-    } else if (this.#consentSituation.consentStatus === "consentGranted") {
-      this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
-      this.app.ConsentState.setConsentTokenFor(CONSENT_ID, this.#consentSituation.consentToken);
-      this.app.UIState.resetViewState("consent", true); // reset view state
+      if (this.#consentSituation.consentStatus === "verifyUserConsent") {
+        this.UIState.transitToUrl(this.#consentSituation.redirectUrl, "consent"); // Go to the consent page
+      } else if (this.#consentSituation.consentStatus === "consentGranted") {
+        this.log("ConsentService", `Received consent token for ${CONSENT_ID}`);
+        this.app.ConsentState.setConsentTokenFor(CONSENT_ID, this.#consentSituation.consentToken);
+      } else {
+        throw new Error("Invalid consent situation");
+      }
+    } catch (error) {
+      this.app.UIState.notify(error);
     }
   }
-
 
   /* ---------------testing requests------------------- */
 
@@ -70,9 +74,12 @@ export default class ConsentService extends LoginAppComponent {
         consentToken,
         authFields?.idToken
       );
-      window.alert(`Received valid data: ${JSON.stringify(results, null, 2)}`);
+      this.UIState.notify(`Received valid data: ${JSON.stringify(results, null, 2)}`);
     } catch (error) {
-      window.alert(`Received a request error: ${JSON.stringify(error, null, 2)}`);
+      this.UIState.notify({
+        text: `Received a request error: ${JSON.stringify(error, null, 2)}`,
+        type: "error",
+      });
     }
   }
 
@@ -85,9 +92,12 @@ export default class ConsentService extends LoginAppComponent {
       this.log("ConsentService", `Verifying consent id: ${consentId}..`);
       const consentToken = this.app.ConsentState.getConsentTokenFor(consentId);
       const response = await this.consentApi.verifyConsentToken(consentToken);
-      window.alert(`Received good validation: ${JSON.stringify(response, null, 2)}`);
+      this.UIState.notify(`Received good validation: ${JSON.stringify(response, null, 2)}`);
     } catch (error) {
-      window.alert(`Received a request error: ${JSON.stringify(error, null, 2)}`);
+      this.UIState.notify({
+        text: `Received a request error: ${JSON.stringify(error, null, 2)}`,
+        type: "error",
+      });
     }
   }
 }
