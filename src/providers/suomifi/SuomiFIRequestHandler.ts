@@ -1,5 +1,5 @@
-import { ErrorWithXmlStatus } from "node-saml/lib/types";
-import { parseXml2JsFromString } from "node-saml/lib/xml";
+import { ErrorWithXmlStatus } from "@node-saml/node-saml/lib/types";
+import { parseXml2JsFromString } from "@node-saml/node-saml/lib/xml";
 import { Context } from "openapi-backend";
 import { v4 as uuidv4 } from "uuid";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
@@ -96,7 +96,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
       if (error instanceof ErrorWithXmlStatus) {
         // Prepare correct failure response
         try {
-          const xmlObj = await parseXml2JsFromString(error.xmlStatus);
+          const xmlObj = (await parseXml2JsFromString(error.xmlStatus)) as any;
           const statusValue = xmlObj.Status?.StatusCode?.[0]?.StatusCode?.[0]?.["$"]?.Value;
           switch (statusValue) {
             case "urn:oasis:names:tc:SAML:2.0:status:RequestDenied":
@@ -183,7 +183,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
       await samlClient.validateRedirectAsync(body, originalQuery); // throws
     } catch (error) {
       log("LogoutResponse", error);
-      logoutRedirectUrl = prepareLogoutRedirectUrl(logoutRedirectUrl, this.identityProviderIdent, { message: "Suboptimal logout validation response", type: "warning" });
+      logoutRedirectUrl = prepareLogoutRedirectUrl(logoutRedirectUrl, this.identityProviderIdent);
     }
 
     return {
