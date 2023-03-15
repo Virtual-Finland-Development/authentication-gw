@@ -16,7 +16,7 @@ export default class AuthService extends LoginAppComponent {
     this.log("AuthService", "logging in..");
     this.UIState.transitToUrl(this.authApi.getLoginUrl(), "auth");
   }
-  async fetchLoggedInState(loginCode) {
+  async fetchLoggedInState(loginCode: string) {
     this.log("AuthService", "fetching logged in state..");
     return this.authApi.getLoggedInState(loginCode);
   }
@@ -26,11 +26,11 @@ export default class AuthService extends LoginAppComponent {
       const authFields = this.AuthState.getAuthFields();
       const response = await this.authApi.authorize(authFields?.idToken);
       if (!validate) {
-        window.alert(response.message);
+        this.UIState.notify(response.message);
       }
     } catch (error) {
       if (!validate) {
-        window.alert(error);
+        this.UIState.notify({ message: error.message, type: "error" });
       } else {
         throw error;
       }

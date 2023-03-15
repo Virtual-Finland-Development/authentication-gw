@@ -37,5 +37,8 @@ export default {
   getStage(): string {
     return this.getEnv("STAGE", "local");
   },
+  isStage(stage: string): boolean {
+    return this.getStage() === stage;
+  },
   REQUEST_TIMEOUT_MSECS: 15000,
 };

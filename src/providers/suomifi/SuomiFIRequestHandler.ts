@@ -1,14 +1,16 @@
-import { ErrorWithXmlStatus } from "node-saml/lib/types";
-import { parseXml2JsFromString } from "node-saml/lib/xml";
+import { ErrorWithXmlStatus } from "@node-saml/node-saml/lib/types";
+import { parseXml2JsFromString } from "@node-saml/node-saml/lib/xml";
 import { Context } from "openapi-backend";
 import { v4 as uuidv4 } from "uuid";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
 
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { AccessDeniedException, NoticeException, ValidationError } from "../../utils/exceptions";
+import { resolveBase64Hash } from "../../utils/hashes";
 import { debug, log } from "../../utils/logging";
 import { prepareCookie, prepareLoginRedirectUrl, prepareLogoutRedirectUrl } from "../../utils/route-utils";
-import { parseBase64XMLBody } from "../../utils/transformers";
+import Settings from "../../utils/Settings";
+import { parseUrlEncoded } from "../../utils/transformers";
 
 import { AuthRequestHandler, HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
@@ -55,10 +57,12 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
    */
   async AuthenticateResponse(context: Context): Promise<HttpResponse> {
     try {
-      const body = parseBase64XMLBody(context.request.body);
+      // Local serve does not encode the request body
+      const requestBody = Settings.isStage("local") ? context.request.requestBody : resolveBase64Hash(context.request.requestBody);
+      const body = parseUrlEncoded(requestBody);
       debug(body);
 
-      const samlClient = await getSuomiFISAML2Client(body.SAMLResponse);  
+      const samlClient = await getSuomiFISAML2Client(body.SAMLResponse);
       const result = await samlClient.validatePostResponseAsync(body); // throws
 
       const { parsedAppContext, idToken, expiresAt, userId } = await createSignedInTokens(body.RelayState, result.profile); // throws
@@ -92,7 +96,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
       if (error instanceof ErrorWithXmlStatus) {
         // Prepare correct failure response
         try {
-          const xmlObj = await parseXml2JsFromString(error.xmlStatus);
+          const xmlObj = (await parseXml2JsFromString(error.xmlStatus)) as any;
           const statusValue = xmlObj.Status?.StatusCode?.[0]?.StatusCode?.[0]?.["$"]?.Value;
           switch (statusValue) {
             case "urn:oasis:names:tc:SAML:2.0:status:RequestDenied":
@@ -179,7 +183,7 @@ export default new (class SuomiFIRequestHandler extends BaseRequestHandler imple
       await samlClient.validateRedirectAsync(body, originalQuery); // throws
     } catch (error) {
       log("LogoutResponse", error);
-      logoutRedirectUrl = prepareLogoutRedirectUrl(logoutRedirectUrl, this.identityProviderIdent, { message: "Suboptimal logout validation response", type: "warning"});
+      logoutRedirectUrl = prepareLogoutRedirectUrl(logoutRedirectUrl, this.identityProviderIdent);
     }
 
     return {

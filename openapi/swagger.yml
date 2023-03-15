@@ -116,7 +116,7 @@ paths:
                         type: string
                         example: "vfd"
         "401":
-          description: Access denied message
+          description: Access denied
           content:
             application/json:
               schema:
@@ -236,7 +236,7 @@ paths:
                           type: string
                           example: "dpp://openweather@testbed.fi/draft/Weather/Current/Metric"
         "401":
-          description: Access denied message
+          description: Access denied
           content:
             application/json:
               schema:
@@ -286,7 +286,7 @@ paths:
               schema:
                 type: string
         "401":
-          description: Access denied message
+          description: Access denied
           content:
             application/json:
               schema:

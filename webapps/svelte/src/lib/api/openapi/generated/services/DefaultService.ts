@@ -100,7 +100,7 @@ export class DefaultService {
                 'X-Consent-User-Id': xConsentUserId,
             },
             errors: {
-                401: `Access denied message`,
+                401: `Access denied`,
             },
         });
     }
@@ -187,7 +187,7 @@ export class DefaultService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                401: `Access denied message`,
+                401: `Access denied`,
             },
         });
     }
@@ -233,7 +233,7 @@ export class DefaultService {
             },
             errors: {
                 303: `Redirect to the testbed consent service, or back to the app context`,
-                401: `Access denied message`,
+                401: `Access denied`,
             },
         });
     }

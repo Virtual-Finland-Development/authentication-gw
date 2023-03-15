@@ -72,7 +72,7 @@ export default class UIState extends LoginAppComponent {
   }
 
   resetViewState(transitionName: KnownTransitionNames, refresh: boolean = false) {
-    window.history.replaceState({}, document.title, window.location.pathname); // clear url params
+    this.clearUrlParams();
     this.#transitions.set(transitionName, false);
     if (refresh) {
       window.location.reload();
@@ -89,8 +89,17 @@ export default class UIState extends LoginAppComponent {
     return Boolean(this.#transitions.get(transitionName));
   }
 
-  dispatchNotification(notification: { message: string; type: string }) {
-    console.log(notification);
+  notify(notification: { message: string; type: string } | string | Error) {
+    console.log("[app:notify]", notification);
+
+    if (notification instanceof Error) {
+      notification = { message: notification.message, type: "error" };
+    }
+
+    if (typeof notification === "string") {
+      notification = { message: notification, type: "info" };
+    }
+
     switch (notification.type) {
       case "danger":
       case "error":
@@ -104,5 +113,9 @@ export default class UIState extends LoginAppComponent {
         dialogs.success({ text: notification.message, title: notification.type });
         break;
     }
+  }
+
+  clearUrlParams() {
+    window.history.replaceState({}, document.title, window.location.pathname); // clear url params
   }
 }

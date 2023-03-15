@@ -13,7 +13,7 @@ export default async function LoginEventListener(loginApp: LoginApp) {
 
   if (affectsThisApp && (event === "login" || event === "logout")) {
     if (message && messageType) {
-      loginApp.UIState.dispatchNotification({ message, type: messageType });
+      loginApp.UIState.notify({ message, type: messageType });
     }
   }
 
@@ -23,8 +23,8 @@ export default async function LoginEventListener(loginApp: LoginApp) {
     //
     if (success) {
       loginApp.AuthState.logout();
-      loginApp.UIState.resetViewState("auth"); // reset view state
     }
+    loginApp.UIState.resetViewState("auth"); // reset view state
   } else if (!loginApp.AuthState.isLoggedIn()) {
     if (affectsThisApp && loginCode) {
       loginApp.log("LoginEventListener", "Logged-in code received, fetching auth state..");
@@ -35,12 +35,16 @@ export default async function LoginEventListener(loginApp: LoginApp) {
         const loggedInState = await loginApp.AuthService.fetchLoggedInState(loginCode);
         loginApp.AuthState.login(loggedInState); // Store state in local storage
         await loginApp.handleLoggedIn(); // Fetch user info
-        loginApp.UIState.resetViewState("auth"); // reset view state
       } catch (error) {
         loginApp.log("LoginEventListener", "Failed to fetch auth state", error);
       }
+      loginApp.UIState.resetViewState("auth"); // reset view state
     } else {
-      loginApp.UIState.handleCurrentState(); // Init UI
+      if (affectsThisApp && event === "login" && !success) {
+        loginApp.UIState.resetViewState("auth"); // reset view state
+      } else {
+        loginApp.UIState.handleCurrentState(); // Init UI
+      }
     }
   } else {
     //

@@ -83,7 +83,7 @@ export default class AuthState extends LoginAppComponent {
     let isLoggedIn = false;
     try {
       const authFields = this.getAuthFields();
-      if (!authFields.profileData) {
+      if (!authFields || !authFields.profileData) {
         throw new Error("No profile data");
       }
 
@@ -95,6 +95,7 @@ export default class AuthState extends LoginAppComponent {
       isLoggedIn = true;
     } catch (error) {
       // Auth invalidated
+      console.error(error);
       this.log("AuthState", "login invalidated");
       this.logout();
       this.UIState.resetViewState("auth"); // reset view state
