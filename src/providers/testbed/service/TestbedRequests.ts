@@ -54,6 +54,7 @@ export async function getUserInfoWithAccessToken(accessToken: string) {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
+    timeout: Settings.REQUEST_TIMEOUT_MSECS,
   });
 
   debug("Testbed user info retrieved", response.data);
