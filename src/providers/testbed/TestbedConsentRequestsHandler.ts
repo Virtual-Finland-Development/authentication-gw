@@ -1,16 +1,16 @@
 import { Context } from "openapi-backend";
 import { BaseRequestHandler } from "../../utils/BaseRequestHandler";
+import { parseAuthorizationFromContext } from "../../utils/JWK-Utils";
+import Runtime from "../../utils/Runtime";
 import { getJSONResponseHeaders } from "../../utils/default-headers";
 import { NoticeException } from "../../utils/exceptions";
-import { parseAuthorizationFromContext } from "../../utils/JWK-Utils";
 import { prepareCookie, prepareRedirectUrl } from "../../utils/route-utils";
-import Runtime from "../../utils/Runtime";
 import { ensureUrlQueryParams } from "../../utils/transformers";
 import { HttpResponse } from "../../utils/types";
 import { parseAppContext } from "../../utils/validators";
-import { fetchConsentStatus, fetchConsentStatuses } from "./service/ConsentRequests";
 import TestbedConfig from "./Testbed.config";
 import { verifyConsent } from "./TestbedAuthorizer";
+import { fetchConsentStatus, fetchConsentStatuses } from "./service/ConsentRequests";
 
 export default new (class TestbedConsentRequestsHandler extends BaseRequestHandler {
   identityProviderIdent = TestbedConfig.ident;
@@ -27,7 +27,7 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
     await verifyConsent(consentToken, {
       idToken: parseAuthorizationFromContext(context), // Optional
       dataSource: context.request.headers["x-consent-data-source"] as string, // Optional
-      consentUserId: context.request.headers["x-consent-user-id"] as string
+      consentUserId: context.request.headers["x-consent-user-id"] as string,
     }); // Throws AccessDeniedException if access needs to be denied
 
     return {
@@ -59,8 +59,8 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
       redirectUrl?: string;
     }> = [];
 
-    const verifiableDataSources = dataSources.filter((dataSource: { consentToken: any; }) => dataSource.consentToken);
-    const resolvableDataSource = dataSources.filter((dataSource: { consentToken: any; }) => !dataSource.consentToken);
+    const verifiableDataSources = dataSources.filter((dataSource: { consentToken: any }) => dataSource.consentToken);
+    const resolvableDataSource = dataSources.filter((dataSource: { consentToken: any }) => !dataSource.consentToken);
 
     // Verify verifiable consent requests
     for (const dataSource of verifiableDataSources) {
@@ -80,7 +80,10 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
     }
 
     // Fetch consent status for fetchable/unverified consent requests
-    const consentSituations = await fetchConsentStatuses(resolvableDataSource.map((ds: { uri: string; }) => ds.uri), idToken);
+    const consentSituations = await fetchConsentStatuses(
+      resolvableDataSource.map((ds: { uri: string }) => ds.uri),
+      idToken
+    );
     for (const consentStatus of consentSituations) {
       if (consentStatus.status === "verifyUserConsent") {
         const dataSourceUri = consentStatus.data.missingConsents[0].dataSource;
@@ -161,7 +164,8 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
       }
 
       const responseStatusFlag = String(context.request.query.status);
-      if (responseStatusFlag === "success") {
+      // Apparently there are multiple ways to say "success" in the consent portal response
+      if (responseStatusFlag === "success" || responseStatusFlag === "ok") {
         const consentStatus = await fetchConsentStatus(dataSourceUri, idToken);
         if (consentStatus.status === "consentGranted") {
           return {

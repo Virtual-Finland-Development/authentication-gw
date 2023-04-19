@@ -299,6 +299,13 @@ paths:
     get:
       operationId: TestbedConsentResponse
       description: "Transition from the testbed consent page back to the app context"
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+          required: false
+          description: "Status of the consent"
       responses:
         "303":
           description: Redirect back to the app context
