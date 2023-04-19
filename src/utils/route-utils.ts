@@ -20,19 +20,19 @@ export function prepareRedirectUrl(redirectUrl: string, providerIdent: string, p
 }
 
 /**
- * 
- * @param redirectUrl 
- * @param loginCode 
- * @param providerIdent 
- * @param message 
- * @returns 
+ *
+ * @param redirectUrl
+ * @param loginCode
+ * @param providerIdent
+ * @param message
+ * @returns
  */
 export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, providerIdent: string, message?: RedirectMessage): string {
-  const params: Array<{key: string, value: string | undefined | boolean}> = [
+  const params: Array<{ key: string; value: string | undefined | boolean }> = [
     { key: "loginCode", value: loginCode },
     { key: "provider", value: providerIdent },
-    { key: "success", value: true},
-    { key: "event", value: "login"},
+    { key: "success", value: true },
+    { key: "event", value: "login" },
   ];
 
   if (message) {
@@ -44,18 +44,18 @@ export function prepareLoginRedirectUrl(redirectUrl: string, loginCode: string, 
 }
 
 /**
- * 
- * @param redirectUrl 
- * @param providerIdent 
- * @param message 
- * @returns 
+ *
+ * @param redirectUrl
+ * @param providerIdent
+ * @param message
+ * @returns
  */
 export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: string, message?: RedirectMessage): string {
-  const params: Array<{key: string, value: string | undefined | boolean}> = [
-    { key: "success", value: true},
+  const params: Array<{ key: string; value: string | undefined | boolean }> = [
+    { key: "success", value: true },
     { key: "event", value: "logout" },
     { key: "provider", value: providerIdent },
-    { key: "logout", value: "success" } // @obsolete
+    { key: "logout", value: "success" }, // @obsolete
   ];
 
   if (message) {
@@ -75,7 +75,7 @@ export function prepareLogoutRedirectUrl(redirectUrl: string, providerIdent: str
  */
 export function prepareErrorRedirectUrl(redirectUrl: string, message: RedirectMessage): string {
   return ensureUrlQueryParams(redirectUrl, [
-    { key: "success", value: false},
+    { key: "success", value: false },
     { key: "message", value: message.message },
     { key: "provider", value: message.provider || "unknown" },
     { key: "event", value: message.event },
@@ -91,10 +91,8 @@ export function prepareErrorRedirectUrl(redirectUrl: string, message: RedirectMe
  */
 export function prepareLoginErrorRedirectUrl(redirectUrl: string, message: RedirectMessage): string {
   return prepareErrorRedirectUrl(redirectUrl, {
-    message: message.message,
-    provider: message.provider,
+    ...message,
     event: "login",
-    type: message.type,
   });
 }
 
@@ -106,10 +104,8 @@ export function prepareLoginErrorRedirectUrl(redirectUrl: string, message: Redir
  */
 export function prepareLogoutErrorRedirectUrl(redirectUrl: string, message: RedirectMessage): string {
   return prepareErrorRedirectUrl(redirectUrl, {
-    message: message.message,
-    provider: message.provider,
+    ...message,
     event: "logout",
-    type: message.type,
   });
 }
 

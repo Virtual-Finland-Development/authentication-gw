@@ -1,8 +1,8 @@
 import axios from "axios";
-import { generateBase64Hash } from "../../../utils/hashes";
-import { debug } from "../../../utils/logging";
 import Runtime from "../../../utils/Runtime";
 import Settings from "../../../utils/Settings";
+import { generateBase64Hash } from "../../../utils/hashes";
+import { debug } from "../../../utils/logging";
 import { transformExpiresInToExpiresAt_ISOString } from "../../../utils/transformers";
 import TestbedSettings from "../Testbed.config";
 
@@ -14,6 +14,9 @@ import TestbedSettings from "../Testbed.config";
 export async function getTokensWithLoginCode(loginCode: string): Promise<{ accessToken: string; idToken: string; expiresAt: string }> {
   const CLIENT_ID = await Settings.getSecret("TESTBED_CLIENT_ID");
   const CLIENT_SECRET = await Settings.getSecret("TESTBED_CLIENT_SECRET");
+
+  debug("Retrieving testbed tokens with login code..", { loginCode });
+
   const response = await axios.post(
     `https://login.testbed.fi/api/oauth/token`,
     new URLSearchParams({
@@ -30,7 +33,7 @@ export async function getTokensWithLoginCode(loginCode: string): Promise<{ acces
     }
   );
 
-  debug("getTokensWithLoginCode", response.data);
+  debug("Testbed tokens retrieved", response.data);
 
   return {
     accessToken: response.data.access_token,
@@ -45,13 +48,16 @@ export async function getTokensWithLoginCode(loginCode: string): Promise<{ acces
  * @returns
  */
 export async function getUserInfoWithAccessToken(accessToken: string) {
+  debug("Retrieving testbed user info..");
+
   const response = await axios.post(`https://login.testbed.fi/api/oauth/userinfo`, null, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
+    timeout: Settings.REQUEST_TIMEOUT_MSECS,
   });
 
-  debug("getUserInfoWithAccessToken", response.data);
+  debug("Testbed user info retrieved", response.data);
 
   return response.data;
 }
