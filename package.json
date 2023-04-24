@@ -34,7 +34,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@pulumi/aws": "^5.14.0",
+    "@pulumi/aws": "^5.37.0",
     "@pulumi/pulumi": "^3.40.0",
     "@types/aws-lambda": "^8.10.102",
     "@types/jsonwebtoken": "^9.0.1",
