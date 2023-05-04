@@ -8,9 +8,8 @@ export function createStackConfig(info: { name: string; stage: string; project: 
     pulumiOrganization: info.pulumiOrganization,
     getTags() {
       return {
-        Name: this.name,
-        Environment: this.stage,
-        Project: this.project,
+        "vfd:stack": this.stage,
+        "vfd:project": this.project,
       };
     },
     generateResourceName(resourceName: string) {

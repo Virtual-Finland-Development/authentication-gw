@@ -10,7 +10,7 @@ import { createStackConfig } from "./utils";
 const stackConfig = createStackConfig({
   name: "authentication-gw",
   stage: pulumi.getStack(),
-  project: "Virtual Finland",
+  project: pulumi.getProject(),
   pulumiOrganization: pulumi.getOrganization(),
 });
 
