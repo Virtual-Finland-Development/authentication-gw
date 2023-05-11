@@ -5,8 +5,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-dev:
+  deploy-app:
     uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-test-deploy.yml@main
+    secrets: inherit
+    with:
+      environment: dev
+  deploy-web:
+    uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-and-deploy-webs.yml@main
     secrets: inherit
     with:
       environment: dev
