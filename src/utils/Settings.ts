@@ -31,9 +31,6 @@ export default {
   getEnvironmentBoolean(key: string, defaultValue?: boolean): boolean {
     return typeof process.env[key] === "undefined" ? Boolean(defaultValue) : process.env[key]?.toLowerCase() === "true" || process.env[key] === "1";
   },
-  getAppContextFallbackURL(): string {
-    return `${this.getEnv("APP_CONTEXT_REDIRECT_FALLBACK_URL", "http://localhost:8000")}`;
-  },
   getStage(): string {
     return this.getEnv("STAGE", "local");
   },
