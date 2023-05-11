@@ -57,15 +57,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           pulumi-access-token: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       - name: Deploy Svelte-app to S3
-        uses: keithweaver/aws-s3-github-action@v1.0.0
-        with:
-          command: sync
-          source: ./webapps/svelte/dist
-          destination: s3://virtual-finland-development-auth-files/${{ inputs.environment }}
-          flags: --delete --exclude '.well-known/*'
+        run: aws s3 sync ./webapps/svelte/dist s3://virtual-finland-development-auth-files/${{ inputs.environment }} --delete --exclude '.well-known/*'
       - name: Deploy the bucket root redirects to S3
-        uses: keithweaver/aws-s3-github-action@v1.0.0
-        with:
-          command: sync
-          source: ./webapps/bucket-root
-          destination: s3://virtual-finland-development-auth-files/
+        run: |
+          aws s3 sync ./webapps/bucket-root s3://virtual-finland-development-auth-files/
