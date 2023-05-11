@@ -11,6 +11,7 @@ jobs:
     with:
       environment: dev
   deploy-web:
+    needs: deploy-app
     uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-and-deploy-webs.yml@main
     secrets: inherit
     with:

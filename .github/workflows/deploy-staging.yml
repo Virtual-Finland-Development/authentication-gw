@@ -1,7 +1,6 @@
 name: "Staging: build, test and deploy"
 on:
   workflow_dispatch:
-    branches: ["main"]
 
 jobs:
   deploy-app:
@@ -10,6 +9,7 @@ jobs:
     with:
       environment: staging
   deploy-web:
+    needs: deploy-app
     uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-and-deploy-webs.yml@main
     secrets: inherit
     with:
