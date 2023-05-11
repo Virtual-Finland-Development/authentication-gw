@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   deploy-web:
-    name: Update demo app
+    name: "Update web apps: ${{ inputs.environment }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
