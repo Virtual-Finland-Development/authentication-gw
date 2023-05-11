@@ -23,9 +23,6 @@ jobs:
     name: Build, test and deploy ${{ inputs.environment }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    outputs:
-      endpoint: ${{ steps.pulumi.outputs.endpoint }}
-      testbedApiEndpoint: "${{ steps.pulumi.outputs.testbedApiEndpoint }}"
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
@@ -70,14 +67,32 @@ jobs:
     needs: build-test-deploy
     steps:
       - uses: actions/checkout@v3
+      - name: Retrieve authentigation-gw endpoint url from Pulumi
+        uses: Virtual-Finland-Development/pulumi-outputs-action@v1
+        id: authentigation-gw-endpoint
+        with:
+          organization: virtualfinland
+          project: authentigation-gw
+          stack: ${{ inputs.environment }}
+          resource: endpoint
+          access-token: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      - name: Retrieve testbed-api endpoint url from Pulumi
+        uses: Virtual-Finland-Development/pulumi-outputs-action@v1
+        id: testbed-api-endpoint
+        with:
+          organization: virtualfinland
+          project: authentigation-gw
+          stack: ${{ inputs.environment }}
+          resource: testbedApiEndpoint
+          access-token: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       - name: Build the svelte app
         working-directory: ./webapps/svelte
         run: |
           npm install
           npm run build -- --base=/${{ inputs.environment }}
         env:
-          VITE_AUTHGW_API_URL: ${{needs.build-test-deploy.outputs.endpoint}}
-          VITE_TESTBED_API_URL: ${{needs.build-test-deploy.outputs.testbedApiEndpoint}}
+          VITE_AUTHGW_API_URL: ${{ steps.authentigation-gw-endpoint.outputs.resource-output }}
+          VITE_TESTBED_API_URL: ${{ steps.testbed-api-endpoint.outputs.resource-output }}
       - name: Configure AWS credentials
         uses: Virtual-Finland-Development/infrastructure/.github/actions/configure-aws-credentials@main
         with:
