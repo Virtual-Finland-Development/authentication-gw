@@ -67,12 +67,12 @@ jobs:
     needs: build-test-deploy
     steps:
       - uses: actions/checkout@v3
-      - name: Retrieve authentigation-gw endpoint url from Pulumi
+      - name: Retrieve authentication-gw endpoint url from Pulumi
         uses: Virtual-Finland-Development/pulumi-outputs-action@v1
-        id: authentigation-gw-endpoint
+        id: authentication-gw-endpoint
         with:
           organization: virtualfinland
-          project: authentigation-gw
+          project: authentication-gw
           stack: ${{ inputs.environment }}
           resource: endpoint
           access-token: ${{ secrets.PULUMI_ACCESS_TOKEN }}
@@ -81,7 +81,7 @@ jobs:
         id: testbed-api-endpoint
         with:
           organization: virtualfinland
-          project: authentigation-gw
+          project: authentication-gw
           stack: ${{ inputs.environment }}
           resource: testbedApiEndpoint
           access-token: ${{ secrets.PULUMI_ACCESS_TOKEN }}
@@ -91,7 +91,7 @@ jobs:
           npm install
           npm run build -- --base=/${{ inputs.environment }}
         env:
-          VITE_AUTHGW_API_URL: ${{ steps.authentigation-gw-endpoint.outputs.resource-output }}
+          VITE_AUTHGW_API_URL: ${{ steps.authentication-gw-endpoint.outputs.resource-output }}
           VITE_TESTBED_API_URL: ${{ steps.testbed-api-endpoint.outputs.resource-output }}
       - name: Configure AWS credentials
         uses: Virtual-Finland-Development/infrastructure/.github/actions/configure-aws-credentials@main
