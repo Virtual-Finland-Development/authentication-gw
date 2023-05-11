@@ -14,14 +14,15 @@ on:
         type: string
         required: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-test-deploy:
-    name: Build, test and deploy ${{ inputs.environment }}
+    name: "Build, test and deploy: ${{ inputs.environment }}"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    outputs:
-      endpoint: ${{ steps.pulumi.outputs.endpoint }}
-      testbedApiEndpoint: "${{ steps.pulumi.outputs.testbedApiEndpoint }}"
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
@@ -38,9 +39,15 @@ jobs:
       - name: Prepare deploy artifacts
         run: |
           npm run predeploy
+      - name: Configure AWS credentials
+        uses: Virtual-Finland-Development/infrastructure/.github/actions/configure-aws-credentials@main
+        with:
+          environment: ${{ inputs.environment }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          pulumi-access-token: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       - name: Deploy with Pulumi
         id: pulumi
-        uses: pulumi/actions@v3
+        uses: pulumi/actions@v4
         with:
           work-dir: ./infra
           command: up
@@ -48,44 +55,9 @@ jobs:
           upsert: true
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          APP_CONTEXT_REDIRECT_FALLBACK_URL: ${{ secrets.APP_CONTEXT_REDIRECT_FALLBACK_URL }}
       - name: Tag the deployment
         uses: Virtual-Finland-Development/automatic-release-action@v1.0
         if: ${{ inputs.environment == 'staging' }}
         with:
           environment: ${{ inputs.environment }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-  deploy-web:
-    name: Update demo app
-    runs-on: ubuntu-latest
-    needs: build-test-deploy
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build the svelte app
-        working-directory: ./webapps/svelte
-        run: |
-          npm install
-          npm run build -- --base=/${{ inputs.environment }}
-        env:
-          VITE_AUTHGW_API_URL: ${{needs.build-test-deploy.outputs.endpoint}}
-          VITE_TESTBED_API_URL: ${{needs.build-test-deploy.outputs.testbedApiEndpoint}}
-      - name: Deploy Svelte-app to S3
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --delete --exclude '.well-known/*'
-        env:
-          AWS_S3_BUCKET: virtual-finland-development-auth-files/${{ inputs.environment }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: eu-north-1
-          SOURCE_DIR: "webapps/svelte/dist"
-      - name: Deploy the bucket root redirects to S3
-        uses: jakejarvis/s3-sync-action@master
-        env:
-          AWS_S3_BUCKET: virtual-finland-development-auth-files
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: eu-north-1
-          SOURCE_DIR: "webapps/bucket-root"

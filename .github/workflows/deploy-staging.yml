@@ -4,8 +4,13 @@ on:
     branches: ["main"]
 
 jobs:
-  deploy-staging:
+  deploy-app:
     uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-test-deploy.yml@main
+    secrets: inherit
+    with:
+      environment: staging
+  deploy-web:
+    uses: Virtual-Finland-Development/authentication-gw/.github/workflows/build-and-deploy-webs.yml@main
     secrets: inherit
     with:
       environment: staging
