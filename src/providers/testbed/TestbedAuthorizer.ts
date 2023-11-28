@@ -7,6 +7,7 @@ import { debug } from "../../utils/logging";
 import { ifString } from "../../utils/transformers";
 import { AuthorizationHeaders, AuthorizerResponse } from "../../utils/types";
 import TestbedConfig from "./Testbed.config";
+import { verifyConsent as verifyConsentFromService } from "./service/ConsentRequests";
 
 /**
  *
@@ -117,6 +118,14 @@ export async function verifyConsent(consentToken: string, comparePackage?: { idT
         if (payload.sub !== comparePackage?.consentUserId) {
           throw new AccessDeniedException("Input mismatch: sub");
         }
+      }
+    }
+
+    // Verify consent using the service so it will get invalidated right after user revokes the consent
+    if (ifString(comparePackage?.dataSource) && ifString(comparePackage?.idToken)) {
+      const serviceVerified = await verifyConsentFromService(comparePackage?.idToken as string, consentToken, comparePackage?.dataSource as string);
+      if (!serviceVerified) {
+        throw new AccessDeniedException("Consent unverified by the authentication provider service");
       }
     }
 
