@@ -80,28 +80,30 @@ export default new (class TestbedConsentRequestsHandler extends BaseRequestHandl
     }
 
     // Fetch consent status for fetchable/unverified consent requests
-    const consentSituations = await fetchConsentStatuses(
-      resolvableDataSource.map((ds: { uri: string }) => ds.uri),
-      idToken
-    );
-    for (const consentStatus of consentSituations) {
-      if (consentStatus.status === "verifyUserConsent") {
-        const dataSourceUri = consentStatus.data.missingConsents[0].dataSource;
-        consentResponses.push({
-          consentStatus: consentStatus.status,
-          dataSource: dataSourceUri,
-          redirectUrl: ensureUrlQueryParams(Runtime.getAppUrl("/consents/testbed/consent-request"), [
-            { key: "appContext", value: parsedAppContext.hash }, // Or maybe provide these at the frontend?
-            { key: "idToken", value: consentStatus.idToken },
-            { key: "dataSource", value: dataSourceUri },
-          ]),
-        });
-      } else if (consentStatus.status === "consentGranted") {
-        consentResponses.push({
-          consentStatus: consentStatus.status,
-          dataSource: consentStatus.dataSourceUri as string,
-          consentToken: consentStatus.data.consentToken,
-        });
+    if (resolvableDataSource.length > 0) {
+      const consentSituations = await fetchConsentStatuses(
+        resolvableDataSource.map((ds: { uri: string }) => ds.uri),
+        idToken
+      );
+      for (const consentStatus of consentSituations) {
+        if (consentStatus.status === "verifyUserConsent") {
+          const dataSourceUri = consentStatus.data.missingConsents[0].dataSource;
+          consentResponses.push({
+            consentStatus: consentStatus.status,
+            dataSource: dataSourceUri,
+            redirectUrl: ensureUrlQueryParams(Runtime.getAppUrl("/consents/testbed/consent-request"), [
+              { key: "appContext", value: parsedAppContext.hash }, // Or maybe provide these at the frontend?
+              { key: "idToken", value: consentStatus.idToken },
+              { key: "dataSource", value: dataSourceUri },
+            ]),
+          });
+        } else if (consentStatus.status === "consentGranted") {
+          consentResponses.push({
+            consentStatus: consentStatus.status,
+            dataSource: consentStatus.dataSourceUri as string,
+            consentToken: consentStatus.data.consentToken,
+          });
+        }
       }
     }
 
