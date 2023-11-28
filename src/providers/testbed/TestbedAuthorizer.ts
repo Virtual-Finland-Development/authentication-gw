@@ -1,12 +1,11 @@
 import * as jwt from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
-import { AccessDeniedException } from "../../utils/exceptions";
 import { decodeIdToken, verifyIdToken } from "../../utils/JWK-Utils";
-import { debug } from "../../utils/logging";
 import Settings from "../../utils/Settings";
+import { AccessDeniedException } from "../../utils/exceptions";
+import { debug } from "../../utils/logging";
 import { ifString } from "../../utils/transformers";
 import { AuthorizationHeaders, AuthorizerResponse } from "../../utils/types";
-import { verifyConsent as verifyConsentFromService } from "./service/ConsentRequests";
 import TestbedConfig from "./Testbed.config";
 
 /**
@@ -44,7 +43,6 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
       expiresAt: payload.exp,
       issuedAt: payload.iat,
     };
-    
   } catch (error) {
     throw new AccessDeniedException(String(error));
   }
@@ -56,7 +54,7 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
       dataSource: authorizationHeaders.consentDataSource,
       consentUserId: authorizationHeaders.consentUserId,
     });
-    
+
     response.consent = {
       dataSource: authorizationHeaders.consentDataSource,
       userId: verifiedConsent.sub,
@@ -75,7 +73,7 @@ export async function authorize(authorizationHeaders: AuthorizationHeaders): Pro
  * @param consentToken
  * @see: https://ioxio.com/guides/verify-consent-in-a-data-source
  */
-export async function verifyConsent(consentToken: string, comparePackage?: { idToken?: string, dataSource?: string, consentUserId?: string}): Promise<JwtPayload> {
+export async function verifyConsent(consentToken: string, comparePackage?: { idToken?: string; dataSource?: string; consentUserId?: string }): Promise<JwtPayload> {
   try {
     // Verify token
     const verified = await verifyIdToken(consentToken, { issuer: "https://consent.testbed.fi", jwksUri: "https://consent.testbed.fi/.well-known/jwks.json" });
@@ -120,14 +118,6 @@ export async function verifyConsent(consentToken: string, comparePackage?: { idT
           throw new AccessDeniedException("Input mismatch: sub");
         }
       }
-      // @TODO: Verify user identity against the users-api service
-    }
-
-    if (ifString(comparePackage?.dataSource) && ifString(comparePackage?.idToken)) {
-      const serviceVerified = await verifyConsentFromService(comparePackage?.idToken as string, consentToken, comparePackage?.dataSource as string);
-      if (!serviceVerified) {
-        throw new AccessDeniedException("Consent unverified by the authentication provider service");
-      }
     }
 
     return payload;
@@ -135,16 +125,16 @@ export async function verifyConsent(consentToken: string, comparePackage?: { idT
     if (error instanceof AccessDeniedException) {
       throw error;
     }
-    
+
     debug(error);
     throw new AccessDeniedException("Consent unverified");
   }
 }
 
 /**
- * 
- * @param idToken 
- * @returns 
+ *
+ * @param idToken
+ * @returns
  */
 export async function createConsentRequestToken(idToken: string): Promise<string> {
   const { decodedToken } = decodeIdToken(idToken);
@@ -156,7 +146,7 @@ export async function createConsentRequestToken(idToken: string): Promise<string
   const expiresIn = 60 * 60; // 1 hour
   const keyId = `vfd:authgw:${Settings.getStage()}:testbed:jwt`;
   const keyIssuer = "https://virtual-finland-development-auth-files.s3.eu-north-1.amazonaws.com";
-  
+
   const payload = {
     sub: decodedToken.payload.sub,
     subiss: decodedToken.payload.subiss || "https://login.testbed.fi",
@@ -165,7 +155,7 @@ export async function createConsentRequestToken(idToken: string): Promise<string
     appiss: "https://login.testbed.fi",
     aud: "https://consent.testbed.fi",
   };
-  
+
   const customHeader = {
     kid: keyId,
     alg: "RS256",
@@ -174,7 +164,7 @@ export async function createConsentRequestToken(idToken: string): Promise<string
   };
 
   const key = await Settings.getStageSecret("TESTBED_CONSENT_JWKS_PRIVATE_KEY");
-  
+
   const token = jwt.sign(payload, key, {
     header: customHeader,
     algorithm: "RS256",
